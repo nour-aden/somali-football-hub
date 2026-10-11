@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Somali Football Hub</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#07111f;color:#fff;font-family:Arial,sans-serif}
+header{background:#0c1b2c;padding:20px 5%;border-bottom:2px solid #20d67b}
+.logo{font-size:25px;font-weight:bold;color:#29df83}
+nav{display:flex;gap:18px;flex-wrap:wrap;margin-top:18px}
+nav a{color:#fff;text-decoration:none;font-size:14px}
+.hero{padding:40px 5%;background:linear-gradient(120deg,#102d40,#075b45)}
+.hero h1{font-size:36px;margin-bottom:10px}
+.hero p{color:#d5e6e2;line-height:1.6}
+button,.btn{background:#20d67b;color:#061a13;border:0;padding:12px 18px;border-radius:7px;font-weight:bold;cursor:pointer}
+section{padding:25px 5%}
+h2{border-left:4px solid #20d67b;padding-left:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px}
+.card{background:#112238;padding:18px;border-radius:12px;border:1px solid #233b50}
+.muted{color:#aab9ca;font-size:13px}
+.score{font-size:23px;font-weight:bold;margin:15px 0}
+.tag{color:#20d67b;font-size:12px;font-weight:bold}
+table{width:100%;border-collapse:collapse;background:#112238}
+th,td{text-align:left;padding:12px;border-bottom:1px solid #294057}
+footer{background:#030914;padding:25px 5%;color:#aab9ca;text-align:center}
+select{padding:8px;border-radius:6px}
+@media(max-width:500px){.hero h1{font-size:28px}nav{gap:12px}}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">⚽ SOMALI FOOTBALL HUB</div>
+<nav>
+<a href="#home" data-so="Bogga Hore" data-en="Home">Bogga Hore</a>
+<a href="#scores" data-so="Natiijooyinka" data-en="Scores">Natiijooyinka</a>
+<a href="#fixtures" data-so="Ciyaaraha" data-en="Fixtures">Ciyaaraha</a>
+<a href="#leagues" data-so="Horyaallada" data-en="Leagues">Horyaallada</a>
+<a href="#news" data-so="Wararka" data-en="News">Wararka</a>
+<select id="language" onchange="changeLanguage()">
+<option value="so">🇸🇴 Somali</option>
+<option value="en">🇬🇧 English</option>
+</select>
+</nav>
+</header>
+
+<div class="hero" id="home">
+<div class="tag">YOUR HOME FOR FOOTBALL</div>
+<h1 data-so="Kubadda Cagta Aduunka, Hal Meel" data-en="World Football, One Place">Kubadda Cagta Aduunka, Hal Meel</h1>
+<p data-so="La soco ciyaaraha, horyaallada iyo wararka kubadda cagta." data-en="Follow football fixtures, leagues and the latest news.">La soco ciyaaraha, horyaallada iyo wararka kubadda cagta.</p>
+<a class="btn" href="#scores" data-so="Eeg Ciyaaraha ↓" data-en="Explore Matches ↓">Eeg Ciyaaraha ↓</a>
+</div>
+
+<section id="scores">
+<h2 data-so="🔴 Natiijooyinka Ciyaaraha" data-en="🔴 Match Centre">🔴 Natiijooyinka Ciyaaraha</h2>
+<div class="grid">
+<div class="card"><div class="muted">ENGLISH PREMIER LEAGUE</div><p>🔵 Manchester City</p><div class="score">— : —</div><p>🔴 Arsenal</p><div class="muted">Natiijo rasmi ah halkan ayaa lagu soo bandhigi doonaa.</div></div>
+<div class="card"><div class="muted">SPANISH LA LIGA</div><p>⚪ Real Madrid</p><div class="score">— : —</div><p>🔵 Barcelona</p><div class="muted">La soco wararka ciyaarta.</div></div>
+</div>
+<p class="muted" data-so="Fiiro gaar ah: natiijooyinkani weli kuma xirna xog toos ah." data-en="Note: scores are not connected to live data yet.">Fiiro gaar ah: natiijooyinkani weli kuma xirna xog toos ah.</p>
+</section>
+
+<section id="fixtures">
+<h2 data-so="📅 Ciyaaraha Soo Socda" data-en="📅 Upcoming Fixtures">📅 Ciyaaraha Soo Socda</h2>
+<div class="grid">
+<div class="card"><div class="tag">MATCH 01</div><h3>Manchester City vs Arsenal</h3><p class="muted">Premier League</p><p>Taariikhda iyo waqtiga: sug jadwalka rasmiga ah.</p></div>
+<div class="card"><div class="tag">MATCH 02</div><h3>Real Madrid vs Barcelona</h3><p class="muted">La Liga</p><p>Taariikhda iyo waqtiga: sug jadwalka rasmiga ah.</p></div>
+<div class="card"><div class="tag">MATCH 03</div><h3>Bayern Munich vs Dortmund</h3><p class="muted">Bundesliga</p><p>Taariikhda iyo waqtiga: sug jadwalka rasmiga ah.</p></div>
+</div>
+</section>
+
+<section id="leagues">
+<h2 data-so="🏆 Horyaallada" data-en="🏆 Popular Leagues">🏆 Horyaallada</h2>
+<div class="grid">
+<div class="card">🏴 English Premier League</div>
+<div class="card">🇪🇸 Spanish La Liga</div>
+<div class="card">🇩🇪 German Bundesliga</div>
+<div class="card">🇮🇹 Italian Serie A</div>
+<div class="card">🌍 UEFA Champions League</div>
+<div class="card">🇫🇷 French Ligue 1</div>
+</div>
+</section>
+
+<section id="news">
+<h2 data-so="📰 Wararka Kubadda Cagta" data-en="📰 Football News">📰 Wararka Kubadda Cagta</h2>
+<div class="grid">
+<div class="card"><div class="tag">FOOTBALL NEWS</div><h3 data-so="Wararkii ugu dambeeyay" data-en="Latest Football News">Wararkii ugu dambeeyay</h3><p data-so="Halkan ku daabac wararka iyo falanqaynta kubadda cagta." data-en="Publish football news and analysis here.">Halkan ku daabac wararka iyo falanqaynta kubadda cagta.</p></div>
+<div class="card"><div class="tag">ANALYSIS</div><h3 data-so="Falanqaynta Ciyaaraha" data-en="Match Analysis">Falanqaynta Ciyaaraha</h3><p data-so="La wadaag aragtidaada iyo falanqaynta ciyaaraha." data-en="Share your opinions and match analysis.">La wadaag aragtidaada iyo falanqaynta ciyaaraha.</p></div>
+</div>
+</section>
+
+<footer>
+<div class="logo">⚽ Somali Football Hub</div>
+<p>Somali 🇸🇴 | English 🇬🇧</p>
+<p>© 2026 Somali Football Hub</p>
+</footer>
+<script>
+function changeLanguage(){
+const lang=document.getElementById('language').value;
+document.documentElement.lang=lang;
+document.querySelectorAll('[data-so]').forEach(el=>{
+el.textContent=el.getAttribute('data-'+lang);
+});
+}
+</script>
+</body>
+  </html>
