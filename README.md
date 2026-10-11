@@ -1,20 +1,21 @@
-Somali Football Hub ⚽
+# Somali Football Hub ⚽
 
-Welcome to Somali Football Hub!
+Welcome to **Somali Football Hub**! Your ultimate platform for Somali football news, live match results, fixtures, league statistics, and ticket bookings.
 
-Your home for Somali and international football news, match results, fixtures, league tables, and player updates.
+---
 
-Features
+## 📌 Feature-yada Mashruuca (Features)
 
-- Latest Football News
-- Live Scores and Match Results
-- Upcoming Fixtures
-- League Standings
-- Player Profiles
-- Somali and English Languages
+- **Dark Mode Modern Interface:** Qaabeyn casri ah oo ku dhisan habka madow (Dark Theme).
+- **Match Spotlight:** Kulanka ugu weyn todobaadka (Big Match Preview).
+- **Upcoming Fixtures:** Schedule-ka iyo waqtiyada kulamada soo socda.
+- **Latest Football News:** Wararkii ugu dambeeyay ee kubadda cagta Soomaaliya.
+- **Fan Zone & Ticket Hub:** Qayb loogu talagalay taageerayaasha iyo kireysiga/iibsiga tikidhada.
+- **Responsive Design:** Wuxuu si kaamil ah ugu shaqeeyaa taleefannada iyo kumbuyuutarrada.
 
-Our Mission
+---
 
-To connect Somali football fans with the latest football news and information.
+## 🛠️ Teknolajiyada La Isticmaalay (Technologies Used)
 
-Somali Football Hub — Football Is Our Passion!
+- **HTML5** - Dhisme xogta web
+- 
