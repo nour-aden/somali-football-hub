@@ -2,227 +2,721 @@
 <html lang="so">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080b09">
 <title>Somali Football Hub</title>
+
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,sans-serif;background:#f4f7f5;color:#17231d}
-header{background:#073b2a;color:white;padding:22px 6%;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px}
-.logo{font-size:25px;font-weight:bold}
-.logo span{color:#56e39f}
-nav a{color:white;text-decoration:none;margin:8px;font-size:14px}
-.hero{background:linear-gradient(120deg,#064e3b,#087f5b);color:white;padding:65px 7%;text-align:center}
-.hero h1{font-size:clamp(30px,6vw,52px);margin-bottom:15px}
-.hero p{font-size:17px;line-height:1.7;max-width:650px;margin:auto}
-.btn{display:inline-block;margin-top:22px;padding:13px 24px;background:#b8f34b;color:#15321f;text-decoration:none;border-radius:7px;font-weight:bold}
-.container{max-width:1100px;margin:auto;padding:35px 18px}
-.section-title{font-size:25px;margin-bottom:20px}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
-.card{background:white;border-radius:12px;padding:22px;box-shadow:0 3px 14px #0000000b}
-.card .icon{font-size:32px;margin-bottom:12px}
-.card h3{margin-bottom:10px}
-.card p{color:#657168;line-height:1.6;font-size:14px}
-.match{display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:center}
-.team{flex:1;font-weight:bold}
-.vs{color:#168052;font-weight:bold}
-.tag{display:inline-block;margin-bottom:10px;background:#e0f7e9;color:#087443;padding:5px 9px;border-radius:20px;font-size:12px}
-.notice{background:#e6f6ed;padding:20px;border-radius:10px;line-height:1.7}
-footer{background:#073b2a;color:white;text-align:center;padding:25px 15px;line-height:1.8}
-footer span{color:#56e39f}
-@media(max-width:600px){header{justify-content:center;text-align:center}nav{display:flex;justify-content:center;flex-wrap:wrap}.hero{padding:48px 20px}}
+:root {
+  --bg:#070908;
+  --panel:#111512;
+  --green:#65d52f;
+  --muted:#a8b1aa;
+  --line:#29312b;
+  --white:#f6f8f6;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--white);
+  font-family:Arial,Helvetica,sans-serif;
+  line-height:1.6
+}
+a{color:inherit;text-decoration:none}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.topline{
+  padding:9px 5%;
+  background:#101210;
+  color:#c7cdc8;
+  font-size:12px;
+  display:flex;
+  justify-content:space-between;
+  gap:10px
+}
+header{
+  position:sticky;
+  top:0;
+  z-index:10;
+  background:#050605f5;
+  border-bottom:1px solid #222922
+}
+.nav{
+  max-width:1180px;
+  margin:auto;
+  padding:15px 22px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px
+}
+.logo{
+  font-size:21px;
+  font-weight:900;
+  line-height:1.1;
+  display:flex;
+  align-items:center;
+  gap:10px
+}
+.ball{
+  display:grid;
+  place-items:center;
+  width:48px;
+  height:48px;
+  border:2px solid var(--green);
+  border-radius:50%;
+  font-size:27px
+}
+.logo strong{color:var(--green);display:block}
+nav{display:flex;align-items:center;gap:18px;font-size:14px}
+nav a:hover{color:var(--green)}
+.btn{
+  border:0;
+  border-radius:28px;
+  padding:12px 20px;
+  background:var(--green);
+  color:#071006;
+  font-weight:800;
+  display:inline-block
+}
+.secondary{background:transparent;color:white;border:1px solid #55714e}
+.menu{
+  display:none;
+  background:none;
+  border:1px solid #344034;
+  color:white;
+  border-radius:8px;
+  padding:8px 12px
+}
+main{max-width:1180px;margin:auto;padding:0 22px}
+.hero{
+  margin:25px 0 35px;
+  min-height:430px;
+  border-radius:24px;
+  display:flex;
+  align-items:center;
+  overflow:hidden;
+  position:relative;
+  background:radial-gradient(ellipse at 75% 40%,#304b37,#142019 35%,#080a08 72%);
+  border:1px solid #252d26
+}
+.hero:after{
+  content:"⚽";
+  position:absolute;
+  right:8%;
+  top:15%;
+  font-size:clamp(100px,20vw,220px);
+  opacity:.12
+}
+.hero-content{position:relative;z-index:1;padding:40px;max-width:680px}
+.eyebrow{
+  color:var(--green);
+  font-size:13px;
+  letter-spacing:3px;
+  font-weight:900
+}
+.hero h1{
+  font-size:clamp(40px,7vw,76px);
+  line-height:1;
+  margin:20px 0;
+  font-weight:1000
+}
+.hero h1 span{color:var(--green);display:block}
+.hero p{color:#d0d7d1;font-size:18px}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:25px}
+.section{margin:40px 0}
+.section-head{margin-bottom:18px}
+.section-head h2{font-size:24px;margin:0;text-transform:uppercase}
+.section-head h2 span{color:var(--green)}
+.section-head p{color:var(--muted)}
+.spotlight,.card,.admin{
+  border:1px solid #303830;
+  background:linear-gradient(120deg,#111411,#090b09);
+  border-radius:16px;
+  padding:22px
+}
+.spot-title{
+  text-align:center;
+  color:var(--green);
+  font-weight:900;
+  letter-spacing:1px;
+  margin-bottom:22px
+}
+.match-row{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  gap:15px;
+  text-align:center
+}
+.club{font-weight:800}
+.crest{display:block;font-size:48px}
+.club small{display:block;color:#adb7af;font-weight:400}
+.vs{
+  width:48px;height:48px;
+  border-radius:50%;
+  background:var(--green);
+  color:#081006;
+  font-weight:900;
+  display:grid;
+  place-items:center
+}
+.match-meta{color:#b9c2ba;font-size:13px;margin-top:18px}
+.cards{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px
+}
+.card h3{margin:5px 0}
+.card p{color:var(--muted)}
+.fixture-teams{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  text-align:center;
+  font-weight:bold
+}
+.fixture-teams div{flex:1}
+.fixture-teams b{color:var(--green)}
+.small-meta{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  border-top:1px solid #292f2a;
+  margin-top:14px;
+  padding-top:11px;
+  color:#b6c0b7;
+  font-size:12px
+}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:470px;background:#101310}
+th,td{padding:12px;text-align:left;border-bottom:1px solid #293029}
+th{background:#1b231b;color:var(--green)}
+.empty{
+  padding:22px;
+  color:var(--muted);
+  text-align:center;
+  border:1px dashed #374037;
+  border-radius:10px;
+  grid-column:1/-1
+}
+.news-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:15px}
+.news-art{
+  min-height:150px;
+  border-radius:10px;
+  background:radial-gradient(circle,#597f47,#14241a 60%,#080a08);
+  display:grid;
+  place-items:center;
+  font-size:70px
+}
+.cta{
+  margin:40px 0;
+  padding:28px;
+  background:linear-gradient(100deg,#1b421b,#09110b 60%,#203c1e);
+  border:1px solid #314b30;
+  border-radius:15px
+}
+footer{
+  margin-top:45px;
+  background:#0d100e;
+  border-top:1px solid #263027
+}
+.footer-grid{
+  max-width:1180px;
+  margin:auto;
+  padding:30px 22px;
+  display:grid;
+  grid-template-columns:1.3fr 1fr 1fr;
+  gap:25px
+}
+footer h3{font-size:14px;color:var(--green)}
+footer p,footer a{font-size:13px;color:#aeb8b0}
+footer a{display:block;margin:7px 0}
+.admin{
+  margin:40px 0;
+  background:#0d110e
+}
+.admin-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px
+}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:13px;color:#cbd4cc}
+.field input,.field select{
+  width:100%;
+  padding:11px;
+  border-radius:8px;
+  background:#080a08;
+  color:white;
+  border:1px solid #3b453c
+}
+.admin-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.status{font-size:13px;color:#b7c5b8;margin-top:10px;overflow-wrap:anywhere}
+.hidden{display:none!important}
+@media(max-width:760px){
+  .nav{padding:12px 15px}
+  .menu{display:block}
+  nav{
+    display:none;
+    position:absolute;
+    top:100%;left:0;right:0;
+    background:#080a08;
+    padding:18px 22px;
+    flex-direction:column;
+    align-items:flex-start;
+    border-bottom:1px solid #333
+  }
+  nav.open{display:flex}
+  .nav>.btn{display:none}
+  main{padding:0 14px}
+  .hero{min-height:350px}
+  .hero-content{padding:28px 22px}
+  .hero h1{font-size:48px}
+  .cards{grid-template-columns:1fr}
+  .news-grid{grid-template-columns:1fr}
+  .match-row{gap:9px}
+  .crest{font-size:37px}
+  .spotlight{padding:17px 10px}
+  .cta{padding:22px}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .footer-grid>div:first-child{grid-column:1/-1}
+  .admin-grid{grid-template-columns:1fr}
+  .topline{padding:8px 12px}
+}
 </style>
 </head>
+
 <body>
+<div class="topline">
+  <span>Ku soo dhawoow Somali Football Hub ⚽</span>
+  <span>Kubadda cagta • Bulshada • Jigjiga</span>
+</div>
 
 <header>
-  <div class="logo">⚽ Somali <span>Football Hub</span></div>
-  <nav>
-    <a href="#home">Home</a>
-    <a href="#matches">Matches</a>
-    <a href="#news">Football</a>
-    <a href="#about">About</a>
-  </nav>
+  <div class="nav">
+    <a class="logo" href="#home">
+      <span class="ball">⚽</span>
+      <span>SOMALI <strong>FOOTBALL HUB</strong></span>
+    </a>
+    <button class="menu" id="menuBtn">☰</button>
+    <nav id="navLinks">
+      <a href="#matches">Ciyaaraha</a>
+      <a href="#standings">Kala sarreynta</a>
+      <a href="#teams">Kooxaha</a>
+      <a href="#news">Wararka</a>
+      <a href="#about">Nagu saabsan</a>
+      <a href="#admin">Maamulka</a>
+    </nav>
+    <a class="btn" href="#matches">Eeg ciyaaraha</a>
+  </div>
 </header>
 
-<section class="hero" id="home">
-  <h1>Football Is Our Passion ⚽</h1>
-  <p>Ku soo dhawoow Somali Football Hub — meesha aad kala socon karto wararka kubadda cagta, ciyaaraha iyo kooxaha aad jeceshahay.</p>
-  <a class="btn" href="#matches">Explore Football</a>
-</section>
-
-<section class="container" id="matches">
-  <h2 class="section-title">🏆 Match Center | Xarunta Ciyaaraha</h2>
-  <div class="cards">
-    <div class="card">
-      <span class="tag">Featured Match</span>
-      <div class="match">
-        <div class="team">🔵 Barcelona</div>
-        <div class="vs">VS</div>
-        <div class="team">⚪ Real Madrid</div>
+<main id="home">
+  <section class="hero">
+    <div class="hero-content">
+      <div class="eyebrow">HORYAALKA BULSHADA • JIGJIGA</div>
+      <h1>U NOOLOW <span>KUBADDA CAGTA.</span></h1>
+      <p>Xamaasad. Tartanka. Guusha. Hal ciyaar, hal bulsho, hal jacayl oo kubadda cagta ah.</p>
+      <div class="actions">
+        <a class="btn" href="#matches">🗓️ Jadwalka ciyaaraha</a>
+        <a class="btn secondary" href="#standings">🏆 Kala sarreynta</a>
       </div>
-      <p style="text-align:center;margin-top:16px">Jadwalka rasmiga ah halkan ayaa lagu soo bandhigi doonaa.</p>
-    </div>
-    <div class="card">
-      <div class="icon">📅</div>
-      <h3>Upcoming Fixtures</h3>
-      <p>La soco jadwalka ciyaaraha soo socda iyo waqtiga ay bilaabanayaan.</p>
-    </div>
-    <div class="card">
-      <div class="icon">📊</div>
-      <h3>League Standings</h3>
-      <p>La soco kala sarreynta kooxaha iyo dhibcaha horyaallada.</p>
-    </div>
-  </div>
-</section>
-
-<section class="container" id="news">
-  <h2 class="section-title">🌍 Football Hub</h2>
-  <div class="cards">
-    <div class="card">
-      <div class="icon">📰</div>
-      <h3>Football News</h3>
-      <p>Wararka ugu dambeeya ee kubadda cagta Soomaaliya iyo dunida.</p>
-    </div>
-    <div class="card">
-      <div class="icon">⭐</div>
-      <h3>Players & Teams</h3>
-      <p>Macluumaad ku saabsan ciyaartoyda iyo kooxaha caanka ah.</p>
-    </div>
-    <div class="card">
-      <div class="icon">🇸🇴</div>
-      <h3>Somali Football</h3>
-      <p>Taageer kubadda cagta Soomaaliya oo la soco horumarkeeda.</p>
-    </div>
-  </div>
-</section>
-  <section class="container">
-    <h2 class="section-title">Kooxaha Horyaalka</h2>
-    <div id="teams-container">
-        <p>Kooxaha waa la soo rarayaa...</p>
     </div>
   </section>
-  
 
-<section class="container" id="about">
-  <h2 class="section-title">About Us | Nagu Saabsan</h2>
-  <div class="notice">
-    <strong>Somali Football Hub</strong> waa madal loogu talagalay taageerayaasha kubadda cagta. Ujeeddadeennu waa inaan taageerayaasha u fududeyno helitaanka wararka, jadwalka ciyaaraha iyo macluumaadka kubadda cagta.
-    <br><br>
-    <strong>Our mission:</strong> Connecting football fans through news, matches and the beautiful game.
-  </div>
-</section>
+  <section class="section" id="spotlight">
+    <div class="section-head">
+      <h2><span>★</span> Ciyaarta la iftiimiyey</h2>
+      <p>Somali Football Hub</p>
+    </div>
+    <div class="spotlight">
+      <div class="spot-title">MATCH SPOTLIGHT</div>
+      <div class="match-row">
+        <div class="club">
+          <span class="crest">⚽</span>
+          <span id="spotHome">Kooxda 1</span>
+          <small>Kooxda guriga</small>
+        </div>
+        <div class="vs">VS</div>
+        <div class="club">
+          <span class="crest">⚽</span>
+          <span id="spotAway">Kooxda 2</span>
+          <small>Kooxda martida</small>
+        </div>
+      </div>
+      <div class="match-meta" id="spotMeta">Jadwalka horyaalka bulshada</div>
+    </div>
+  </section>
+
+  <section class="section" id="matches">
+    <div class="section-head">
+      <h2><span>›</span> Ciyaaraha soo socda</h2>
+      <p>Jadwalka horyaalka</p>
+    </div>
+    <div id="fixtures" class="cards">
+      <div class="empty">Jadwalka ciyaaraha halkan ayuu ka soo muuqan doonaa.</div>
+    </div>
+  </section>
+
+  <section class="section" id="results">
+    <div class="section-head">
+      <h2><span>★</span> Natiijooyinkii ciyaaraha</h2>
+      <p>Natiijooyinka rasmiga ah</p>
+    </div>
+    <div id="resultsList" class="cards">
+      <div class="empty">Natiijooyin wali lama gelin.</div>
+    </div>
+  </section>
+
+  <section class="section" id="standings">
+    <div class="section-head">
+      <h2><span>★</span> Kala sarreynta horyaalka</h2>
+      <p>Waxaa lagu xisaabiyaa natiijooyinka la geliyey</p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>Kooxda</th><th>C</th><th>G</th>
+            <th>Barbaro</th><th>L</th><th>Farqiga</th><th>Dhibco</th>
+          </tr>
+        </thead>
+        <tbody id="standingsBody">
+          <tr><td colspan="8">Xogta kooxaha halkan ayay ka soo muuqan doontaa.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section" id="teams">
+    <div class="section-head">
+      <h2><span>›</span> Kooxaha horyaalka</h2>
+      <p>Kooxaha ka qaybgalaya</p>
+    </div>
+    <div id="teamsList" class="cards">
+      <div class="empty">Kooxaha halkan ayay ka soo muuqan doonaan.</div>
+    </div>
+  </section>
+
+  <section class="section" id="news">
+    <div class="section-head">
+      <h2><span>★</span> Wararka kubadda cagta</h2>
+      <p>Wararka iyo dhacdooyinka</p>
+    </div>
+    <div class="news-grid">
+      <article class="card">
+        <div class="news-art">⚽</div>
+        <h3>Ku soo dhawoow Somali Football Hub</h3>
+        <p>La soco ciyaaraha, kooxaha, natiijooyinka iyo kala sarreynta horyaalka bulshada ee Jigjiga.</p>
+      </article>
+      <article class="card">
+        <h3>Warar dheeraad ah</h3>
+        <p>Wararka kooxaha</p>
+        <p>Jadwalka ciyaaraha</p>
+        <p>Natiijooyinka cusub</p>
+        <p>Horumarka horyaalka</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="cta" id="about">
+    <h2>⚽ WADAJIR AYAAN U NOOLNAHAY KUBADDA!</h2>
+    <p>Somali Football Hub — Kubaddu waxay mideysaa bulshada.</p>
+    <a class="btn" href="#matches">La soco horyaalka</a>
+  </section>
+
+  <section class="admin" id="admin">
+    <h2>🔐 Maamulka horyaalka</h2>
+    <p>Maamulka ayaa halkan ka geli kara si uu u maamulo kooxaha iyo ciyaaraha.</p>
+
+    <div id="adminLogin">
+      <div class="admin-grid">
+        <div class="field">
+          <label>Email-ka maamulka</label>
+          <input id="adminEmail" type="email" placeholder="Email-kaaga">
+        </div>
+        <div class="field">
+          <label>Password-ka</label>
+          <input id="adminPassword" type="password" placeholder="Password-kaaga">
+        </div>
+      </div>
+      <div class="admin-actions">
+        <button class="btn" id="loginBtn">Soo gal</button>
+      </div>
+      <div class="status" id="loginStatus">Marka Firebase si sax ah loogu xiro, maamulka ayaa geli kara.</div>
+    </div>
+
+    <div id="adminPanel" class="hidden">
+      <h3>Ku dar koox cusub</h3>
+      <div class="admin-grid">
+        <div class="field">
+          <label>Magaca kooxda</label>
+          <input id="teamNameInput" placeholder="Tusaale: Jigjiga FC">
+        </div>
+        <div class="field">
+          <label>Calaamadda kooxda</label>
+          <input id="teamEmojiInput" placeholder="⚽">
+        </div>
+      </div>
+      <div class="admin-actions">
+        <button class="btn" id="addTeamBtn">Ku dar kooxda</button>
+      </div>
+
+      <h3>Jadwal geli ama natiijo qor</h3>
+      <div class="admin-grid">
+        <div class="field">
+          <label>Kooxda guriga</label>
+          <select id="homeTeamSelect"><option value="">Dooro koox</option></select>
+        </div>
+        <div class="field">
+          <label>Kooxda martida</label>
+          <select id="awayTeamSelect"><option value="">Dooro koox</option></select>
+        </div>
+        <div class="field">
+          <label>Taariikhda iyo waqtiga</label>
+          <input id="matchDate" type="datetime-local">
+        </div>
+        <div class="field">
+          <label>Xaaladda ciyaarta</label>
+          <select id="matchStatus">
+            <option value="scheduled">Ciyaar soo socota</option>
+            <option value="played">Ciyaar la dhammeeyey</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Goolasha kooxda guriga</label>
+          <input id="homeGoals" type="number" min="0" placeholder="0">
+        </div>
+        <div class="field">
+          <label>Goolasha kooxda martida</label>
+          <input id="awayGoals" type="number" min="0" placeholder="0">
+        </div>
+      </div>
+      <div class="admin-actions">
+        <button class="btn" id="saveMatchBtn">Kaydi ciyaarta</button>
+        <button class="btn secondary" id="logoutBtn">Ka bax</button>
+      </div>
+      <div class="status" id="adminStatus"></div>
+    </div>
+  </section>
+</main>
 
 <footer>
-  <strong>⚽ Somali <span>Football Hub</span></strong>
-  <p>Football brings us together.</p>
-  <p>© 2026 Somali Football Hub. All rights reserved.</p>
+  <div class="footer-grid">
+    <div>
+      <a class="logo" href="#home">
+        <span class="ball">⚽</span>
+        <span>SOMALI <strong>FOOTBALL HUB</strong></span>
+      </a>
+      <p>Hoyga ciyaaraha, kooxaha iyo taageerayaasha kubadda cagta.</p>
+    </div>
+    <div>
+      <h3>LINKS DEGDEG AH</h3>
+      <a href="#matches">Ciyaaraha</a>
+      <a href="#standings">Kala sarreynta</a>
+      <a href="#teams">Kooxaha</a>
+      <a href="#news">Wararka</a>
+    </div>
+    <div>
+      <h3>NALA SOCO</h3>
+      <p>Somali Football Hub • Jigjiga</p>
+      <p>Football brings us together.</p>
+    </div>
+  </div>
 </footer>
-  function fetchTeams() {
-    const container = document.getElementById('teams-container');
 
-    db.collection("leagues").doc("League 1").collection("Teams")
-        .get()
-        .then((querySnapshot) => {
-            container.innerHTML = "";
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
-            if (querySnapshot.empty) {
-                container.innerHTML = "<p>Wax koox ah lagama helin Firebase.</p>";
-                return;
-            }
-
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                const teamName = data.Name || data.name || doc.id;
-
-                const teamElement = document.createElement('div');
-                teamElement.style.border = "1px solid #ccc";
-                teamElement.style.padding = "10px";
-                teamElement.style.margin = "8px 0";
-                teamElement.style.borderRadius = "8px";
-                teamElement.style.backgroundColor = "#ffffff";
-                
-                teamElement.innerHTML = `<h3 style="color: #0d5c3a; margin: 0;">⚽ ${teamName}</h3>`;
-                
-                container.appendChild(teamElement);
-            });
-        })
-        .catch((error) => {
-            console.error("Cillad ayaa dhacday: ", error);
-            container.innerHTML = "<p>Lama soo bixin karo kooxaha.</p>";
-        });
-}
-
-document.addEventListener("DOMContentLoaded", fetchTeams);
-  
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script><script>
+<script>
+/*
+Geli Firebase config-kaagii hore halkan.
+Ha gelin password-kaaga.
+*/
 const firebaseConfig = {
-  apiKey: "AIzaSyDY11SHn7KdhpC3Tlnah8WPNBcVDnV5AvA",
+  apiKey: "GELI_API_KEY_GAAGA",
   authDomain: "somali-football-hub.firebaseapp.com",
   projectId: "somali-football-hub",
   storageBucket: "somali-football-hub.firebasestorage.app",
   messagingSenderId: "759729306447",
-  appId: "1:759729306447:web:733df2429b53435d65233a"
+  appId: "GELI_APP_ID_GAAGA"
 };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const $ = id => document.getElementById(id);
+let db = null;
+let auth = null;
+let currentUser = null;
+let teams = [];
+let matches = [];
 
-console.log("Somali Football Hub Firebase connected!");
-</script>
-  <script>
-firebase.firestore().collection("leagues").get()
-  .then((snapshot) => {
-    snapshot.forEach((doc) => {
-      console.log("League:", doc.data());
-    });
-    alert("Firebase wuu shaqaynayaa!");
-  })
-  .catch((error) => {
-    alert("Firebase wali ma shaqaynayo: " + error.message);
+$("menuBtn").addEventListener("click", () => {
+  $("navLinks").classList.toggle("open");
+});
+
+$("navLinks").querySelectorAll("a").forEach(link => {
+  link.addEventListener("click", () => $("navLinks").classList.remove("open"));
+});
+
+function status(id, message) {
+  $(id).textContent = message;
+}
+
+function safe(value) {
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  }[ch]));
+}
+
+function renderTeams() {
+  $("teamsList").innerHTML = teams.length
+    ? teams.map(t => `
+      <article class="card">
+        <div class="crest">${safe(t.emoji || "⚽")}</div>
+        <h3>${safe(t.name)}</h3>
+        <p>Somali Football Hub</p>
+      </article>
+    `).join("")
+    : '<div class="empty">Kooxo lama helin. Maamulka ayaa kooxo ku dari kara.</div>';
+
+  ["homeTeamSelect","awayTeamSelect"].forEach(id => {
+    const select = $(id);
+    const old = select.value;
+    select.innerHTML = '<option value="">Dooro koox</option>' +
+      teams.map(t => `<option value="${safe(t.id)}">${safe(t.name)}</option>`).join("");
+    if (teams.some(t => t.id === old)) select.value = old;
   });
-  </script>
-<section id="league-teams" style="max-width:1000px;margin:30px auto;padding:20px;background:white;color:#222;border-radius:12px;">
-  <h2>Jigjiga Community League</h2>
-  <p id="teams-status">Kooxaha waa la soo rarayaa...</p>
-  <div id="teams-list"></div>
-</section>
 
-<script>
-async function showTeams() {
-  const status = document.getElementById("teams-status");
-  const list = document.getElementById("teams-list");
+  renderStandings();
+}
 
-  try {
-    const snapshot = await db
-      .collection("leagues")
-      .doc("League 1")
-      .collection("Teams")
-      .get();
+function renderFixtures() {
+  const upcoming = matches.filter(m => m.status !== "played")
+    .sort((a,b) => (a.date || "").localeCompare(b.date || ""));
 
-    if (snapshot.empty) {
-      status.textContent = "Kooxo lama helin. Hubi xogta Firestore.";
-      return;
-    }
+  $("fixtures").innerHTML = upcoming.length
+    ? upcoming.map(m => {
+      const home = teams.find(t => t.id === m.homeTeamId)?.name || m.homeName || "Kooxda guriga";
+      const away = teams.find(t => t.id === m.awayTeamId)?.name || m.awayName || "Kooxda martida";
+      return `
+        <article class="card">
+          <div class="fixture-teams">
+            <div>⚽<br>${safe(home)}</div>
+            <b>VS</b>
+            <div>⚽<br>${safe(away)}</div>
+          </div>
+          <div class="small-meta">
+            <span>${safe(m.date || "Waqti lama cayimin")}</span>
+            <span>Soo socota</span>
+          </div>
+        </article>`;
+    }).join("")
+    : '<div class="empty">Ciyaaro soo socda wali lama gelin.</div>';
 
-    status.textContent = "Tirada kooxaha: " + snapshot.size;
+  const played = matches.filter(m => m.status === "played");
 
-    snapshot.forEach((doc) => {
-      const data = doc.data();
-      const name = data.Name || data.name || doc.id;
+  $("resultsList").innerHTML = played.length
+    ? played.map(m => {
+      const home = teams.find(t => t.id === m.homeTeamId)?.name || m.homeName || "Koox";
+      const away = teams.find(t => t.id === m.awayTeamId)?.name || m.awayName || "Koox";
+      return `
+        <article class="card">
+          <div class="fixture-teams">
+            <div>${safe(home)}</div>
+            <b>${Number(m.homeGoals || 0)} - ${Number(m.awayGoals || 0)}</b>
+            <div>${safe(away)}</div>
+          </div>
+          <div class="small-meta"><span>Natiijo rasmi ah</span></div>
+        </article>`;
+    }).join("")
+    : '<div class="empty">Natiijooyin wali lama gelin.</div>';
 
-      const card = document.createElement("div");
-      card.textContent = "⚽ " + name;
-      card.style.cssText =
-        "padding:15px;margin:10px 0;background:#f0f7f2;border-radius:8px;font-weight:bold;";
-
-      list.appendChild(card);
-    });
-  } catch (error) {
-    status.textContent = "Khalad: " + error.message;
+  const first = upcoming[0] || matches[0];
+  if (first) {
+    $("spotHome").textContent =
+      teams.find(t => t.id === first.homeTeamId)?.name || first.homeName || "Kooxda guriga";
+    $("spotAway").textContent =
+      teams.find(t => t.id === first.awayTeamId)?.name || first.awayName || "Kooxda martida";
+    $("spotMeta").textContent = first.date || "Jadwalka horyaalka bulshada";
   }
 }
 
-showTeams();
-</script>
-</body>
-</html>
+function renderStandings() {
+  const stats = new Map();
+
+  teams.forEach(t => stats.set(t.id, {
+    id:t.id,name:t.name,played:0,w:0,d:0,l:0,gf:0,ga:0,pts:0
+  }));
+
+  matches.filter(m =>
+    m.status === "played" &&
+    stats.has(m.homeTeamId) &&
+    stats.has(m.awayTeamId)
+  ).forEach(m => {
+    const h = stats.get(m.homeTeamId);
+    const a = stats.get(m.awayTeamId);
+    const hg = Number(m.homeGoals || 0);
+    const ag = Number(m.awayGoals || 0);
+
+    h.played++;
+    a.played++;
+    h.gf += hg;
+    h.ga += ag;
+    a.gf += ag;
+    a.ga += hg;
+
+    if (hg > ag) {
+      h.w++; h.pts += 3; a.l++;
+    } else if (hg < ag) {
+      a.w++; a.pts += 3; h.l++;
+    } else {
+      h.d++; a.d++; h.pts++; a.pts++;
+    }
+  });
+
+  const sorted = [...stats.values()].sort((a,b) =>
+    b.pts-a.pts ||
+    (b.gf-b.ga)-(a.gf-a.ga) ||
+    b.gf-a.gf ||
+    a.name.localeCompare(b.name)
+  );
+
+  $("standingsBody").innerHTML = sorted.length
+    ? sorted.map((t,i) => `
+      <tr>
+        <td>${i+1}</td><td>${safe(t.name)}</td><td>${t.played}</td>
+        <td>${t.w}</td><td>${t.d}</td><td>${t.l}</td>
+        <td>${t.gf-t.ga}</td><td><strong>${t.pts}</strong></td>
+      </tr>
+    `).join("")
+    : '<tr><td colspan="8">Kooxo lama helin.</td></tr>';
+}
+
+async function loadData() {
+  if (!db) return;
+
+  try {
+    const [teamSnap, matchSnap] = await Promise.all([
+      db.collection("teams").get(),
+      db.collection("matches").get()
+    ]);
+
+    teams = teamSnap.docs.map(doc => {
+      const d = doc.data() || {};
+      return {
+        id:doc.id,
+        name:d.name || d.Name || d.teamName || doc.id,
+        emoji:d.emoji || d.Emoji || "⚽"
+      };
+    });
+
+    matches = matchSnap.docs.map(doc => ({
+      id:doc
