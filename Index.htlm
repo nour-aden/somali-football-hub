@@ -1,181 +1,115 @@
 <!DOCTYPE html>
 <html lang="so">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Somali Football Hub</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- Icons FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Somali Football Hub</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f4f7f5;color:#17231d}
+header{background:#073b2a;color:white;padding:22px 6%;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px}
+.logo{font-size:25px;font-weight:bold}
+.logo span{color:#56e39f}
+nav a{color:white;text-decoration:none;margin:8px;font-size:14px}
+.hero{background:linear-gradient(120deg,#064e3b,#087f5b);color:white;padding:65px 7%;text-align:center}
+.hero h1{font-size:clamp(30px,6vw,52px);margin-bottom:15px}
+.hero p{font-size:17px;line-height:1.7;max-width:650px;margin:auto}
+.btn{display:inline-block;margin-top:22px;padding:13px 24px;background:#b8f34b;color:#15321f;text-decoration:none;border-radius:7px;font-weight:bold}
+.container{max-width:1100px;margin:auto;padding:35px 18px}
+.section-title{font-size:25px;margin-bottom:20px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
+.card{background:white;border-radius:12px;padding:22px;box-shadow:0 3px 14px #0000000b}
+.card .icon{font-size:32px;margin-bottom:12px}
+.card h3{margin-bottom:10px}
+.card p{color:#657168;line-height:1.6;font-size:14px}
+.match{display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:center}
+.team{flex:1;font-weight:bold}
+.vs{color:#168052;font-weight:bold}
+.tag{display:inline-block;margin-bottom:10px;background:#e0f7e9;color:#087443;padding:5px 9px;border-radius:20px;font-size:12px}
+.notice{background:#e6f6ed;padding:20px;border-radius:10px;line-height:1.7}
+footer{background:#073b2a;color:white;text-align:center;padding:25px 15px;line-height:1.8}
+footer span{color:#56e39f}
+@media(max-width:600px){header{justify-content:center;text-align:center}nav{display:flex;justify-content:center;flex-wrap:wrap}.hero{padding:48px 20px}}
+</style>
 </head>
 <body>
 
-    <!-- Header / Navigation -->
-    <header>
-        <div class="top-bar">
-            <span>Kubadda Cagta Soomaaliya! ⚽</span>
-            <a href="#">Ka eeg Browser-ka</a>
-        </div>
-        <nav class="navbar">
-            <div class="logo">
-                <i class="fa-solid fa-futbol text-green"></i>
-                <span>SOMALI <span class="text-green">FOOTBALL HUB</span></span>
-            </div>
-            <ul class="nav-links">
-                <li><a href="#">Kulamada</a></li>
-                <li><a href="#">Natiijooyinka</a></li>
-                <li><a href="#">Kooroxaha</a></li>
-                <li><a href="#">Wararka</a></li>
-                <li><a href="#">Dalabyada</a></li>
-            </ul>
-            <a href="#" class="btn btn-primary">Isoor Tikidhada</a>
-        </nav>
-    </header>
+<header>
+  <div class="logo">⚽ Somali <span>Football Hub</span></div>
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#matches">Matches</a>
+    <a href="#news">Football</a>
+    <a href="#about">About</a>
+  </nav>
+</header>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1>U NOOLOW <br><span class="text-green">KUBADDA CAGTA</span></h1>
-            <p>Xamaasada. Cayaaraha. Guusha. Kulanka kasta, daqiiqad kasta oo kubadda cagta Soomaaliyeed ah.</p>
-            <a href="#" class="btn btn-primary"><i class="fa-solid fa-ticket"></i> HELLO TIKIDHADA KULANKA</a>
-        </div>
-    </section>
+<section class="hero" id="home">
+  <h1>Football Is Our Passion ⚽</h1>
+  <p>Ku soo dhawoow Somali Football Hub — meesha aad kala socon karto wararka kubadda cagta, ciyaaraha iyo kooxaha aad jeceshahay.</p>
+  <a class="btn" href="#matches">Explore Football</a>
+</section>
 
-    <!-- Match Spotlight -->
-    <section class="container match-spotlight-section">
-        <h2 class="section-title">KULANKA UGU WEYN</h2>
-        <div class="spotlight-card">
-            <div class="team">
-                <div class="team-badge red">DEKEDDA</div>
-                <h3>DEKEDDA FC</h3>
-            </div>
-            <div class="match-info">
-                <div class="vs-badge">VS</div>
-                <p class="match-time"><i class="fa-regular fa-calendar"></i> 26 MAAY 2026 &nbsp;|&nbsp; <i class="fa-regular fa-clock"></i> 04:00 PM</p>
-                <a href="#" class="btn btn-primary"><i class="fa-solid fa-play"></i> DAAWO MOOGDGE (LIVE)</a>
-            </div>
-            <div class="team">
-                <div class="team-badge blue">ELMAN</div>
-                <h3>ELMAN FC</h3>
-            </div>
-        </div>
-    </section>
+<section class="container" id="matches">
+  <h2 class="section-title">🏆 Match Center | Xarunta Ciyaaraha</h2>
+  <div class="cards">
+    <div class="card">
+      <span class="tag">Featured Match</span>
+      <div class="match">
+        <div class="team">🔵 Barcelona</div>
+        <div class="vs">VS</div>
+        <div class="team">⚪ Real Madrid</div>
+      </div>
+      <p style="text-align:center;margin-top:16px">Jadwalka rasmiga ah halkan ayaa lagu soo bandhigi doonaa.</p>
+    </div>
+    <div class="card">
+      <div class="icon">📅</div>
+      <h3>Upcoming Fixtures</h3>
+      <p>La soco jadwalka ciyaaraha soo socda iyo waqtiga ay bilaabanayaan.</p>
+    </div>
+    <div class="card">
+      <div class="icon">📊</div>
+      <h3>League Standings</h3>
+      <p>La soco kala sarreynta kooxaha iyo dhibcaha horyaallada.</p>
+    </div>
+  </div>
+</section>
 
-    <!-- Upcoming Matches -->
-    <section class="container">
-        <h2 class="section-title">KULAMADA SOO SOCDA</h2>
-        <div class="matches-grid">
-            
-            <div class="match-card">
-                <div class="teams-versus">
-                    <span>HORSEED</span>
-                    <span class="vs-sm">VS</span>
-                    <span>MOGADISHU CITY</span>
-                </div>
-                <div class="match-details">
-                    <p><i class="fa-regular fa-calendar"></i> 28 MAAY &nbsp; <i class="fa-regular fa-clock"></i> 03:30 PM</p>
-                </div>
-                <a href="#" class="link-btn">Faahfaahinta <i class="fa-solid fa-chevron-right"></i></a>
-            </div>
+<section class="container" id="news">
+  <h2 class="section-title">🌍 Football Hub</h2>
+  <div class="cards">
+    <div class="card">
+      <div class="icon">📰</div>
+      <h3>Football News</h3>
+      <p>Wararka ugu dambeeya ee kubadda cagta Soomaaliya iyo dunida.</p>
+    </div>
+    <div class="card">
+      <div class="icon">⭐</div>
+      <h3>Players & Teams</h3>
+      <p>Macluumaad ku saabsan ciyaartoyda iyo kooxaha caanka ah.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🇸🇴</div>
+      <h3>Somali Football</h3>
+      <p>Taageer kubadda cagta Soomaaliya oo la soco horumarkeeda.</p>
+    </div>
+  </div>
+</section>
 
-            <div class="match-card">
-                <div class="teams-versus">
-                    <span>GAADIIDKA</span>
-                    <span class="vs-sm">VS</span>
-                    <span>HEEGAN</span>
-                </div>
-                <div class="match-details">
-                    <p><i class="fa-regular fa-calendar"></i> 29 MAAY &nbsp; <i class="fa-regular fa-clock"></i> 04:00 PM</p>
-                </div>
-                <a href="#" class="link-btn">Faahfaahinta <i class="fa-solid fa-chevron-right"></i></a>
-            </div>
+<section class="container" id="about">
+  <h2 class="section-title">About Us | Nagu Saabsan</h2>
+  <div class="notice">
+    <strong>Somali Football Hub</strong> waa madal loogu talagalay taageerayaasha kubadda cagta. Ujeeddadeennu waa inaan taageerayaasha u fududeyno helitaanka wararka, jadwalka ciyaaraha iyo macluumaadka kubadda cagta.
+    <br><br>
+    <strong>Our mission:</strong> Connecting football fans through news, matches and the beautiful game.
+  </div>
+</section>
 
-            <div class="match-card">
-                <div class="teams-versus">
-                    <span>LFA PORT</span>
-                    <span class="vs-sm">VS</span>
-                    <span>BADBAADO</span>
-                </div>
-                <div class="match-details">
-                    <p><i class="fa-regular fa-calendar"></i> 30 MAAY &nbsp; <i class="fa-regular fa-clock"></i> 03:45 PM</p>
-                </div>
-                <a href="#" class="link-btn">Faahfaahinta <i class="fa-solid fa-chevron-right"></i></a>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- Latest News -->
-    <section class="container">
-        <h2 class="section-title">WARARKII UGU DAMBEEYAY</h2>
-        <div class="news-grid">
-            <div class="main-news-card">
-                <div class="news-img-placeholder">⚽ WARARKA KUBADDA CAGTA</div>
-                <div class="news-content">
-                    <h3>Finaalka Horyaalka Premier League Soomaaliya: Wax Kasta Oo Aad U Baahan Tahay In Aad Ogaato</h3>
-                    <p>Eeg falanqaynta, xiddigaha muhiimka ah, iyo halka aad ka daawan karto ciyaarta ugu weyn xilli ciyaareedkan.</p>
-                    <a href="#" class="link-btn text-green">Sii Akhri <i class="fa-solid fa-chevron-right"></i></a>
-                </div>
-            </div>
-            <div class="side-news-card">
-                <h4>WARAR KALE</h4>
-                <ul>
-                    <li><a href="#">10-kii Golaha Ugu Uzani Xilli Ciyaareedka <i class="fa-solid fa-chevron-right"></i></a></li>
-                    <li><a href="#">Xaaladda Dhaawacyada Xiddigaha <i class="fa-solid fa-chevron-right"></i></a></li>
-                    <li><a href="#">Wararkii Ugu Dambeeyay Ee Kala Iibsiga <i class="fa-solid fa-chevron-right"></i></a></li>
-                    <li><a href="#">Falanqaynta Kulamada Horyaalka <i class="fa-solid fa-chevron-right"></i></a></li>
-                </ul>
-            </div>
-        </div>
-    </section>
-
-    <!-- Join Fan Zone Banner -->
-    <section class="container">
-        <div class="fan-zone-banner">
-            <div class="fan-zone-info">
-                <i class="fa-solid fa-trophy trophy-icon"></i>
-                <div>
-                    <h2>KUSOO BIIR FAN ZONE-KA!</h2>
-                    <p>Hel wararkii ugu dambeeyay, qiimo dhimis tikidhada ah iyo fursado gaar ah.</p>
-                </div>
-            </div>
-            <a href="#" class="btn btn-white">AHOO xubin (JOIN NOW)</a>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container footer-content">
-            <div class="footer-about">
-                <div class="logo">
-                    <i class="fa-solid fa-futbol text-green"></i>
-                    <span>SOMALI <span class="text-green">FOOTBALL HUB</span></span>
-                </div>
-                <p>Goyntaada rasmiga ah ee natiijooyinka livenka ah, wararka, iyo wax kasta oo ku saabsan kubadda cagta Soomaaliya.</p>
-            </div>
-            <div class="footer-links">
-                <h4>XANNIYIHA</h4>
-                <ul>
-                    <li><a href="#">Kulamada</a></li>
-                    <li><a href="#">Kooroxaha</a></li>
-                    <li><a href="#">Wararka</a></li>
-                    <li><a href="#">Tikidhada</a></li>
-                </ul>
-            </div>
-            <div class="footer-social">
-                <h4>NA SOO RAAC</h4>
-                <div class="social-icons">
-                    <a href="#"><i class="fa-brands fa-facebook"></i></a>
-                    <a href="#"><i class="fa-brands fa-twitter"></i></a>
-                    <a href="#"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="#"><i class="fa-brands fa-youtube"></i></a>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2026 Somali Football Hub. Dhammaan xuquuqda waa la dhowray.</p>
-        </div>
-    </footer>
+<footer>
+  <strong>⚽ Somali <span>Football Hub</span></strong>
+  <p>Football brings us together.</p>
+  <p>© 2026 Somali Football Hub. All rights reserved.</p>
+</footer>
 
 </body>
 </html>
