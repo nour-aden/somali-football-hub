@@ -117,6 +117,43 @@ footer span{color:#56e39f}
   <p>Football brings us together.</p>
   <p>© 2026 Somali Football Hub. All rights reserved.</p>
 </footer>
+  function fetchTeams() {
+    const container = document.getElementById('teams-container');
+
+    db.collection("leagues").doc("League 1").collection("Teams")
+        .get()
+        .then((querySnapshot) => {
+            container.innerHTML = "";
+
+            if (querySnapshot.empty) {
+                container.innerHTML = "<p>Wax koox ah lagama helin Firebase.</p>";
+                return;
+            }
+
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                const teamName = data.Name || data.name || doc.id;
+
+                const teamElement = document.createElement('div');
+                teamElement.style.border = "1px solid #ccc";
+                teamElement.style.padding = "10px";
+                teamElement.style.margin = "8px 0";
+                teamElement.style.borderRadius = "8px";
+                teamElement.style.backgroundColor = "#ffffff";
+                
+                teamElement.innerHTML = `<h3 style="color: #0d5c3a; margin: 0;">⚽ ${teamName}</h3>`;
+                
+                container.appendChild(teamElement);
+            });
+        })
+        .catch((error) => {
+            console.error("Cillad ayaa dhacday: ", error);
+            container.innerHTML = "<p>Lama soo bixin karo kooxaha.</p>";
+        });
+}
+
+document.addEventListener("DOMContentLoaded", fetchTeams);
+  
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script><script>
 const firebaseConfig = {
   apiKey: "AIzaSyDY11SHn7KdhpC3Tlnah8WPNBcVDnV5AvA",
