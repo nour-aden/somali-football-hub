@@ -110,6 +110,20 @@ footer span{color:#56e39f}
   <p>Football brings us together.</p>
   <p>© 2026 Somali Football Hub. All rights reserved.</p>
 </footer>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script><script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDY11SHn7KdhpC3Tlnah8WPNBcVDnV5AvA",
+  authDomain: "somali-football-hub.firebaseapp.com",
+  projectId: "somali-football-hub",
+  storageBucket: "somali-football-hub.firebasestorage.app",
+  messagingSenderId: "759729306447",
+  appId: "1:759729306447:web:733df2429b53435d65233a"
+};
 
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+console.log("Somali Football Hub Firebase connected!");
+</script>
 </body>
 </html>
