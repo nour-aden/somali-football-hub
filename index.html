@@ -181,5 +181,48 @@ firebase.firestore().collection("leagues").get()
     alert("Firebase wali ma shaqaynayo: " + error.message);
   });
   </script>
+<section id="league-teams" style="max-width:1000px;margin:30px auto;padding:20px;background:white;color:#222;border-radius:12px;">
+  <h2>Jigjiga Community League</h2>
+  <p id="teams-status">Kooxaha waa la soo rarayaa...</p>
+  <div id="teams-list"></div>
+</section>
+
+<script>
+async function showTeams() {
+  const status = document.getElementById("teams-status");
+  const list = document.getElementById("teams-list");
+
+  try {
+    const snapshot = await db
+      .collection("leagues")
+      .doc("League 1")
+      .collection("Teams")
+      .get();
+
+    if (snapshot.empty) {
+      status.textContent = "Kooxo lama helin. Hubi xogta Firestore.";
+      return;
+    }
+
+    status.textContent = "Tirada kooxaha: " + snapshot.size;
+
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      const name = data.Name || data.name || doc.id;
+
+      const card = document.createElement("div");
+      card.textContent = "⚽ " + name;
+      card.style.cssText =
+        "padding:15px;margin:10px 0;background:#f0f7f2;border-radius:8px;font-weight:bold;";
+
+      list.appendChild(card);
+    });
+  } catch (error) {
+    status.textContent = "Khalad: " + error.message;
+  }
+}
+
+showTeams();
+</script>
 </body>
 </html>
