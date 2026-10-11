@@ -1,108 +1,318 @@
 <!DOCTYPE html>
-<html lang="so">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Somali Football Hub</title>
-<style>
-*{box-sizing:border-box}
-body{margin:0;background:#07111f;color:#fff;font-family:Arial,sans-serif}
-header{background:#0c1b2c;padding:20px 5%;border-bottom:2px solid #20d67b}
-.logo{font-size:25px;font-weight:bold;color:#29df83}
-nav{display:flex;gap:18px;flex-wrap:wrap;margin-top:18px}
-nav a{color:#fff;text-decoration:none;font-size:14px}
-.hero{padding:40px 5%;background:linear-gradient(120deg,#102d40,#075b45)}
-.hero h1{font-size:36px;margin-bottom:10px}
-.hero p{color:#d5e6e2;line-height:1.6}
-button,.btn{background:#20d67b;color:#061a13;border:0;padding:12px 18px;border-radius:7px;font-weight:bold;cursor:pointer}
-section{padding:25px 5%}
-h2{border-left:4px solid #20d67b;padding-left:12px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px}
-.card{background:#112238;padding:18px;border-radius:12px;border:1px solid #233b50}
-.muted{color:#aab9ca;font-size:13px}
-.score{font-size:23px;font-weight:bold;margin:15px 0}
-.tag{color:#20d67b;font-size:12px;font-weight:bold}
-table{width:100%;border-collapse:collapse;background:#112238}
-th,td{text-align:left;padding:12px;border-bottom:1px solid #294057}
-footer{background:#030914;padding:25px 5%;color:#aab9ca;text-align:center}
-select{padding:8px;border-radius:6px}
-@media(max-width:500px){.hero h1{font-size:28px}nav{gap:12px}}
-</style>
-</head>
-<body>
-<header>
-<div class="logo">⚽ SOMALI FOOTBALL HUB</div>
-<nav>
-<a href="#home" data-so="Bogga Hore" data-en="Home">Bogga Hore</a>
-<a href="#scores" data-so="Natiijooyinka" data-en="Scores">Natiijooyinka</a>
-<a href="#fixtures" data-so="Ciyaaraha" data-en="Fixtures">Ciyaaraha</a>
-<a href="#leagues" data-so="Horyaallada" data-en="Leagues">Horyaallada</a>
-<a href="#news" data-so="Wararka" data-en="News">Wararka</a>
-<select id="language" onchange="changeLanguage()">
-<option value="so">🇸🇴 Somali</option>
-<option value="en">🇬🇧 English</option>
-</select>
-</nav>
-</header>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Somali Football Hub</title>
+  <meta name="description" content="Somali Football Hub – football scores, fixtures, news, tables, teams and players in Somali and English. Sample data only until a live feed is connected.">
+  <meta name="theme-color" content="#07101f">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%234189dd'/%3E%3Cpath fill='%23fff' d='M32 12l5.9 12.6 13.8 1.7-10.2 9.5 2.7 13.6L32 42.6 19.8 49.4l2.7-13.6-10.2-9.5 13.8-1.7z'/%3E%3C/svg%3E">
+  <style>
+/* =========================================================
+   Somali Football Hub – styles (inside index.html)
+   Original design: deep night-pitch navy, Somali sky blue,
+   and a floodlight-lime accent. Mobile first.
+   ========================================================= */
 
-<div class="hero" id="home">
-<div class="tag">YOUR HOME FOR FOOTBALL</div>
-<h1 data-so="Kubadda Cagta Aduunka, Hal Meel" data-en="World Football, One Place">Kubadda Cagta Aduunka, Hal Meel</h1>
-<p data-so="La soco ciyaaraha, horyaallada iyo wararka kubadda cagta." data-en="Follow football fixtures, leagues and the latest news.">La soco ciyaaraha, horyaallada iyo wararka kubadda cagta.</p>
-<a class="btn" href="#scores" data-so="Eeg Ciyaaraha ↓" data-en="Explore Matches ↓">Eeg Ciyaaraha ↓</a>
-</div>
-
-<section id="scores">
-<h2 data-so="🔴 Natiijooyinka Ciyaaraha" data-en="🔴 Match Centre">🔴 Natiijooyinka Ciyaaraha</h2>
-<div class="grid">
-<div class="card"><div class="muted">ENGLISH PREMIER LEAGUE</div><p>🔵 Manchester City</p><div class="score">— : —</div><p>🔴 Arsenal</p><div class="muted">Natiijo rasmi ah halkan ayaa lagu soo bandhigi doonaa.</div></div>
-<div class="card"><div class="muted">SPANISH LA LIGA</div><p>⚪ Real Madrid</p><div class="score">— : —</div><p>🔵 Barcelona</p><div class="muted">La soco wararka ciyaarta.</div></div>
-</div>
-<p class="muted" data-so="Fiiro gaar ah: natiijooyinkani weli kuma xirna xog toos ah." data-en="Note: scores are not connected to live data yet.">Fiiro gaar ah: natiijooyinkani weli kuma xirna xog toos ah.</p>
-</section>
-
-<section id="fixtures">
-<h2 data-so="📅 Ciyaaraha Soo Socda" data-en="📅 Upcoming Fixtures">📅 Ciyaaraha Soo Socda</h2>
-<div class="grid">
-<div class="card"><div class="tag">MATCH 01</div><h3>Manchester City vs Arsenal</h3><p class="muted">Premier League</p><p>Taariikhda iyo waqtiga: sug jadwalka rasmiga ah.</p></div>
-<div class="card"><div class="tag">MATCH 02</div><h3>Real Madrid vs Barcelona</h3><p class="muted">La Liga</p><p>Taariikhda iyo waqtiga: sug jadwalka rasmiga ah.</p></div>
-<div class="card"><div class="tag">MATCH 03</div><h3>Bayern Munich vs Dortmund</h3><p class="muted">Bundesliga</p><p>Taariikhda iyo waqtiga: sug jadwalka rasmiga ah.</p></div>
-</div>
-</section>
-
-<section id="leagues">
-<h2 data-so="🏆 Horyaallada" data-en="🏆 Popular Leagues">🏆 Horyaallada</h2>
-<div class="grid">
-<div class="card">🏴 English Premier League</div>
-<div class="card">🇪🇸 Spanish La Liga</div>
-<div class="card">🇩🇪 German Bundesliga</div>
-<div class="card">🇮🇹 Italian Serie A</div>
-<div class="card">🌍 UEFA Champions League</div>
-<div class="card">🇫🇷 French Ligue 1</div>
-</div>
-</section>
-
-<section id="news">
-<h2 data-so="📰 Wararka Kubadda Cagta" data-en="📰 Football News">📰 Wararka Kubadda Cagta</h2>
-<div class="grid">
-<div class="card"><div class="tag">FOOTBALL NEWS</div><h3 data-so="Wararkii ugu dambeeyay" data-en="Latest Football News">Wararkii ugu dambeeyay</h3><p data-so="Halkan ku daabac wararka iyo falanqaynta kubadda cagta." data-en="Publish football news and analysis here.">Halkan ku daabac wararka iyo falanqaynta kubadda cagta.</p></div>
-<div class="card"><div class="tag">ANALYSIS</div><h3 data-so="Falanqaynta Ciyaaraha" data-en="Match Analysis">Falanqaynta Ciyaaraha</h3><p data-so="La wadaag aragtidaada iyo falanqaynta ciyaaraha." data-en="Share your opinions and match analysis.">La wadaag aragtidaada iyo falanqaynta ciyaaraha.</p></div>
-</div>
-</section>
-
-<footer>
-<div class="logo">⚽ Somali Football Hub</div>
-<p>Somali 🇸🇴 | English 🇬🇧</p>
-<p>© 2026 Somali Football Hub</p>
-</footer>
-<script>
-function changeLanguage(){
-const lang=document.getElementById('language').value;
-document.documentElement.lang=lang;
-document.querySelectorAll('[data-so]').forEach(el=>{
-el.textContent=el.getAttribute('data-'+lang);
-});
+:root {
+  --bg: #07101f;
+  --bg2: #0b1730;
+  --card: #101f3a;
+  --card2: #142849;
+  --line: #213657;
+  --txt: #eaf1fb;
+  --mut: #94a8c6;
+  --blue: #4189dd;
+  --sky: #6db5ff;
+  --lime: #c8f542;
+  --red: #ff5a5f;
+  --amber: #ffb84d;
+  --radius: 16px;
+  --shadow: 0 10px 30px rgba(0, 0, 0, .35);
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
-</script>
-</body>
-  </html>
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg);
+  background-image:
+    radial-gradient(900px 400px at 85% -5%, rgba(65, 137, 221, .22), transparent 60%),
+    radial-gradient(700px 400px at -10% 20%, rgba(200, 245, 66, .06), transparent 60%);
+  background-attachment: fixed;
+  color: var(--txt);
+  line-height: 1.55;
+  font-size: 16px;
+  min-height: 100vh;
+}
+img, svg { max-width: 100%; }
+a { color: var(--sky); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+[hidden] { display: none !important; }
+:focus-visible { outline: 3px solid var(--lime); outline-offset: 2px; border-radius: 6px; }
+
+.wrap { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 16px; }
+.wrap.narrow { max-width: 780px; }
+
+.skip-link {
+  position: absolute; left: -999px; top: 8px; background: var(--lime); color: #09121f;
+  padding: 8px 14px; border-radius: 8px; z-index: 200; font-weight: 700;
+}
+.skip-link:focus { left: 8px; }
+
+/* ---------- Sample banner ---------- */
+.sample-banner {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: linear-gradient(90deg, #3a2a05, #2a1d03);
+  border-bottom: 1px solid #6b4b0f;
+  color: #ffe2a8; font-size: .82rem; padding: 8px 14px; line-height: 1.4;
+}
+.sb-tag {
+  background: var(--amber); color: #2a1d03; font-weight: 800; letter-spacing: .06em;
+  font-size: .68rem; padding: 2px 8px; border-radius: 99px; flex: none; margin-top: 1px;
+}
+.sb-close {
+  margin-left: auto; background: none; border: 0; color: #ffe2a8; font-size: 1.3rem;
+  line-height: 1; padding: 0 4px; flex: none;
+}
+
+/* ---------- Header ---------- */
+.site-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(7, 16, 31, .88);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.header-in { display: flex; align-items: center; gap: 12px; height: 62px; }
+.brand { display: flex; align-items: center; gap: 10px; color: var(--txt); text-decoration: none !important; flex: none; }
+.brand-text { font-weight: 800; letter-spacing: -.01em; font-size: 1.02rem; white-space: nowrap; }
+.brand-text b { color: var(--lime); }
+.header-tools { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+.icon-btn {
+  width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line);
+  background: var(--card); display: grid; place-items: center;
+}
+.icon-btn:hover { border-color: var(--blue); }
+
+.lang { display: flex; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 3px; }
+.lang button {
+  border: 0; background: transparent; padding: 6px 10px; border-radius: 9px;
+  font-weight: 700; font-size: .8rem; color: var(--mut);
+}
+.lang button[aria-pressed="true"] { background: var(--blue); color: #fff; }
+
+/* Mobile navigation (dropdown) */
+.main-nav {
+  display: none; position: absolute; left: 0; right: 0; top: 62px;
+  background: var(--bg2); border-bottom: 1px solid var(--line);
+  padding: 12px 16px 16px; box-shadow: var(--shadow);
+  grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.main-nav.open { display: grid; }
+.main-nav a {
+  color: var(--txt); padding: 12px 14px; border-radius: 12px; background: var(--card);
+  border: 1px solid var(--line); font-weight: 600; text-decoration: none; font-size: .95rem;
+}
+.main-nav a.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.main-nav a.nav-somali { border-color: var(--lime); }
+
+@media (min-width: 1100px) {
+  .menu-btn { display: none; }
+  .main-nav {
+    display: flex !important; position: static; background: none; border: 0; box-shadow: none;
+    padding: 0; gap: 2px; margin-left: 10px; flex: 1; justify-content: center;
+  }
+  .main-nav a { background: none; border: 0; padding: 8px 10px; font-size: .88rem; color: var(--mut); }
+  .main-nav a:hover { color: var(--txt); background: var(--card); }
+  .main-nav a.active { background: var(--card2); color: var(--lime); }
+  .main-nav a.nav-somali { color: var(--lime); }
+}
+
+/* ---------- Pages ---------- */
+.page { padding-bottom: 48px; animation: fade .35s ease both; }
+@keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+.page-title { font-size: clamp(1.7rem, 5vw, 2.5rem); margin: 28px 0 8px; letter-spacing: -.02em; line-height: 1.15; }
+.lead { color: var(--mut); max-width: 62ch; margin: 0 0 20px; }
+.kicker { color: var(--lime); font-weight: 800; letter-spacing: .12em; text-transform: uppercase; font-size: .75rem; margin: 0 0 8px; }
+
+/* ---------- Hero ---------- */
+.hero {
+  position: relative; overflow: hidden;
+  background: linear-gradient(135deg, #0d2a57 0%, #0a1a38 55%, #07101f 100%);
+  border-bottom: 1px solid var(--line);
+}
+.hero-pitch { position: absolute; inset: 0; width: 100%; height: 100%; color: rgba(109, 181, 255, .13); }
+.hero::after {
+  content: ""; position: absolute; right: -80px; top: -80px; width: 340px; height: 340px;
+  background: radial-gradient(circle, rgba(200, 245, 66, .22), transparent 65%);
+}
+.hero-in { position: relative; z-index: 1; padding-top: 44px; padding-bottom: 40px; }
+.hero h1 { font-size: clamp(2rem, 7vw, 3.8rem); line-height: 1.05; letter-spacing: -.03em; margin: 0 0 14px; max-width: 16ch; }
+.hero-text { color: #c4d4ec; max-width: 56ch; font-size: 1.05rem; margin: 0 0 22px; }
+.hero-cta { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 28px; }
+.stat-strip { display: flex; gap: 12px; flex-wrap: wrap; }
+.stat-strip > div {
+  background: rgba(16, 31, 58, .75); border: 1px solid var(--line); border-radius: 14px;
+  padding: 10px 16px; min-width: 110px;
+}
+.stat-strip b { display: block; font-size: 1.5rem; color: var(--lime); line-height: 1.1; }
+.stat-strip span { color: var(--mut); font-size: .78rem; }
+
+/* ---------- Buttons ---------- */
+.btn {
+  border: 1px solid transparent; border-radius: 12px; padding: 12px 20px; font-weight: 700;
+  transition: transform .15s ease, background .15s ease;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn.primary { background: var(--lime); color: #09121f; }
+.btn.primary:hover { background: #d8ff58; }
+.btn.ghost { background: transparent; border-color: var(--sky); color: var(--sky); }
+.btn.ghost:hover { background: rgba(109, 181, 255, .12); }
+.btn.small { padding: 8px 14px; font-size: .85rem; }
+.link-btn { background: none; border: 0; color: var(--sky); font-weight: 700; padding: 6px 0; }
+.link-btn:hover { text-decoration: underline; }
+
+/* ---------- Section heads / grids ---------- */
+.section-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 34px 0 14px; }
+.section-head h2 { margin: 0; font-size: 1.3rem; letter-spacing: -.01em; }
+.tag-sample, .chip-sample {
+  display: inline-block; vertical-align: middle; background: rgba(255, 184, 77, .15); color: var(--amber);
+  border: 1px solid rgba(255, 184, 77, .45); font-size: .62rem; letter-spacing: .08em; font-weight: 800;
+  padding: 2px 8px; border-radius: 99px;
+}
+.grid { display: grid; gap: 14px; }
+.match-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.news-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.league-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.team-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+.player-grid { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+
+/* ---------- Cards ---------- */
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 16px; transition: transform .18s ease, border-color .18s ease;
+}
+.card.click { cursor: pointer; }
+.card.click:hover { transform: translateY(-3px); border-color: var(--blue); }
+
+/* Match card */
+.match { display: flex; flex-direction: column; gap: 12px; }
+.match-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: .78rem; color: var(--mut); }
+.match-body { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
+.m-team { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; font-weight: 700; font-size: .9rem; min-width: 0; }
+.m-team span.nm { overflow-wrap: anywhere; }
+.score { font-size: 1.8rem; font-weight: 800; letter-spacing: .02em; white-space: nowrap; }
+.score span { color: var(--mut); margin: 0 4px; font-weight: 400; }
+.ko { font-size: 1.25rem; font-weight: 800; color: var(--lime); }
+.match-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: .75rem; color: var(--mut); }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 99px;
+  font-size: .72rem; font-weight: 800; background: var(--card2); border: 1px solid var(--line); color: var(--txt);
+}
+.chip.live { background: rgba(255, 90, 95, .14); border-color: rgba(255, 90, 95, .5); color: #ff9ea1; }
+.chip.live i { width: 7px; height: 7px; border-radius: 50%; background: var(--red); animation: pulse 1.3s infinite; }
+.chip.ft { color: var(--mut); }
+.chip.up { color: var(--sky); border-color: rgba(109, 181, 255, .4); }
+.chip.lg { background: transparent; color: var(--mut); }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 90, 95, .7); } 70% { box-shadow: 0 0 0 7px rgba(255, 90, 95, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 90, 95, 0); } }
+
+/* Badge (original monogram crest – not an official club logo) */
+.badge {
+  --size: 48px;
+  width: var(--size); height: var(--size); flex: none; display: inline-grid; place-items: center;
+  border-radius: 14px 14px 22px 22px; font-weight: 900; font-size: calc(var(--size) * .3);
+  letter-spacing: .02em; background: linear-gradient(145deg, var(--c1), var(--c2));
+  border: 2px solid rgba(255, 255, 255, .25); box-shadow: 0 4px 10px rgba(0, 0, 0, .35);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .25);
+}
+.badge.lg { --size: 84px; }
+.badge.sm { --size: 34px; border-radius: 10px 10px 16px 16px; border-width: 1px; }
+
+/* Fixtures list */
+.day-group { margin-bottom: 22px; }
+.day-title { font-size: .85rem; color: var(--lime); text-transform: uppercase; letter-spacing: .1em; margin: 0 0 10px; font-weight: 800; }
+.fix-row {
+  display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: center;
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px;
+}
+.fix-time { font-weight: 800; font-size: 1.1rem; color: var(--lime); }
+.fix-teams { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; font-weight: 700; }
+.fix-teams .vs { color: var(--mut); font-weight: 400; font-size: .8rem; }
+.fix-meta { grid-column: 2; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+/* News */
+.news-card { display: flex; flex-direction: column; gap: 10px; padding: 0; overflow: hidden; }
+.news-img { height: 110px; display: grid; place-items: center; font-weight: 900; letter-spacing: .12em; font-size: .75rem; color: rgba(255, 255, 255, .85); background: linear-gradient(135deg, var(--a), var(--b)); position: relative; }
+.news-img svg { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .15; color: #fff; }
+.news-body { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.news-body h3 { margin: 0; font-size: 1.05rem; line-height: 1.3; }
+.news-body p { margin: 0; color: var(--mut); font-size: .9rem; }
+.news-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: .75rem; color: var(--mut); }
+
+/* Leagues */
+.league-card { display: flex; flex-direction: column; gap: 10px; }
+.league-card h3 { margin: 0; font-size: 1.15rem; }
+.league-code {
+  width: 54px; height: 54px; border-radius: 16px; display: grid; place-items: center; font-weight: 900;
+  background: linear-gradient(135deg, var(--blue), #1d4e96); letter-spacing: .02em;
+}
+.league-head { display: flex; align-items: center; gap: 12px; }
+.facts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; font-size: .84rem; color: var(--mut); margin: 0; }
+.facts dt { font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--mut); opacity: .8; }
+.facts dd { margin: 0 0 4px; color: var(--txt); font-weight: 600; }
+.card-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: auto; }
+.league-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.lchip {
+  display: inline-flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--line);
+  padding: 10px 16px; border-radius: 14px; font-weight: 700; transition: border-color .15s ease, transform .15s ease;
+}
+.lchip:hover { border-color: var(--lime); transform: translateY(-2px); }
+.lchip b { color: var(--lime); font-size: .8rem; }
+
+/* Teams / players cards */
+.team-card { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; }
+.team-card h3 { margin: 0; font-size: 1rem; }
+.team-card small { color: var(--mut); }
+.player-card { display: flex; gap: 14px; align-items: center; }
+.avatar {
+  width: 58px; height: 58px; border-radius: 50%; flex: none; display: grid; place-items: center; font-weight: 900;
+  background: linear-gradient(135deg, var(--blue), #1d4e96); border: 2px solid rgba(255, 255, 255, .2);
+}
+.avatar.lg { width: 90px; height: 90px; font-size: 1.6rem; }
+.player-card h3 { margin: 0 0 2px; font-size: 1rem; }
+.player-card p { margin: 0; color: var(--mut); font-size: .84rem; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); }
+table.std { width: 100%; border-collapse: collapse; min-width: 560px; font-size: .92rem; }
+table.std th, table.std td { padding: 12px 10px; text-align: center; border-bottom: 1px solid var(--line); white-space: nowrap; }
+table.std th { background: var(--card2); color: var(--mut); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; }
+table.std td.tl, table.std th.tl { text-align: left; }
+table.std tr:last-child td { border-bottom: 0; }
+table.std tbody tr:hover { background: rgba(65, 137, 221, .08); }
+table.std td.pts { font-weight: 900; color: var(--lime); }
+table.std tr:first-child td:first-child { box-shadow: inset 4px 0 0 var(--lime); }
+.team-cell { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+.legend { color: var(--mut); font-size: .8rem; margin-top: 10px; }
+.pos-pos { color: #8ef0a8; } .pos-neg { color: #ff9ea1; }
+
+/* Filters / pills / notices */
+.filters { display: flex; flex-wrap: wrap; gap: 12px; margin: 14px 0 18px; }
+.field { display: flex; flex-direction: column; gap: 4px; font-size: .75rem; color: var(--mut); font-weight: 700; letter-spacing: .04em; min-width: 150px; }
+.field.grow { flex: 1; min-width: 220px; }
+.field input, .field select {
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 11px 14px;
+  font-size: 1rem; width: 100%; appearance: none; -webkit-appearance: none;
+}
+.field select {
+  background-image: linear-gradient(45deg, transparent 50%, var(--mut) 50%), linear-gradient(135deg, var(--mut) 50%, transparent 50%);
+  background-position: calc(100% - 20px) 50%, calc(100% - 14px) 50%; background-size: 6px 6px; background-repeat: no-repeat; padding-right: 36px;
+}
+.field i
