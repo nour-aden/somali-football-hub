@@ -169,5 +169,17 @@ const db = firebase.firestore();
 
 console.log("Somali Football Hub Firebase connected!");
 </script>
+  <script>
+firebase.firestore().collection("leagues").get()
+  .then((snapshot) => {
+    snapshot.forEach((doc) => {
+      console.log("League:", doc.data());
+    });
+    alert("Firebase wuu shaqaynayaa!");
+  })
+  .catch((error) => {
+    alert("Firebase wali ma shaqaynayo: " + error.message);
+  });
+  </script>
 </body>
 </html>
