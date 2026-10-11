@@ -1,21 +1,74 @@
-# Somali Football Hub ⚽
+⚽ SOMALI FOOTBALL HUB
 
-Welcome to **Somali Football Hub**! Your ultimate platform for Somali football news, live match results, fixtures, league statistics, and ticket bookings.
+🏆 Hoyga Kubadda Cagta Soomaaliyeed
 
----
+Ku soo dhawoow Somali Football Hub — madal loogu talagalay taageerayaasha kubadda cagta, gaar ahaan horyaallada iyo kooxaha deegaanka Jigjiga.
 
-## 📌 Feature-yada Mashruuca (Features)
-
-- **Dark Mode Modern Interface:** Qaabeyn casri ah oo ku dhisan habka madow (Dark Theme).
-- **Match Spotlight:** Kulanka ugu weyn todobaadka (Big Match Preview).
-- **Upcoming Fixtures:** Schedule-ka iyo waqtiyada kulamada soo socda.
-- **Latest Football News:** Wararkii ugu dambeeyay ee kubadda cagta Soomaaliya.
-- **Fan Zone & Ticket Hub:** Qayb loogu talagalay taageerayaasha iyo kireysiga/iibsiga tikidhada.
-- **Responsive Design:** Wuxuu si kaamil ah ugu shaqeeyaa taleefannada iyo kumbuyuutarrada.
+Waxaan hiigsanaynaa inaan taageerayaasha siino meel ay ka heli karaan jadwalka ciyaaraha, natiijooyinka, kooxaha iyo kala sarreynta horyaalka.
 
 ---
 
-## 🛠️ Teknolajiyada La Isticmaalay (Technologies Used)
+🌟 FEATURES | WAXYAABAHA UU LEEYAHAY
 
-- **HTML5** - Dhisme xogta web
-- 
+- ⚽ Match Center — Macluumaadka ciyaaraha.
+- 📅 Fixtures — Jadwalka ciyaaraha soo socda.
+- 🏆 League Table — Kala sarreynta kooxaha.
+- 👥 Teams — Liiska kooxaha horyaalka.
+- 📊 Results — Natiijooyinka ciyaaraha.
+- 🌍 Somali & English — Taageerada labada luuqadood.
+- 📱 Mobile Friendly — Naqshad ku habboon telefoonka iyo kombiyuutarka.
+
+---
+
+🥅 OUR MISSION | UJEEDDADA
+
+Ujeeddadeennu waa inaan isku xirno taageerayaasha kubadda cagta, kor u qaadno kooxaha deegaanka, isla markaana fududeyno helitaanka jadwalka iyo natiijooyinka ciyaaraha.
+
+Football brings us together. ⚽
+
+---
+
+🏟️ COMMUNITY LEAGUE
+
+Somali Football Hub wuxuu hiigsanayaa inuu taageero horyaallada deegaanka, isagoo kooxaha siinaya meel ay kaga muuqdaan tartanka.
+
+Waxyaabaha la qorsheynayo waxaa ka mid ah:
+
+- Liiska kooxaha.
+- Jadwalka kulamada.
+- Dhibcaha iyo natiijooyinka.
+- Kala sarreynta horyaalka.
+
+---
+
+💻 TECHNOLOGY
+
+- HTML
+- CSS
+- JavaScript
+- Firebase
+- GitHub Pages
+
+---
+
+🌐 WEBSITE
+
+Visit Somali Football Hub:
+
+https://nour-aden.github.io/somali-football-hub/
+
+---
+
+👨‍💻 PROJECT
+
+Project Name: Somali Football Hub
+Focus: Football News, Teams, Fixtures & League Results
+Location Focus: Jigjiga, Ethiopia
+
+---
+
+⚽ SOMALI FOOTBALL HUB
+
+Passion. Unity. Football.
+
+Made for football fans.
