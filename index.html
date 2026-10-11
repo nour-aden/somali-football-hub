@@ -705,9 +705,13 @@ async function loadData() {
 
   try {
     const [teamSnap, matchSnap] = await Promise.all([
-      db.collection("teams").get(),
-      db.collection("matches").get()
-    ]);
+  db.collection("leagues")
+    .doc("League 1")
+    .collection("Teams")
+    .get(),
+
+  db.collection("matches").get()
+]);
 
     teams = teamSnap.docs.map(doc => {
       const d = doc.data() || {};
