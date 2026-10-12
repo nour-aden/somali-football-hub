@@ -425,6 +425,31 @@
         }
     });
 </script>
-sb_publishable_uokTWBlF8-3PAlXNh0lkrw_ixHfr92T
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const SUPABASE_URL = "https://fkyqbuwsbayjypvujgqj.supabase.co";
+const SUPABASE_KEY = "HALKAN_GELI_PUBLISHABLE_KEY_GAAGA";
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+async function sooQaadoGoobaha() {
+  const { data, error } = await db
+    .from("places")
+    .select("*");
+
+  if (error) {
+    console.error("Khalad:", error.message);
+    return;
+  }
+
+  console.log("Goobaha Jigjiga:", data);
+}
+
+sooQaadoGoobaha();
+    </script>
 </body>
   </html>
