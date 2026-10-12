@@ -1,74 +1,45 @@
-⚽ SOMALI FOOTBALL HUB
+Jijiga Digital Guide
 
-🏆 Hoyga Kubadda Cagta Soomaaliyeed
+Jijiga Digital Guide waa website Af-Soomaali ah oo loogu talagalay in dadka ka caawiyo helidda macluumaadka iyo adeegyada magaalada Jigjiga.
 
-Ku soo dhawoow Somali Football Hub — madal loogu talagalay taageerayaasha kubadda cagta, gaar ahaan horyaallada iyo kooxaha deegaanka Jigjiga.
+Waxyaabaha ku jira
 
-Waxaan hiigsanaynaa inaan taageerayaasha siino meel ay ka heli karaan jadwalka ciyaaraha, natiijooyinka, kooxaha iyo kala sarreynta horyaalka.
+- Waxbarashada iyo jaamacadaha.
+- Adeegyada caafimaadka.
+- Goobaha muhiimka ah.
+- Gaadiidka magaalada.
+- Ganacsiyada iyo adeegyada dadweynaha.
+- Qalabka raadinta adeegyada.
+- Naqshad ku habboon telefoonka iyo kombiyuutarka.
 
----
+Faylasha mashruuca
 
-🌟 FEATURES | WAXYAABAHA UU LEEYAHAY
+"index.html" — Waxa uu ka kooban yahay HTML, CSS iyo JavaScript.
 
-- ⚽ Match Center — Macluumaadka ciyaaraha.
-- 📅 Fixtures — Jadwalka ciyaaraha soo socda.
-- 🏆 League Table — Kala sarreynta kooxaha.
-- 👥 Teams — Liiska kooxaha horyaalka.
-- 📊 Results — Natiijooyinka ciyaaraha.
-- 🌍 Somali & English — Taageerada labada luuqadood.
-- 📱 Mobile Friendly — Naqshad ku habboon telefoonka iyo kombiyuutarka.
+"README.md" — Waxa uu sharxayaa mashruuca iyo sida loo isticmaalo.
 
----
+Sida loo bilaabo
 
-🥅 OUR MISSION | UJEEDDADA
+1. Samee gal la yiraahdo "Jijiga-Digital-Guide".
+2. Geli faylka "index.html".
+3. Ku fur faylka browser-kaaga, sida Google Chrome.
+4. Isticmaal sanduuqa raadinta si aad u tijaabiso raadinta adeegyada.
 
-Ujeeddadeennu waa inaan isku xirno taageerayaasha kubadda cagta, kor u qaadno kooxaha deegaanka, isla markaana fududeyno helitaanka jadwalka iyo natiijooyinka ciyaaraha.
+Sida loo beddelo website-ka
 
-Football brings us together. ⚽
+Waxaad wax ka beddeli kartaa qoraallada, midabada, qaybaha iyo naqshadda adigoo tafatiraya faylka "index.html".
 
----
+Waxyaabaha mustaqbalka lagu dari karo
 
-🏟️ COMMUNITY LEAGUE
+- Khariidadda magaalada Jigjiga.
+- Goobaha oo leh cinwaanno sax ah.
+- Lambarrada telefoonka ee adeegyada.
+- Bogag u gaar ah goob kasta.
+- Wararka iyo ogeysiisyada magaalada.
+- Hab ay ganacsiyadu xogtooda ku soo gudbin karaan.
 
-Somali Football Hub wuxuu hiigsanayaa inuu taageero horyaallada deegaanka, isagoo kooxaha siinaya meel ay kaga muuqdaan tartanka.
+Ogeysiis
 
-Waxyaabaha la qorsheynayo waxaa ka mid ah:
+Xogta tusaalaha ah ee website-ka waa in la xaqiijiyaa. Ha gelin cinwaanno, lambarrada telefoonka ama macluumaad ganacsi oo aan la hubin.
 
-- Liiska kooxaha.
-- Jadwalka kulamada.
-- Dhibcaha iyo natiijooyinka.
-- Kala sarreynta horyaalka.
-
----
-
-💻 TECHNOLOGY
-
-- HTML
-- CSS
-- JavaScript
-- Firebase
-- GitHub Pages
-
----
-
-🌐 WEBSITE
-
-Visit Somali Football Hub:
-
-https://nour-aden.github.io/somali-football-hub/
-
----
-
-👨‍💻 PROJECT
-
-Project Name: Somali Football Hub
-Focus: Football News, Teams, Fixtures & League Results
-Location Focus: Jigjiga, Ethiopia
-
----
-
-⚽ SOMALI FOOTBALL HUB
-
-Passion. Unity. Football.
-
-Made for football fans.
+Website-kan wuxuu hadda ku shaqaynayaa hal fayl oo HTML ah. Sawirka madaxa ee magaalada wuxuu u baahan yahay internet si uu u soo muuqdo.
