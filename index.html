@@ -599,4 +599,24 @@ function raadiGoobaha() {
 /* Xogta Supabase soo qaad */
 sooQaadoGoobaha();
 </script></body>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
+const db = window.supabase.createClient(
+  "https://fkyqbuwsbayjypvujgqj.supabase.co",
+  "HALKAN KU RID PUBLISHABLE KEY-GAAGA"
+);
+
+async function tijaabi() {
+  const { data, error } = await db
+    .from("places")
+    .select("*");
+
+  if (error) {
+    alert("XIRIIRKA WAA FASHILMAY: " + error.message);
+  } else {
+    alert("WAA SHAQAYNAYAA! Goobaha la helay: " + data.length);
+  }
+}
+
+tijaabi();
+  </script>
 </html>
