@@ -428,28 +428,65 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
 const SUPABASE_URL = "https://fkyqbuwsbayjypvujgqj.supabase.co";
-const SUPABASE_KEY = "HALKAN_GELI_PUBLISHABLE_KEY_GAAGA";
+const SUPABASE_KEY = "HALKAN_GELI_PUBLISHABLE_KEY-GAAGA";
 
 const db = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
 
-async function sooQaadoGoobaha() {
-  const { data, error } = await db
-    .from("places")
-    .select("*");
+async function sooBandhigGoobaha() {
+  const qaybta = document.querySelector("#goobaha");
 
-  if (error) {
-    console.error("Khalad:", error.message);
+  if (!qaybta) {
+    console.error("Qaybta #goobaha lama helin.");
     return;
   }
 
-  console.log("Goobaha Jigjiga:", data);
+  qaybta.innerHTML = "<p>Goobaha waa la soo rarayaa...</p>";
+
+  const { data, error } = await db
+    .from("places")
+    .select("*")
+    .order("id", { ascending: true });
+
+  if (error) {
+    qaybta.innerHTML = "<p>Xogta lama soo qaadi karin.</p>";
+    console.error(error.message);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    qaybta.innerHTML = "<p>Weli goob laguma darin.</p>";
+    return;
+  }
+
+  qaybta.innerHTML = data.map(goob => `
+    <article class="card">
+      <h3>${ammaan(goob.name)}</h3>
+      <p><strong>Qaybta:</strong> ${ammaan(goob.category)}</p>
+      <p><strong>Cinwaanka:</strong> ${ammaan(goob.address || "Lama hayo")}</p>
+      <p>${ammaan(goob.description || "")}</p>
+      ${goob.phone ? `<p>Telefoon: ${ammaan(goob.phone)}</p>` : ""}
+    </article>
+  `).join("");
 }
 
-sooQaadoGoobaha();
-    </script>
+function ammaan(qoraal) {
+  return String(qoraal ?? "").replace(/[&<>"']/g, xaraf => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[xaraf]);
+}
+
+sooBandhigGoobaha();
+</script>
 </body>
   </html>
