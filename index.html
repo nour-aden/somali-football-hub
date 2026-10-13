@@ -475,13 +475,15 @@ async function sooQaadoGoobaha() {
   SUPABASE_URL,
   SUPABASE_KEY
 );
-    );
+     const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
-    const { data, error } = await db
-      .from("places")
-      .select("id, name, category, address, description, phone")
-      .order("id", { ascending: true });
-
+const { data, error } = await db
+  .from("places")
+  .select("id, name, category, address, description, phone")
+  .order("id", { ascending: true });
     if (error) {
       console.error("Supabase error:", error.message);
       muujiXaalad(
