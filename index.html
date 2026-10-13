@@ -390,13 +390,10 @@ async function sooQaadoGoobaha() {
       .select("id, name, category, address, description, phone")
       .order("id", { ascending: true });
 
-    if (error) {
-      console.error("Supabase error:", error);
-      muujiXaalad(
-        "Xogta lama soo qaadi karin. Hubi in RLS policy-gu oggol yahay akhriska dadweynaha iyo in magacyada columns-ku sax yihiin."
-      );
-      return;
-    }
+  if (error) {
+  muujiXaalad("QALADKA: " + error.message);
+  return;
+  }
 
     placesGrid.innerHTML = "";
 
