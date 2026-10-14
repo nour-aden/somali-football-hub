@@ -1,45 +1,44 @@
-Jijiga Digital Guide
+LifeFix 🌍
 
-Jijiga Digital Guide waa website Af-Soomaali ah oo loogu talagalay in dadka ka caawiyo helidda macluumaadka iyo adeegyada magaalada Jigjiga.
+Find Your Solution
 
-Waxyaabaha ku jira
+LifeFix is a website that helps people solve everyday problems through simple guides, practical tips, and useful tools.
 
-- Waxbarashada iyo jaamacadaha.
-- Adeegyada caafimaadka.
-- Goobaha muhiimka ah.
-- Gaadiidka magaalada.
-- Ganacsiyada iyo adeegyada dadweynaha.
-- Qalabka raadinta adeegyada.
-- Naqshad ku habboon telefoonka iyo kombiyuutarka.
+🎯 Our Mission
 
-Faylasha mashruuca
+Our mission is to make everyday life easier by providing clear, helpful, and easy-to-follow solutions for people around the world.
 
-"index.html" — Waxa uu ka kooban yahay HTML, CSS iyo JavaScript.
+📚 What LifeFix Offers
 
-"README.md" — Waxa uu sharxayaa mashruuca iyo sida loo isticmaalo.
+- 💼 Career & Jobs — Job search tips, CV writing, and interview preparation.
+- 📚 Learning & Education — Study techniques, learning resources, and skill development.
+- 💰 Money & Budget — Budget planning, saving tips, and expense management.
+- 💻 Technology Help — Simple solutions to common phone, computer, and internet problems.
+- 🏠 Daily Life — Practical tips for organizing time and managing everyday tasks.
+- 🛍️ Small Business — Guidance for starting and improving a small business.
 
-Sida loo bilaabo
+🌐 Our Vision
 
-1. Samee gal la yiraahdo "Jijiga-Digital-Guide".
-2. Geli faylka "index.html".
-3. Ku fur faylka browser-kaaga, sida Google Chrome.
-4. Isticmaal sanduuqa raadinta si aad u tijaabiso raadinta adeegyada.
+We aim to build a helpful online resource where people can discover practical solutions to everyday challenges.
 
-Sida loo beddelo website-ka
+🛠️ Built With
 
-Waxaad wax ka beddeli kartaa qoraallada, midabada, qaybaha iyo naqshadda adigoo tafatiraya faylka "index.html".
+- HTML
+- CSS
+- JavaScript
 
-Waxyaabaha mustaqbalka lagu dari karo
+🚀 Future Plans
 
-- Khariidadda magaalada Jigjiga.
-- Goobaha oo leh cinwaanno sax ah.
-- Lambarrada telefoonka ee adeegyada.
-- Bogag u gaar ah goob kasta.
-- Wararka iyo ogeysiisyada magaalada.
-- Hab ay ganacsiyadu xogtooda ku soo gudbin karaan.
+- Add more practical guides.
+- Develop useful interactive tools.
+- Improve the website for mobile devices.
+- Support more languages.
+- Continue improving the user experience.
 
-Ogeysiis
+📌 Project Status
 
-Xogta tusaalaha ah ee website-ka waa in la xaqiijiyaa. Ha gelin cinwaanno, lambarrada telefoonka ama macluumaad ganacsi oo aan la hubin.
+LifeFix is under development. New guides and features will be added over time.
 
-Website-kan wuxuu hadda ku shaqaynayaa hal fayl oo HTML ah. Sawirka madaxa ee magaalada wuxuu u baahan yahay internet si uu u soo muuqdo.
+---
+
+LifeFix — Simple Solutions for Everyday Life.
