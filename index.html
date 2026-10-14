@@ -1,641 +1,614 @@
-<!DOCTYPE html><html lang="en">
+<!doctype html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#102a43">
-<meta name="description" content="LifeFix offers practical step-by-step solutions for careers, education, money, technology, daily life, and small business.">
-<title>LifeFix — Simple Solutions for Everyday Life</title><style>
-:root {
-  --navy:#102a43;
-  --deep:#071b2e;
-  --blue:#2563eb;
-  --gold:#ffd166;
-  --light:#f4f7fc;
-  --white:#ffffff;
-  --text:#243b53;
-  --muted:#627d98;
-  --border:#e1e8f0;
-  --shadow:0 10px 28px rgba(16,42,67,.08);
-}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:90px}
-body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--light);color:var(--text);line-height:1.65}
-button,input,textarea{font:inherit}
-button,a{-webkit-tap-highlight-color:transparent}
-a{color:var(--blue)}
-button{cursor:pointer}
-.site-header{position:sticky;top:0;z-index:100;background:var(--deep);color:white;box-shadow:0 3px 18px #0002}
-.header-inner{width:min(1180px,92%);margin:auto;min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:15px}
-.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:white;font-size:23px;font-weight:800}
-.brand-icon{display:grid;place-items:center;width:38px;height:38px;background:var(--gold);color:var(--navy);border-radius:12px}
-.brand-name span{color:var(--gold)}
-.nav-links{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.nav-links a{color:white;text-decoration:none;padding:9px 11px;border-radius:8px;font-size:14px;font-weight:700}
-.nav-links a:hover{background:#ffffff18;color:var(--gold)}
-.menu-toggle{display:none;background:transparent;color:white;border:1px solid #60758a;border-radius:9px;padding:8px 12px}
-.hero{background:radial-gradient(circle at 85% 15%,#2563eb88,transparent 35%),linear-gradient(120deg,#071b2e,#102a43);color:white}
-.hero-inner{width:min(1180px,90%);margin:auto;padding:76px 0;display:grid;grid-template-columns:1.4fr .6fr;gap:38px;align-items:center}
-.eyebrow{display:inline-block;color:var(--gold);font-weight:bold;font-size:13px;letter-spacing:.5px}
-h1{font-size:clamp(36px,5vw,58px);line-height:1.12;letter-spacing:-1px;margin:14px 0}
-.hero-copy{max-width:650px;color:#e0eaf5;font-size:18px}
-.search-box{display:flex;gap:8px;background:white;border-radius:12px;padding:6px;max-width:650px;margin-top:26px}
-.search-box input{flex:1;min-width:0;border:0;outline:0;padding:12px;color:var(--text);border-radius:8px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;background:var(--blue);color:white;border:0;border-radius:9px;padding:12px 17px;font-weight:bold;text-decoration:none}
-.btn:hover{background:#1d4ed8}
-.btn-light{background:#eaf2ff;color:var(--navy)}
-.btn-light:hover{background:#d8e7ff}
-.hero-panel{border:1px solid #ffffff35;background:#ffffff10;padding:24px;border-radius:20px}
-.hero-panel .emoji{font-size:38px}
-.hero-panel h2{margin:8px 0}
-.hero-panel p{color:#e0eaf5;font-size:14px}
-.hero-panel ul{padding-left:20px;color:#fff;font-size:14px}
-.container{width:min(1180px,90%);margin:auto;padding:44px 0}
-.section-heading{margin-bottom:22px}
-.section-heading h2{margin:0;color:var(--navy);font-size:clamp(25px,3vw,32px)}
-.section-heading p{margin:5px 0;color:var(--muted)}
-.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
-.card{min-width:0;background:white;border:1px solid var(--border);border-radius:17px;padding:23px;box-shadow:var(--shadow);transition:transform .2s,box-shadow .2s}
-.card:hover{transform:translateY(-3px);box-shadow:0 15px 32px #102a4317}
-.category-icon{width:52px;height:52px;display:grid;place-items:center;border-radius:14px;background:#eaf2ff;font-size:28px;margin-bottom:13px}
-.card h3{color:var(--navy);margin:0 0 8px}
-.card p{color:var(--muted);font-size:14px;margin:0 0 14px;overflow-wrap:anywhere}
-.text-link{font-size:14px;font-weight:bold;text-decoration:none}
-.text-link:hover{text-decoration:underline}
-.soft-section{background:#eaf2ff}
-.soft-section .container{padding-top:38px;padding-bottom:38px}
-.detail-view{display:none}
-.detail-view.active{display:block;animation:fadeIn .25s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.detail-header{display:flex;align-items:center;gap:14px;margin-bottom:18px}
-.detail-header .category-icon{flex-shrink:0;margin:0}
-.detail-header h2{margin:0;color:var(--navy);font-size:clamp(25px,4vw,34px)}
-.guide-list{padding-left:24px}
-.guide-list li{padding:5px 0}
-.tip{padding:15px;border-left:4px solid var(--blue);background:#eaf2ff;border-radius:8px;margin:18px 0}
-.detail-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
-.detail-actions button:disabled{opacity:.4;cursor:not-allowed}
-.status{display:none;padding:12px 15px;background:#e7f3ff;color:#17436c;border-radius:9px;margin:14px 0;font-size:14px;overflow-wrap:anywhere}
-.status.visible{display:block}
-.empty-state{display:none;background:white;padding:20px;border-radius:12px;color:var(--muted)}
-.place-image{display:grid;place-items:center;min-height:120px;border-radius:12px;background:linear-gradient(135deg,#2d83c6,#102a43);font-size:43px;margin-bottom:13px}
-.place-category{display:inline-block;background:#eaf2ff;color:#1454a1;padding:4px 9px;border-radius:20px;font-size:12px;font-weight:bold;margin-bottom:8px}
-.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.contact-form{display:grid;gap:13px}
-.contact-form label{font-size:14px;font-weight:bold}
-.contact-form input,.contact-form textarea{display:block;width:100%;margin-top:5px;padding:12px;border:1px solid #d4dfeb;border-radius:9px;background:white;color:var(--text)}
-.contact-form textarea{min-height:120px;resize:vertical}
-.small-note{color:var(--muted);font-size:13px}
-footer{background:var(--deep);color:#dbe7f4;padding:30px 5%;margin-top:30px}
-.footer-inner{width:min(1180px,100%);margin:auto;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
-footer p{margin:5px 0;font-size:14px}
-footer a{color:var(--gold);text-decoration:none}
-.back-top{position:fixed;right:17px;bottom:17px;z-index:40;width:44px;height:44px;border:0;border-radius:50%;background:var(--blue);color:white;box-shadow:0 5px 18px #0003;display:none}
-.back-top.visible{display:block}
-:focus-visible{outline:3px solid #f59e0b;outline-offset:3px}
-@media(max-width:850px){
- .hero-inner{grid-template-columns:1fr;padding:55px 0}
- .hero-panel{max-width:600px}
- .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-}
-@media(max-width:620px){
- .header-inner{min-height:65px;flex-wrap:wrap;padding:10px 0}
- .menu-toggle{display:block}
- .nav-links{display:none;width:100%;flex-direction:column;align-items:stretch;padding-bottom:10px}
- .nav-links.open{display:flex}
- .nav-links a{padding:11px}
- .hero-inner{padding:44px 0}
- .hero-copy{font-size:16px}
- .search-box{flex-direction:column}
- .search-box .btn{width:100%}
- .grid,.about-grid{grid-template-columns:1fr}
- .container{padding:34px 0}
- .card{padding:20px}
- .detail-actions .btn{flex:1 1 100%}
-}
-</style></head><body>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="brand" href="#home" data-home>
-      <span class="brand-icon">✦</span>
-      <span class="brand-name">Life<span>Fix</span></span>
-    </a>
-    <button class="menu-toggle" id="menuToggle" type="button" aria-expanded="false" aria-label="Open navigation">☰ Menu</button>
-    <nav class="nav-links" id="navLinks">
-      <a href="#home" data-home>Home</a>
-      <a href="#solutions" data-solutions>Solutions</a>
-      <a href="#popular">Popular</a>
-      <a href="#about">About</a>
-      <a href="#contact">Contact</a>
-    </nav>
-  </div>
-</header><section class="hero" id="home">
-  <div class="hero-inner">
-    <div>
-      <span class="eyebrow">PRACTICAL HELP FOR EVERYDAY LIFE</span>
-      <h1>Find a solution.<br>Move forward.</h1>
-      <p class="hero-copy">Discover clear, practical guides to help you solve everyday problems, learn useful skills, manage money, find work, and more.</p>
-      <form class="search-box" id="searchForm">
-        <input id="searchInput" type="search" placeholder="Search for a solution..." aria-label="Search solutions">
-        <button class="btn" type="submit">Search →</button>
-      </form>
-      <div id="searchStatus" class="status" role="status"></div>
-    </div>
-    <aside class="hero-panel">
-      <div class="emoji">💡</div>
-      <h2>Small steps. Real progress.</h2>
-      <p>Useful information made easier to understand and put into practice.</p>
-      <ul>
-        <li>Simple step-by-step guides</li>
-        <li>Practical ideas for daily challenges</li>
-        <li>Learning at your own pace</li>
-      </ul>
-    </aside>
-  </div>
-</section><main>
-<section class="container" id="solutions">
-  <div class="section-heading">
-    <h2>Explore LifeFix Solutions</h2>
-    <p>Choose a topic to find helpful steps and ideas.</p>
-  </div>
-  <div class="grid" id="categoryGrid"></div>
-  <div id="noResults" class="empty-state">No matching solutions found. Try another search.</div>
-</section><section class="soft-section" id="detailSection">
-  <div class="container">
-    <div class="section-heading">
-      <h2>Solution Guide</h2>
-      <p>Open a topic to read its guide. Use Back and Next to move between topics.</p>
-    </div>
-    <div id="detailPlaceholder" class="card">
-      <h3>Choose a solution above</h3>
-      <p>Select “Explore solutions” on any topic card to read its step-by-step guide here.</p>
-    </div>
-    <div id="detailViews"></div>
-  </div>
-</section><section class="container" id="popular">
-  <div class="section-heading">
-    <h2>Popular Resources</h2>
-    <p>Useful ideas to get you started.</p>
-  </div>
-  <div class="grid" id="popularGrid"></div>
-</section><section class="soft-section" id="placesSection">
-  <div class="container">
-    <div class="section-heading">
-      <h2>Community Resources</h2>
-      <p>Resources saved in the LifeFix database.</p>
-    </div>
-    <div id="dbStatus" class="status" role="status"></div>
-    <div id="placesGrid" class="grid"></div>
-    <div id="emptyPlaces" class="empty-state">No community resources are available yet.</div>
-  </div>
-</section><section class="container" id="about">
-  <div class="section-heading">
-    <h2>About LifeFix</h2>
-    <p>Helpful information for people around the world.</p>
-  </div>
-  <div class="about-grid">
-    <article class="card">
-      <div class="category-icon">🌍</div>
-      <h3>Our mission</h3>
-      <p>LifeFix aims to make useful knowledge easier to understand, helping people take practical steps toward everyday goals.</p>
-    </article>
-    <article class="card">
-      <div class="category-icon">🧭</div>
-      <h3>How to use LifeFix</h3>
-      <p>Choose a topic, read the guide, and try the steps that suit your situation. Use the search box to find relevant information.</p>
-    </article>
-  </div>
-</section><section class="soft-section" id="contact">
-  <div class="container">
-    <div class="section-heading">
-      <h2>Contact LifeFix</h2>
-      <p>Have a question or an idea for a useful guide?</p>
-    </div>
-    <div class="about-grid">
-      <article class="card">
-        <div class="category-icon">✉️</div>
-        <h3>Send us a message</h3>
-        <p>Enter your name and message. Your email app will open with the message prepared, so you can send it to the LifeFix team once an email address is configured.</p>
-        <p class="small-note">Contact email setup is required before messages can be sent to the website owner.</p>
-      </article>
-      <article class="card">
-        <form class="contact-form" id="contactForm">
-          <label>Your name
-            <input id="contactName" type="text" required maxlength="100" placeholder="Enter your name">
-          </label>
-          <label>Your email
-            <input id="contactEmail" type="email" required maxlength="150" placeholder="you@example.com">
-          </label>
-          <label>Your message
-            <textarea id="contactMessage" required maxlength="3000" placeholder="How can we help?"></textarea>
-          </label>
-          <button class="btn" type="submit">Prepare message →</button>
-          <div id="contactStatus" class="status" role="status"></div>
-        </form>
-      </article>
-    </div>
-  </div>
-</section>
-</main><footer>
-  <div class="footer-inner">
-    <div>
-      <strong>LifeFix — Simple Solutions for Everyday Life</strong>
-      <p>Practical knowledge. Clear steps. Everyday progress.</p>
-    </div>
-    <div>
-      <p><a href="#home" data-home>Home</a> · <a href="#solutions" data-solutions>Solutions</a> · <a href="#contact">Contact</a></p>
-      <p>© <span id="year"></span> LifeFix. All rights reserved.</p>
-    </div>
-  </div>
-</footer><button class="back-top" id="backTop" type="button" aria-label="Back to top">↑</button>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jebena Coffee Works | Small-batch roasters in Addis Ababa</title>
+  <meta name="description" content="Single-origin Ethiopian coffee, roasted in small batches in Addis Ababa and delivered fresh. Shop this week's coffees, subscribe, or visit the roastery.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400&family=Noto+Sans+Ethiopic:wght@600;800&display=swap" rel="stylesheet">
+  <style>
+    /* Jebena Coffee Works
+       Palette comes from the coffee itself: green bean, roasted bean, ripe cherry, and the gold of a first-crack marker. */
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
-"use strict";
+    :root {
+      --bean: #e3e8d2;
+      --bean-deep: #d2dabb;
+      --roast: #2a1a12;
+      --roast-soft: #5a4a3f;
+      --cherry: #b02a30;
+      --cherry-dark: #8f1f25;
+      --gold: #d9a23a;
 
-/* LifeFix content: add or edit topics in this list. */
-const topics = [
-  {
-    id:"career", icon:"💼", title:"Career & Jobs",
-    description:"Find jobs, improve your CV, and prepare for interviews.",
-    intro:"A practical starting point for your job search.",
-    steps:[
-      "Choose roles that match your skills, interests, and experience.",
-      "Prepare a clear CV with your contact details, skills, education, and experience.",
-      "Write a short cover letter tailored to each job.",
-      "Search trusted job websites and official company career pages.",
-      "Practice interview answers and prepare questions for the employer.",
-      "Keep a record of applications and follow up politely when appropriate."
-    ],
-    tip:"Protect your personal information. Be cautious if someone asks you to pay money to get a job."
-  },
-  {
-    id:"learning", icon:"📚", title:"Learning & Education",
-    description:"Build skills, improve study habits, and keep learning.",
-    intro:"Make learning easier by setting a clear goal and following a routine.",
-    steps:[
-      "Choose one subject or skill you want to improve.",
-      "Break the goal into small weekly learning targets.",
-      "Use trusted books, courses, teachers, and educational resources.",
-      "Study in short focused sessions and take regular breaks.",
-      "Practice what you learn with exercises or a small project.",
-      "Review your progress each week and adjust your plan."
-    ],
-    tip:"Consistent practice is usually more useful than trying to learn everything in one day."
-  },
-  {
-    id:"money", icon:"💰", title:"Money & Budget",
-    description:"Plan spending, understand expenses, and build better money habits.",
-    intro:"A simple budget helps you understand where your money goes.",
-    steps:[
-      "Write down the income you expect to receive.",
-      "List essential expenses such as housing, food, transport, and bills.",
-      "Record other spending for a few weeks.",
-      "Separate needs from wants before making non-essential purchases.",
-      "Set a realistic savings goal, even if you start with a small amount.",
-      "Review your budget regularly and change it when your circumstances change."
-    ],
-    tip:"Never share your PIN, password, or banking verification codes. This guide is general information, not personal financial advice."
-  },
-  {
-    id:"technology", icon:"💻", title:"Technology Help",
-    description:"Troubleshoot common phone, computer, and internet problems.",
-    intro:"Try safe basic checks before changing settings or deleting files.",
-    steps:[
-      "Identify the exact problem and any error message.",
-      "Check the power, battery, cables, Wi-Fi, or mobile data connection.",
-      "Restart the device or app if it is safe to do so.",
-      "Install updates from the device settings or official app store.",
-      "Check available storage and close apps you are not using.",
-      "Back up important files before resetting a device or removing data.",
-      "If the problem continues, consult the official support page for your device."
-    ],
-    tip:"Do not share passwords or install unknown apps suggested by strangers who claim they can fix your device."
-  },
-  {
-    id:"daily-life", icon:"🏠", title:"Daily Life",
-    description:"Organize time, manage everyday tasks, and build helpful routines.",
-    intro:"Small changes can make daily responsibilities easier to manage.",
-    steps:[
-      "Write down the tasks you need to complete.",
-      "Choose the three most important tasks for today.",
-      "Break large tasks into smaller actions.",
-      "Give each task a realistic time slot.",
-      "Prepare essential items the night before when possible.",
-      "Review what worked at the end of the day and plan tomorrow."
-    ],
-    tip:"Leave some unscheduled time for rest and unexpected tasks."
-  },
-  {
-    id:"small-business", icon:"🛍️", title:"Small Business",
-    description:"Explore business ideas, customer service, and basic planning.",
-    intro:"Start by understanding a real customer need before investing heavily.",
-    steps:[
-      "Identify a problem people are willing to pay to solve.",
-      "Ask potential customers what they need and what they currently use.",
-      "Estimate startup costs, regular expenses, and possible selling prices.",
-      "Test your idea on a small scale before spending a lot.",
-      "Keep clear records of sales, costs, and money received.",
-      "Treat customers fairly and respond to complaints professionally.",
-      "Check the local rules, permits, and tax requirements for your business."
-    ],
-    tip:"Start small, keep reliable records, and avoid borrowing more than you can reasonably repay."
-  }
-];
+      --font-display: "Bricolage Grotesque", "Noto Sans Ethiopic", system-ui, sans-serif;
+      --font-body: "Newsreader", Georgia, "Noto Sans Ethiopic", serif;
 
-const popularItems = [
-  {icon:"📝",title:"Create a Better CV",text:"Organize your skills, education, and experience into a clear CV.",topic:"career"},
-  {icon:"🎯",title:"Build a Study Routine",text:"Set small learning goals and practice consistently.",topic:"learning"},
-  {icon:"📊",title:"Start a Simple Budget",text:"List income and expenses to understand your money.",topic:"money"},
-  {icon:"📶",title:"Fix Internet Problems",text:"Check your connection and troubleshoot common issues.",topic:"technology"},
-  {icon:"📅",title:"Plan Your Day",text:"Choose priorities and make a realistic daily plan.",topic:"daily-life"},
-  {icon:"💡",title:"Test a Business Idea",text:"Talk to potential customers before making a big investment.",topic:"small-business"}
-];
-
-const categoryGrid = document.getElementById("categoryGrid");
-const detailViews = document.getElementById("detailViews");
-const detailPlaceholder = document.getElementById("detailPlaceholder");
-const popularGrid = document.getElementById("popularGrid");
-const searchInput = document.getElementById("searchInput");
-const searchForm = document.getElementById("searchForm");
-const searchStatus = document.getElementById("searchStatus");
-const noResults = document.getElementById("noResults");
-const menuToggle = document.getElementById("menuToggle");
-const navLinks = document.getElementById("navLinks");
-const backTop = document.getElementById("backTop");
-
-let activeTopicIndex = -1;
-
-function makeCard(topic) {
-  const card = document.createElement("article");
-  card.className = "card";
-  card.dataset.search = (topic.title + " " + topic.description).toLowerCase();
-
-  const icon = document.createElement("div");
-  icon.className = "category-icon";
-  icon.textContent = topic.icon;
-
-  const title = document.createElement("h3");
-  title.textContent = topic.title;
-
-  const description = document.createElement("p");
-  description.textContent = topic.description;
-
-  const link = document.createElement("a");
-  link.className = "text-link";
-  link.href = "#detailSection";
-  link.textContent = "Explore solutions →";
-  link.addEventListener("click", function(event) {
-    event.preventDefault();
-    openTopic(topic.id, true);
-  });
-
-  card.append(icon, title, description, link);
-  return card;
-}
-
-func
-// LifeFix: display the six solution topics
-const lifeFixTopics = [
-  {
-    id: "career",
-    icon: "💼",
-    title: "Career & Jobs",
-    description: "Find jobs, prepare your CV, and practice interviews.",
-    steps: [
-      "Choose a job that matches your skills and interests.",
-      "Prepare a clear CV with your education and experience.",
-      "Search trusted job websites and company career pages.",
-      "Write a short, professional application for each job.",
-      "Practice interview questions and follow up politely."
-    ]
-  },
-  {
-    id: "learning",
-    icon: "📚",
-    title: "Learning & Education",
-    description: "Build skills and make learning easier.",
-    steps: [
-      "Choose one skill or subject you want to learn.",
-      "Set a small, realistic learning goal.",
-      "Study in short, regular sessions.",
-      "Practice what you learn with exercises or projects.",
-      "Review your progress every week."
-    ]
-  },
-  {
-    id: "money",
-    icon: "💰",
-    title: "Money & Budget",
-    description: "Organize your spending and plan your budget.",
-    steps: [
-      "Write down your monthly income.",
-      "List essential expenses such as food, housing, and transport.",
-      "Record your spending each day.",
-      "Set a realistic limit for non-essential purchases.",
-      "Review your budget weekly and save what you can."
-    ]
-  },
-  {
-    id: "technology",
-    icon: "💻",
-    title: "Technology Help",
-    description: "Solve common phone, computer, and internet problems.",
-    steps: [
-      "Identify the exact problem and any error message.",
-      "Check your internet connection and battery or power.",
-      "Restart the device or application.",
-      "Install official updates if available.",
-      "Back up important data before major changes and seek trusted support if needed."
-    ]
-  },
-  {
-    id: "daily-life",
-    icon: "🏠",
-    title: "Daily Life",
-    description: "Manage your time and everyday responsibilities.",
-    steps: [
-      "Write down the tasks you need to complete.",
-      "Choose the three most important tasks.",
-      "Break large tasks into small steps.",
-      "Set a time for each task and take short breaks.",
-      "Review what worked and plan for tomorrow."
-    ]
-  },
-  {
-    id: "small-business",
-    icon: "🛍️",
-    title: "Small Business",
-    description: "Explore practical steps for starting and improving a business.",
-    steps: [
-      "Identify a real customer need.",
-      "Ask potential customers what they need and can afford.",
-      "Estimate startup costs and ongoing expenses.",
-      "Test your idea on a small scale before investing heavily.",
-      "Track sales, expenses, customer feedback, and local legal requirements."
-    ]
-  }
-];
-
-(function initialiseLifeFixTopics() {
-  const solutionsSection = document.getElementById("solutions");
-  const guideSection = document.getElementById("detailSection");
-
-  if (!solutionsSection || !guideSection) {
-    console.error(
-      "LifeFix setup: Could not find #solutions or #detailSection."
-    );
-    return;
-  }
-
-  const grid = solutionsSection.querySelector(".grid");
-  if (!grid) {
-    console.error("LifeFix setup: Solutions grid was not found.");
-    return;
-  }
-
-  grid.innerHTML = "";
-
-  lifeFixTopics.forEach(function(topic) {
-    const card = document.createElement("article");
-    card.className = "card solution-card";
-    card.dataset.search =
-      (topic.title + " " + topic.description + " " +
-       topic.steps.join(" ")).toLowerCase();
-
-    const icon = document.createElement("div");
-    icon.className = "category-icon";
-    icon.textContent = topic.icon;
-
-    const title = document.createElement("h3");
-    title.textContent = topic.title;
-
-    const description = document.createElement("p");
-    description.textContent = topic.description;
-
-    const link = document.createElement("a");
-    link.className = "text-link";
-    link.href = "#detailSection";
-    link.textContent = "Explore solutions →";
-
-    link.addEventListener("click", function(event) {
-      event.preventDefault();
-      showLifeFixGuide(topic.id);
-    });
-
-    card.append(icon, title, description, link);
-    grid.appendChild(card);
-  });
-
-  function showLifeFixGuide(topicId) {
-    const topic = lifeFixTopics.find(function(item) {
-      return item.id === topicId;
-    });
-
-    if (!topic) return;
-
-    guideSection.innerHTML = "";
-
-    const container = document.createElement("div");
-    container.className = "card";
-
-    const heading = document.createElement("div");
-    heading.className = "detail-top";
-
-    const icon = document.createElement("div");
-    icon.className = "category-icon";
-    icon.textContent = topic.icon;
-
-    const title = document.createElement("h2");
-    title.textContent = topic.title;
-
-    heading.append(icon, title);
-
-    const intro = document.createElement("p");
-    intro.className = "detail-lead";
-    intro.textContent = topic.description;
-
-    const list = document.createElement("ol");
-    list.className = "guide-list";
-
-    topic.steps.forEach(function(step) {
-      const item = document.createElement("li");
-      item.textContent = step;
-      list.appendChild(item);
-    });
-
-    const actions = document.createElement("div");
-    actions.className = "detail-actions";
-
-    const back = document.createElement("button");
-    back.type = "button";
-    back.className = "btn btn-secondary";
-    back.textContent = "← Back to solutions";
-    back.addEventListener("click", function() {
-      solutionsSection.scrollIntoView({ behavior: "smooth" });
-    });
-
-    const next = document.createElement("button");
-    next.type = "button";
-    next.className = "btn";
-    next.textContent = "Next guide →";
-    next.addEventListener("click", function() {
-      const currentIndex = lifeFixTopics.findIndex(
-        function(item) { return item.id === topic.id; }
-      );
-      const nextTopic = lifeFixTopics[
-        (currentIndex + 1) % lifeFixTopics.length
-      ];
-      showLifeFixGuide(nextTopic.id);
-    });
-
-    actions.append(back, next);
-    container.append(heading, intro, list, actions);
-    guideSection.appendChild(container);
-    guideSection.style.display = "block";
-    guideSection.scrollIntoView({ behavior: "smooth" });
-  }
-
-  // Connect the search box to the solution cards.
-  const searchInput = document.getElementById("searchInput");
-  const searchForm = document.getElementById("searchForm");
-
-  function filterLifeFixTopics() {
-    const query = searchInput
-      ? searchInput.value.trim().toLowerCase()
-      : "";
-
-    let visibleCount = 0;
-
-    Array.from(grid.children).forEach(function(card) {
-      const matches = card.dataset.search.includes(query);
-      card.style.display = matches ? "" : "none";
-      if (matches) visibleCount++;
-    });
-
-    let message = document.getElementById("lifeFixSearchMessage");
-
-    if (!message) {
-      message = document.createElement("p");
-      message.id = "lifeFixSearchMessage";
-      message.className = "status";
-      grid.parentNode.insertBefore(message, grid.nextSibling);
+      --gutter: clamp(1.25rem, 4vw, 2.5rem);
+      --max: 1180px;
+      --space-section: clamp(4rem, 9vw, 7.5rem);
     }
 
-    message.textContent = visibleCount
-      ? visibleCount + " solution topic(s) found."
-      : "No matching topics found. Try another search.";
+    *, *::before, *::after { box-sizing: border-box; }
 
-    message.classList.toggle("visible", Boolean(query));
-  }
+    html { scroll-behavior: smooth; }
 
-  if (searchInput) {
-    searchInput.addEventListener("input", filterLifeFixTopics);
-  }
+    body {
+      margin: 0;
+      background: var(--bean);
+      color: var(--roast);
+      font-family: var(--font-body);
+      font-size: 1.125rem;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
 
-  if (searchForm) {
-    searchForm.addEventListener("submit", function(event) {
-      event.preventDefault();
-      filterLifeFixTopics();
-      solutionsSection.scrollIntoView({ behavior: "smooth" });
-    });
-  }
-})();
+    img, svg { display: block; max-width: 100%; }
+
+    a { color: inherit; }
+
+    .wrap {
+      width: 100%;
+      max-width: var(--max);
+      margin-inline: auto;
+      padding-inline: var(--gutter);
+    }
+
+    .sr {
+      position: absolute;
+      width: 1px; height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    .skip {
+      position: absolute;
+      left: 1rem; top: -4rem;
+      padding: .6rem 1rem;
+      background: var(--roast);
+      color: var(--bean);
+      z-index: 10;
+    }
+    .skip:focus { top: 1rem; }
+
+    :focus-visible {
+      outline: 3px solid var(--cherry);
+      outline-offset: 3px;
+    }
+    .dark :focus-visible { outline-color: var(--gold); }
+
+    /* Type */
+    h1, h2, h3, .brand-name, .btn, th, .nav a, .order-link {
+      font-family: var(--font-display);
+    }
+
+    h1, h2, h3 { margin: 0; line-height: 1.02; letter-spacing: -0.02em; }
+
+    h1 {
+      font-size: clamp(2.8rem, 7.4vw, 5.4rem);
+      font-weight: 800;
+      font-stretch: 78%;
+      font-variation-settings: "wdth" 78;
+      max-width: 11ch;
+    }
+
+    h2 {
+      font-size: clamp(2rem, 4.4vw, 3.2rem);
+      font-weight: 700;
+      font-variation-settings: "wdth" 82;
+    }
+
+    h3 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    p { margin: 0 0 1em; max-width: 62ch; }
+
+    .lead {
+      font-size: 1.3rem;
+      line-height: 1.55;
+      max-width: 34em;
+    }
+
+    /* Header */
+    .site-header { padding-block: 1.1rem; }
+
+    .bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem 2rem;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: .7rem;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 2.6rem; height: 2.6rem;
+      border-radius: 50%;
+      background: var(--roast);
+      color: var(--bean);
+      font-family: "Noto Sans Ethiopic", sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    .brand-name {
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: -0.01em;
+    }
+
+    .nav {
+      display: flex;
+      gap: 1.6rem;
+      list-style: none;
+      margin: 0; padding: 0;
+    }
+
+    .nav a {
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      padding-block: .3rem;
+      border-bottom: 2px solid transparent;
+    }
+    .nav a:hover { border-bottom-color: var(--cherry); }
+
+    .order-link {
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      padding: .5rem .9rem;
+      border: 2px solid var(--roast);
+      border-radius: 999px;
+    }
+    .order-link:hover { background: var(--roast); color: var(--bean); }
+
+    /* Buttons */
+    .btn {
+      display: inline-block;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.005em;
+      text-decoration: none;
+      padding: .85rem 1.4rem;
+      border: 2px solid var(--roast);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--roast);
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--cherry);
+      border-color: var(--cherry);
+      color: var(--bean);
+    }
+    .btn-primary:hover { background: var(--cherry-dark); border-color: var(--cherry-dark); }
+
+    .btn-ghost:hover { background: var(--roast); color: var(--bean); }
+
+    .btn-add {
+      padding: .5rem 1rem;
+      font-size: .95rem;
+      white-space: nowrap;
+    }
+    .btn-add:hover { background: var(--roast); color: var(--bean); }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .8rem;
+      margin-top: 2rem;
+    }
+
+    /* Hero */
+    .hero { padding-block: clamp(2rem, 6vw, 4.5rem) var(--space-section); }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      gap: clamp(2rem, 5vw, 4rem);
+      align-items: center;
+    }
+
+    .hero-copy .lead { margin-top: 1.6rem; margin-bottom: 0; }
+
+    .curve { margin: 0; }
+
+    .curve svg {
+      width: 100%;
+      height: auto;
+      background: var(--bean-deep);
+      border-radius: 1.25rem;
+      padding: .5rem;
+    }
+
+    .curve figcaption {
+      margin-top: .8rem;
+      font-size: .98rem;
+      font-style: italic;
+      color: var(--roast-soft);
+    }
+
+    .curve .grid line { stroke: var(--roast); stroke-opacity: .14; stroke-width: 1; }
+    .curve .grid .axis { stroke-opacity: .5; }
+
+    .curve .ticks text {
+      font-family: var(--font-display);
+      font-size: 12px;
+      fill: var(--roast-soft);
+    }
+
+    .curve .roast-line {
+      fill: none;
+      stroke: var(--cherry);
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 1;
+      stroke-dashoffset: 0;
+    }
+
+    .curve .marks circle { fill: var(--roast); }
+    .curve .marks .crack { fill: var(--gold); stroke: var(--roast); stroke-width: 2.5; }
+
+    .curve .notes text {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 600;
+      fill: var(--roast);
+    }
+
+    /* The one orchestrated moment: the curve draws itself once */
+    @media (prefers-reduced-motion: no-preference) {
+      .curve .roast-line {
+        stroke-dashoffset: 1;
+        animation: draw 3.2s cubic-bezier(.45, .1, .25, 1) .3s forwards;
+      }
+      .curve .marks circle,
+      .curve .notes text {
+        opacity: 0;
+        animation: appear .5s ease forwards;
+      }
+      .curve .marks circle:nth-child(1), .curve .notes text:nth-child(1) { animation-delay: .3s; }
+      .curve .marks circle:nth-child(2), .curve .notes text:nth-child(2) { animation-delay: 1.0s; }
+      .curve .marks circle:nth-child(3), .curve .notes text:nth-child(3) { animation-delay: 2.6s; }
+      .curve .marks circle:nth-child(4), .curve .notes text:nth-child(4) { animation-delay: 3.3s; }
+    }
+
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+    @keyframes appear { to { opacity: 1; } }
+
+    /* Sections */
+    .section { padding-block: var(--space-section); }
+
+    .section-head { margin-bottom: clamp(2rem, 4vw, 3rem); }
+    .section-head h2 { margin-bottom: 1rem; }
+    .section-head p { margin-bottom: 0; color: var(--roast-soft); }
+    .dark .section-head p { color: #c9d0b6; }
+
+    .dark {
+      background: var(--roast);
+      color: var(--bean);
+    }
+
+    /* Coffees table */
+    .spec {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .spec th, .spec td {
+      padding: 1.2rem 1rem 1.2rem 0;
+      vertical-align: baseline;
+      border-top: 1px solid rgba(42, 26, 18, .28);
+    }
+
+    .spec thead th {
+      padding-block: .6rem;
+      font-size: .95rem;
+      font-weight: 600;
+      color: var(--roast-soft);
+      border-top: 0;
+      border-bottom: 2px solid var(--roast);
+    }
+
+    .spec tbody th {
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .spec .sub {
+      display: block;
+      margin-top: .15rem;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      font-weight: 400;
+      font-style: italic;
+      letter-spacing: 0;
+      color: var(--roast-soft);
+    }
+
+    .spec .price {
+      font-family: var(--font-display);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .spec .act { text-align: right; padding-right: 0; }
+
+    .spec tbody tr:last-child th,
+    .spec tbody tr:last-child td { border-bottom: 1px solid rgba(42, 26, 18, .28); }
+
+    .status {
+      min-height: 1.6em;
+      margin: 1.2rem 0 0;
+      color: var(--cherry);
+      font-weight: 600;
+    }
+
+    /* Roasting steps */
+    .steps {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0;
+      border-top: 2px solid var(--gold);
+    }
+
+    .steps li {
+      position: relative;
+      padding: 1.6rem 1.5rem 0 0;
+    }
+
+    .steps li::before {
+      content: "";
+      position: absolute;
+      top: -8px; left: 0;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--gold);
+    }
+
+    .steps .time {
+      display: block;
+      margin-bottom: .6rem;
+      font-family: var(--font-display);
+      font-size: 2.4rem;
+      font-weight: 800;
+      font-variation-settings: "wdth" 80;
+      letter-spacing: -0.03em;
+      color: var(--gold);
+      line-height: 1;
+    }
+
+    .steps h3 { margin-bottom: .5rem; }
+    .steps p { margin: 0; color: #c9d0b6; font-size: 1.05rem; }
+
+    /* Subscribe */
+    .split {
+      display: grid;
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      gap: clamp(2rem, 5vw, 4rem);
+      align-items: start;
+    }
+
+    .split .section-head { margin-bottom: 0; }
+
+    .plans fieldset {
+      margin: 0 0 1.6rem;
+      padding: 0;
+      border: 0;
+    }
+
+    .plans legend {
+      padding: 0;
+      margin-bottom: .8rem;
+      font-family: var(--font-display);
+      font-size: .95rem;
+      font-weight: 600;
+      color: var(--roast-soft);
+    }
+
+    .plan {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      grid-template-areas:
+        "radio name price"
+        "radio note price";
+      column-gap: 1rem;
+      align-items: center;
+      padding: 1.1rem 1.2rem;
+      border: 2px solid rgba(42, 26, 18, .3);
+      border-radius: 1rem;
+      cursor: pointer;
+    }
+    .plan + .plan { margin-top: .7rem; }
+
+    .plan input {
+      grid-area: radio;
+      width: 1.25rem; height: 1.25rem;
+      margin: 0;
+      accent-color: var(--cherry);
+    }
+
+    .plan-name {
+      grid-area: name;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.15rem;
+      line-height: 1.2;
+    }
+
+    .plan-note {
+      grid-area: note;
+      font-size: .98rem;
+      font-style: italic;
+      color: var(--roast-soft);
+      line-height: 1.3;
+    }
+
+    .plan-price {
+      grid-area: price;
+      font-family: var(--font-display);
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .plan:has(input:checked) {
+      border-color: var(--cherry);
+      background: var(--bean-deep);
+    }
+    .plan:has(input:focus-visible) {
+      outline: 3px solid var(--cherry);
+      outline-offset: 3px;
+    }
+
+    /* Visit */
+    .visit { background: var(--bean-deep); }
+
+    .visit-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+      gap: clamp(2rem, 5vw, 4rem);
+      align-items: start;
+    }
+
+    .visit h2 { margin-bottom: 1.2rem; }
+
+    .cupping {
+      padding-left: 1rem;
+      border-left: 4px solid var(--cherry);
+    }
+
+    address {
+      font-style: normal;
+      margin-top: 1.6rem;
+    }
+
+    address a { text-decoration-thickness: 1px; text-underline-offset: 3px; }
+    address a:hover { color: var(--cherry); }
+
+    .glyph {
+      margin: 0 0 .4rem;
+      font-family: "Noto Sans Ethiopic", sans-serif;
+      font-weight: 800;
+      font-size: clamp(5rem, 14vw, 9rem);
+      line-height: 1;
+      color: var(--cherry);
+    }
+
+    .hours table { width: 100%; border-collapse: collapse; }
+
+    .hours th, .hours td {
+      padding: .8rem 0;
+      text-align: left;
+      border-top: 1px solid rgba(42, 26, 18, .28);
+    }
+    .hours tr:last-child th, .hours tr:last-child td { border-bottom: 1px solid rgba(42, 26, 18, .28); }
+
+    .hours th { font-size: 1.05rem; }
+    .hours td { font-family: var(--font-display); font-weight: 600; text-align: right; }
+
+    .hours .note { margin-top: 1rem; font-style: italic; color: var(--roast-soft); }
+
+    /* Footer */
+    .site-footer {
+      background: var(--roast);
+      color: var(--bean);
+      padding-block: 3rem;
+    }
+
+    .foot p { margin: 0 0 .4rem; }
+    .foot-brand { font-family: var(--font-display); font-weight: 800; font-size: 1.5rem; letter-spacing: -0.02em; }
+    .foot .fine { margin-top: 1.4rem; font-size: .95rem; color: #c9d0b6; }
+
+    /* Tablet */
+    @media (max-width: 960px) {
+      .hero-grid, .split, .visit-grid { grid-template-columns: minmax(0, 1fr); }
+      h1 { max-width: 14ch; }
+      .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 2.5rem; border-top: 0; }
+      .steps li { border-top: 2px solid var(--gold); }
+    }
+
+    /* Phone: the coffee table becomes a stack of rows */
+    @media (max-width: 760px) {
+      .spec thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+      .spec, .spec tbody, .spec tr, .spec th, .spec td { display: block; }
+
+      .spec tr {
+        padding: 1.3rem 0;
+        border-top: 1px solid rgba(42, 26, 18, .28);
+      }
+      .spec tbody tr:last-child { border-bottom: 1px solid rgba(42, 26, 18, .28); }
+
+      .spec th, .spec td,
+      .spec tbody tr:last-child th,
+      .spec tbody tr:last-child td { padding: 0; border: 0; }
+
+      .spec td {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        padding-top: .45rem;
+        text-align: right;
+      }
+
+      .spec td::before {
+        content: attr(data-label);
+        font-family: var(--font-display);
+        font-size: .92rem;
+        font-weight: 600;
+        text-align: left;
+        color: var(--roast-soft);
+      }
+
+      .spec td.act { display: block; padding-top: 1rem; text-align: left; }
+      .spec td.act::before { content: none; }
+    }
+
+    @media (max-width: 560px) {
+      body { font-size: 1.05rem; }
+      .bar { justify-content: space-between; }
+      .nav { order: 3; width: 100%; gap: 1.2rem; flex-wrap: wrap; }
+      .steps { grid-template-columns: minmax(0, 1fr); }
+      .plan { padding: 1rem; }
+      .plan-price { font-size: .95rem; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="wrap bar">
+      <a class="brand" href="#top" aria-label="Jebena Coffee Works, home">
+        <span class="brand-mark" lang="am" aria-hidden="true">ቡና</span>
+        <span class="brand-name">Jebena Coffee Works</span>
+      </a>
+      <nav aria-label="Main">
+        <ul class="nav">
+          <li><a href="#coffees">Coffees</a></li>
+          <li><a href="#roasting">Roasting</a></li>
+          <li><a href="#subscribe">Subscribe</a></li>
+          <li><a href="#visit">Visit</a></li>
+        </ul>
+      </nav>
+      <a class="order-link" href="#coffees">Your order: <span id="cart-count">0</span> b
