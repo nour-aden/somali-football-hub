@@ -1,690 +1,586 @@
-i<!DOCTYPE html><html lang="so">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="LifeFix — Hagaha waxbarashada, caafimaadka, gaadiidka iyo ganacsiyada magaalada Jigjiga.">
-<title>LifeFix</title><style>
-  :root {
---navy: #102a43;
---blue: #2563eb;
---light: #f3f7ff;
---white: #ffffff;
---text: #243b53;
---muted: #627d98;
---gold: #fbbf24;
-}
-
-* {
-  box-sizing: border-box;
-  }
-
-html {
-scroll-behavior: smooth;
-}
-
-body {
-margin: 0;
-font-family: Arial, Helvetica, sans-serif;
-background: var(--light);
-color: var(--text);
-line-height: 1.6;
-}
-
-header {
-background: var(--navy);
-color: var(--white);
-padding: 18px 5%;
-display: flex;
-justify-content: space-between;
-align-items: center;
-flex-wrap: wrap;
-gap: 15px;
-}
-
-.logo {
-font-size: 25px;
-font-weight: bold;
-}
-
-.logo span {
-color: var(--gold);
-}
-
-nav {
-display: flex;
-flex-wrap: wrap;
-gap: 20px;
-}
-
-header a {
-color: var(--white);
-text-decoration: none;
-font-weight: 600;
-}
-
-header a:hover {
-color: var(--gold);
-}
-
-.hero {
-padding: 75px 6%;
-background: linear-gradient(135deg, #102a43, #2563eb);
-color: var(--white);
-}
-
-.hero-content {
-max-width: 850px;
-margin: 0 auto;
-}
-
-.intro {
-color: var(--gold);
-font-weight: bold;
-}
-
-.hero h1 {
-font-size: clamp(30px, 5vw, 48px);
-line-height: 1.2;
-margin: 15px 0;
-}
-
-.hero p {
-max-width: 700px;
-}
-
-.search-box {
-display: flex;
-gap: 10px;
-max-width: 650px;
-margin-top: 25px;
-}
-
-.search-box input {
-flex: 1;
-min-width: 0;
-padding: 15px;
-border: 1px solid #dbeafe;
-border-radius: 10px;
-font-size: 16px;
-}
-
-button {
-background: var(--blue);
-color: var(--white);
-border: none;
-border-radius: 10px;
-padding: 14px 22px;
-font-size: 15px;
-font-weight: bold;
-cursor: pointer;
-}
-
-button:hover {
-background: #1e40af;
-}
-
-.container {
-width: 90%;
-max-width: 1200px;
-margin: 35px auto;
-}
-
-.section-title {
-font-size: 27px;
-margin-bottom: 22px;
-color: var(--navy);
-}
-
-.grid {
-display: grid;
-grid-template-columns: repeat(3, minmax(0, 1fr));
-gap: 22px;
-}
-
-.card {
-background: var(--white);
-border: 1px solid #e2e8f0;
-border-radius: 16px;
-padding: 25px;
-box-shadow: 0 5px 18px rgba(16, 42, 67, 0.07);
-transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.card:hover {
-transform: translateY(-4px);
-box-shadow: 0 12px 28px rgba(16, 42, 67, 0.12);
-}
-
-.category-icon {
-font-size: 32px;
-margin-bottom: 10px;
-}
-
-.card h3 {
-margin: 8px 0;
-color: var(--navy);
-}
-
-.card p {
-color: var(--muted);
-font-size: 15px;
-}
-
-.card a {
-color: var(--blue);
-font-weight: bold;
-text-decoration: none;
-}
-
-.card a:hover {
-text-decoration: underline;
-}
-
-input,
-button {
-font-family: inherit;
-}
-
-footer {
-background: var(--navy);
-color: var(--white);
-text-align: center;
-padding: 25px 5%;
-margin-top: 45px;
-}
-
-@media (max-width: 768px) {
-header {
-flex-direction: column;
-align-items: flex-start;
-}
-
-nav {
-gap: 14px;
-}
-
-.hero {
-padding: 50px 6%;
-}
-
-.grid {
-grid-template-columns: 1fr;
-}
-
-.search-box {
-flex-direction: column;
-}
-
-.search-box button {
-width: 100%;
-}
-
-.container {
-width: 92%;
-}
-
-.card {
-padding: 20px;
-}
-}
-:root {
-  --navy: #102a43;
-  --blue: #2563eb;
-  --light: #f3f7ff;
-  --white: #ffffff;
-  --text: #243b53;
-  --muted: #627d98;
-  --gold: #fbbf24;
-}
-* { box-sizing: border-box; }
-
-html { scroll-behavior: smooth; }
-
-body {
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background: var(--light);
-  color: var(--text);
-  line-height: 1.6;
-}
-
-header {
-  background: var(--navy);
-  color: white;
-  padding: 15px 5%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 15px;
-  flex-wrap: wrap;
-}
-
-.logo {
-  font-size: 21px;
-  font-weight: bold;
-}
-
-.logo span { color: var(--gold); }
-
-nav {
-  display: flex;
-  gap: 18px;
-  flex-wrap: wrap;
-}
-
-nav a {
-  color: white;
-  text-decoration: none;
-  font-size: 14px;
-}
-
-  header nav a {
-color: #ffffff !important;
-}
-
-header nav a:hover {
-color: #ffd166 !important;
-}
-nav a:hover { color: var(--gold); }
-nav a:link,
-nav a:visited,
-nav a:active {
-color: #ffffff !important;
-}
-.hero {
-  min-height: 330px;
-  padding: 55px 6%;
-  color: white;
-  background:
-    linear-gradient(90deg, rgba(7,34,72,.93), rgba(7,34,72,.55)),
-    url("https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1600&q=80")
-    center/cover no-repeat;
-  display: flex;
-  align-items: center;
-}
-
-.hero-content { max-width: 720px; }
-
-.hero .intro {
-  color: var(--gold);
-  font-weight: bold;
-}
-
-.hero h1 {
-  font-size: clamp(32px, 5vw, 48px);
-  line-height: 1.15;
-  margin: 10px 0;
-}
-
-.hero p { max-width: 620px; }
-
-.search-box {
-  display: flex;
-  max-width: 650px;
-  gap: 8px;
-  background: white;
-  padding: 6px;
-  border-radius: 10px;
-  margin-top: 24px;
-}
-
-.search-box input {
-  flex: 1;
-  min-width: 0;
-  border: none;
-  outline: none;
-  padding: 12px;
-  font-size: 15px;
-}
-
-button {
-  cursor: pointer;
-  border: none;
-  border-radius: 7px;
-  padding: 12px 18px;
-  background: var(--blue);
-  color: white;
-  font-weight: bold;
-}
-
-button:hover { background: #1055ac; }
-
-.container {
-  max-width: 1200px;
-  margin: auto;
-  padding: 30px 22px;
-}
-
-.section-title {
-  margin: 0 0 18px;
-  font-size: 24px;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
-}
-
-.card {
-  background: var(--white);
-  padding: 20px;
-  border-radius: 13px;
-  box-shadow: 0 4px 18px rgba(20,50,90,.07);
-  border: 1px solid #e8edf5;
-  transition: transform .2s;
-  overflow-wrap: anywhere;
-}
-
-.card:hover { transform: translateY(-3px); }
-
-.category-icon { font-size: 32px; }
-
-.card h3 {
-  margin: 8px 0;
-  font-size: 18px;
-}
-
-.card p {
-  color: var(--muted);
-  font-size: 14px;
-  margin: 8px 0;
-}
-
-.card a {
-  color: var(--white);
-  font-size: 14px;
-  font-weight: bold;
-  text-decoration: none;
-}
-
-.place-image {
-  min-height: 115px;
-  background: linear-gradient(135deg, #2679bb, #0d2e5c);
-  border-radius: 9px;
-  display: grid;
-  place-items: center;
-  font-size: 46px;
-  margin-bottom: 12px;
-}
-
-.place-category {
-  display: inline-block;
-  background: #e9f2ff;
-  color: #1454a1;
-  padding: 4px 9px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: bold;
-}
-
-#status {
-  padding: 12px;
-  margin: 12px 0;
-  border-radius: 8px;
-  background: #e8f3ff;
-  color: #154777;
-  font-size: 14px;
-  display: none;
-
-  <button type="submit">Search →</button>
-</form>
-
-  </div>
-</section><main class="container">  <section id="adeegyada">
-    <h2 class="section-title">Explore LifeFix Solutions</h2>
-
-  <article class="card">
-  <div class="category-icon">💼</div>
-  <h3>Career & Jobs</h3>
-  <p>Discover career paths, job search tips, CV writing guides, and interview preparation.</p>
-  <a href="#career" onclick="document.getElementById('career').style.display='block'; document.getElementById('career').scrollIntoView({behavior:'smooth'}); return false;">Explore solutions →</a>
-  </article>
-
-  <article class="card">
-  <div class="category-icon">📚</div>
-  <h3>Learning & Education</h3>
-  <p>Learn new skills, improve your knowledge, and discover simple study methods.</p>
-  <a href="#learning">Explore solutions →</a>
-  </article>
-
-  <article class="card">
-  <div class="category-icon">💰</div>
-  <h3>Money & Budget</h3>
-  <p>Learn to manage your money, plan your budget, and track your expenses.</p>
-  <a href="#money">Explore solutions →</a>
-  </article>
-
-  <article class="card">
-  <div class="category-icon">💻</div>
-  <h3>Technology Help</h3>
-  <p>Find simple solutions to common phone, computer, and internet problems.</p>
-  <a href="#technology">Explore solutions →</a>
-  </article>
-
-  <article class="card">
-  <div class="category-icon">🏠</div>
-  <h3>Daily Life</h3>
-  <p>Get practical tips for organizing your time, managing daily tasks, and solving everyday problems.</p>
-  <a href="#daily-life">Explore solutions →</a>
-  </article>
-
-  <article class="card">
-  <div class="category-icon">🛍️</div>
-  <h3>Small Business</h3>
-  <p>Learn how to start a small business, attract customers, and improve your business skills.</p>
-  <a href="#small-business">Explore solutions →</a>
-  </article>
-
-</div>
-
-  </section>
-</section><section id="career" class="container" style="padding: 30px 0; display: none;">
-  <article class="card">
-    <h2>Career & Jobs</h2>
-    <h3>How to Find a Job</h3>
-    <p>Follow these simple steps to improve your chances of finding a job.</p>
-    <ol>
-      <li>Choose a job that matches your skills.</li>
-      <li>Prepare a clear and professional CV.</li>
-      <li>Search for job openings online.</li>
-      <li>Practice answering interview questions.</li>
-      <li>Apply for jobs and follow up politely.</li>
-    </ol>
-  </article>
-</section>
-  </article>
-  </section> <section id="waxbarashada" class="container" style="padding: 30px 0; display: none;">
-  <article class="card">
-    <h2>🌍 Learning Resources</h2>
-
-    <p>Discover useful learning resources to build your knowledge, develop new skills, and improve your education.</p>
-
-    <h3>Jaamacadda Jigjiga</h3>
-    <p>Jaamacadda Jigjiga waa xarun waxbarasho sare oo ku taalla magaalada Jigjiga. Waxay ardayda siisaa fursado ay ku bartaan maaddooyin iyo xirfado kala duwan.</p>
-
-    <h3>Dugsiyada</h3>
-    
-
-    <h3>Ujeeddada boggan</h3>
-    <p>Boggan wuxuu dadka ka caawinayaa inay helaan xogta xarumaha waxbarashada, cinwaannadooda iyo macluumaadka lagala xiriiri karo.</p>
-  </article>
-  </section> <section id="goobaha" style="margin-top:32px;">
-    <h2 class="section-title">Popular Solutions</h2>
-
-<div class="grid" id="placesGrid"></div>
-
-<p id="emptyState" class="empty">Wax goob ah lama helin.</p>
-
-<div class="notice">
-  <strong>Fiiro gaar ah:</strong>
-  Macluumaadka goobaha waa in la xaqiijiyaa ka hor inta
-  aan loo bandhigin dadweynaha.
-</div>
-
-  </section>  <section id="xog" style="margin-top:32px;">
-    <h2 class="section-title">About LifeFix</h2><article class="card">
-  <p>LifeFix is a helpful website that provides simple, practical solutions to everyday problems.</p>  <p>Our goal is to help people learn new skills, solve common problems, manage money, find jobs, and use technology more easily.</p>  <p>We aim to make useful information simple, accessible, and helpful for people around the world.</p>
-    </article>
-</div>
-
-  </section></main><footer>
-  LifeFix
-
-<p>Simple Solutions for Everyday Life.</p>
-    
-  <p>Macluumaad. Adeeg. Horumar.</p>
-  <p>© <span id="year"></span> LifeFix. All rights reserved.</p>
-</footer><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
-const SUPABASE_URL = "https://fkyqbuwsbayjypyujgqj.supabase.co";
-const SUPABASE_KEY = "sb_publishable_uokTWBlF8-3PAlXNh0lkrw_ixHfr92T";
-
-const placesGrid = document.getElementById("placesGrid");
-const statusBox = document.getElementById("status");
-const emptyState = document.getElementById("emptyState");
-const searchForm = document.getElementById("searchForm");
-const searchInput = document.getElementById("searchInput");
-
-document.getElementById("year").textContent =
-  new Date().getFullYear();
-
-function muujiXaalad(fariin) {
-  statusBox.textContent = fariin;
-  statusBox.style.display = "block";
-}
-
-async function sooQaadoGoobaha() {
-  if (!window.supabase) {
-    muujiXaalad("Supabase ma soo degin. Hubi internet-ka.");
-    return;
-  }
-
-  try {
-    const db = window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY
-    );
-
-    const { data, error } = await db
-      .from("places")
-      .select("id, name, category, address, description, phone")
-      .order("id", { ascending: true });
-
-  if (error) {
-  muujiXaalad("QALADKA: " + error.message);
-  return;
-  }
-
-    placesGrid.innerHTML = "";
-
-    if (!data || data.length === 0) {
-      muujiXaalad("Weli wax goob ah laguma darin.");
-      emptyState.style.display = "block";
-      return;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="LifeFix gives you clear, practical step-by-step guides for careers, learning, budgeting, technology, daily life, and small business.">
+  <meta name="theme-color" content="#102a43">
+  <title>LifeFix — Simple Solutions for Everyday Life</title>
+
+  <style>
+    :root {
+      --navy: #102a43;
+      --navy-deep: #071b2e;
+      --blue: #2563eb;
+      --blue-dark: #1d4ed8;
+      --sky: #eaf2ff;
+      --light: #f5f8fc;
+      --white: #fff;
+      --text: #243b53;
+      --muted: #627d98;
+      --gold: #ffd166;
+      --border: #e1eaf4;
+      --shadow: 0 12px 32px rgba(16, 42, 67, .08);
+      --radius: 18px;
     }
 
-    data.forEach(function(place) {
-      const card = document.createElement("article");
-      card.className = "card";
+    * { box-sizing: border-box; }
 
-      const icon = document.createElement("div");
-      icon.className = "place-image";
-      icon.textContent = helAstaanta(place.category);
-
-      const category = document.createElement("span");
-      category.className = "place-category";
-      category.textContent = place.category || "Goob";
-
-      const title = document.createElement("h3");
-      title.textContent = place.name || "Goob aan magac lahayn";
-
-      card.appendChild(icon);
-      card.appendChild(category);
-      card.appendChild(title);
-
-      if (place.address) {
-        const address = document.createElement("p");
-        address.textContent = "📍 " + place.address;
-        card.appendChild(address);
-      }
-
-      if (place.description) {
-        const description = document.createElement("p");
-        description.textContent = place.description;
-        card.appendChild(description);
-      }
-
-      if (place.phone) {
-        const phone = document.createElement("p");
-        phone.textContent = "☎ " + place.phone;
-        card.appendChild(phone);
-      }
-
-      placesGrid.appendChild(card);
-    });
-
-    muujiXaalad("Xogta waa la soo qaaday: " + data.length + " goobood.");
-
-    raadiGoobaha();
-
-  } catch (error) {
-    console.error("Xiriirka Supabase wuu fashilmay:", error);
-    muujiXaalad("Xiriirku wuu fashilmay. Hubi internet-ka iyo Supabase settings-ka.");
-  }
-}
-
-function helAstaanta(category) {
-  const c = (category || "").toLowerCase();
-
-  if (c.includes("health") || c.includes("caafimaad")) return "🏥";
-  if (c.includes("education") || c.includes("waxbarasho")) return "🎓";
-  if (c.includes("transport") || c.includes("gaadiid")) return "🚌";
-  if (c.includes("business") || c.includes("ganacsi")) return "🛍️";
-  if (c.includes("market") || c.includes("suuq")) return "🏪";
-
-  return "📍";
-}
-
-searchForm.addEventListener("submit", function(event) {
-  event.preventDefault();
-  raadiGoobaha();
-
-  document.getElementById("goobaha").scrollIntoView({
-    behavior: "smooth"
-  });
-});
-
-searchInput.addEventListener("input", raadiGoobaha);
-
-function raadiGoobaha() {
-  const query = searchInput.value.trim().toLowerCase();
-
-  const cards = document.querySelectorAll(
-    "#adeegyadaGrid .card, #placesGrid .card"
-  );
-
-  let foundPlaces = 0;
-
-  cards.forEach(function(card) {
-    const matches = card.textContent.toLowerCase().includes(query);
-
-    card.style.display = matches ? "" : "none";
-
-    if (matches && card.closest("#placesGrid")) {
-      foundPlaces++;
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 88px;
     }
-  });
 
-  emptyState.style.display =
-    query && foundPlaces === 0 ? "block" : "none";
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background: var(--light);
+      line-height: 1.65;
+    }
 
-  if (query && foundPlaces === 0) {
-    emptyState.textContent = "Wax goob ah oo ku habboon raadinta lama helin.";
-  } else {
-    emptyState.textContent = "Wax goob ah lama helin.";
-  }
-}
+    button, input, textarea, select { font: inherit; }
 
-sooQaadoGoobaha();
-</script></body>
-                                                                                       </html>
+    button, a { -webkit-tap-highlight-color: transparent; }
+
+    a { color: var(--blue); }
+
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: 8px;
+      z-index: 1000;
+      background: white;
+      padding: 10px 14px;
+      border-radius: 8px;
+    }
+
+    .skip-link:focus { left: 8px; }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 14px max(5%, calc((100% - 1180px)/2));
+      background: rgba(7, 27, 46, .97);
+      color: white;
+      box-shadow: 0 4px 18px rgba(0,0,0,.12);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: white;
+      text-decoration: none;
+      font-size: 23px;
+      font-weight: 800;
+      letter-spacing: -.5px;
+      white-space: nowrap;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 11px;
+      color: var(--navy);
+      background: var(--gold);
+      font-size: 20px;
+    }
+
+    .brand span:last-child { color: var(--gold); }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .nav-links a {
+      color: #edf4ff;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 9px 12px;
+      border-radius: 9px;
+      transition: background .2s, color .2s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a:focus-visible {
+      color: var(--gold);
+      background: rgba(255,255,255,.09);
+    }
+
+    .menu-toggle {
+      display: none;
+      color: white;
+      background: transparent;
+      border: 1px solid #466079;
+      border-radius: 10px;
+      padding: 8px 12px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      color: white;
+      background:
+        radial-gradient(circle at 80% 15%, rgba(37,99,235,.5), transparent 34%),
+        linear-gradient(120deg, rgba(7,27,46,.97), rgba(16,42,67,.88)),
+        url("https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1600&q=80")
+        center/cover;
+    }
+
+    .hero-inner {
+      width: min(1180px, 90%);
+      margin: auto;
+      padding: 82px 0 76px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(240px, .75fr);
+      align-items: center;
+      gap: 48px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      margin: 0 0 14px;
+      padding: 6px 12px;
+      border: 1px solid rgba(255,209,102,.45);
+      border-radius: 999px;
+      background: rgba(255,209,102,.1);
+      color: var(--gold);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .4px;
+    }
+
+    h1 {
+      margin: 0 0 18px;
+      font-size: clamp(36px, 5.2vw, 60px);
+      line-height: 1.08;
+      letter-spacing: -1.4px;
+    }
+
+    .hero-copy {
+      max-width: 660px;
+      margin: 0;
+      color: #e1eaf5;
+      font-size: 18px;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 8px;
+      max-width: 670px;
+      margin-top: 28px;
+      padding: 7px;
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 14px 36px rgba(0,0,0,.2);
+    }
+
+    .search-box input {
+      flex: 1;
+      min-width: 0;
+      padding: 12px 14px;
+      border: 0;
+      outline: 0;
+      color: var(--text);
+      background: white;
+      border-radius: 9px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 18px;
+      background: var(--blue);
+      color: white;
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform .18s, background .18s;
+    }
+
+    .btn:hover {
+      background: var(--blue-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      color: var(--navy);
+      background: #eaf2ff;
+    }
+
+    .btn-secondary:hover { background: #d9e8ff; }
+
+    .hero-aside {
+      padding: 25px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 22px;
+      background: rgba(255,255,255,.09);
+      backdrop-filter: blur(8px);
+    }
+
+    .hero-aside .big-icon { font-size: 38px; }
+
+    .hero-aside h2 { margin: 8px 0; font-size: 22px; }
+
+    .hero-aside p {
+      margin: 0;
+      color: #e1eaf5;
+      font-size: 14px;
+    }
+
+    .hero-points {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .hero-point {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: #f6f9ff;
+      font-size: 14px;
+    }
+
+    .hero-point span {
+      color: var(--gold);
+      font-weight: 900;
+    }
+
+    main { min-height: 55vh; }
+
+    .container {
+      width: min(1180px, 90%);
+      margin: 0 auto;
+      padding: 48px 0;
+    }
+
+    .section-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 20px;
+      margin-bottom: 22px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      color: var(--navy);
+      font-size: clamp(25px, 3vw, 32px);
+      line-height: 1.2;
+    }
+
+    .section-heading p {
+      margin: 7px 0 0;
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      min-width: 0;
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: white;
+      box-shadow: var(--shadow);
+      transition: transform .2s, box-shadow .2s, border-color .2s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 38px rgba(16,42,67,.12);
+      border-color: #c7dbf7;
+    }
+
+    .category-icon {
+      display: grid;
+      place-items: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 15px;
+      background: var(--sky);
+      font-size: 27px;
+      margin-bottom: 15px;
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      color: var(--navy);
+      font-size: 19px;
+    }
+
+    .card p {
+      margin: 0 0 15px;
+      color: var(--muted);
+      font-size: 14px;
+      overflow-wrap: anywhere;
+    }
+
+    .text-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-weight: 800;
+      font-size: 14px;
+      text-decoration: none;
+    }
+
+    .text-link:hover { text-decoration: underline; }
+
+    .section-soft { background: #edf4ff; }
+
+    .section-soft .container {
+      padding-top: 44px;
+      padding-bottom: 44px;
+    }
+
+    .solution-card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .solution-card .category-icon { margin-bottom: 12px; }
+
+    .solution-card .text-link { margin-top: auto; }
+
+    .detail-view { display: none; }
+
+    .detail-view.active {
+      display: block;
+      animation: appear .25s ease-out;
+    }
+
+    @keyframes appear {
+      from { opacity: 0; transform: translateY(7px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .detail-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .detail-top .category-icon {
+      flex: 0 0 52px;
+      margin: 0;
+    }
+
+    .detail-top h2 {
+      margin: 0;
+      color: var(--navy);
+      font-size: clamp(25px, 3vw, 34px);
+    }
+
+    .detail-lead { color: var(--muted); margin-top: 0; }
+
+    .guide-list { padding-left: 22px; }
+
+    .guide-list li { padding: 5px 0 5px 4px; }
+
+    .tip-box {
+      margin-top: 20px;
+      padding: 16px 18px;
+      border-left: 4px solid var(--blue);
+      border-radius: 8px;
+      background: #edf4ff;
+    }
+
+    .detail-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 25px;
+    }
+
+    .status {
+      display: none;
+      margin: 16px 0;
+      padding: 12px 15px;
+      border-radius: 10px;
+      color: #17436c;
+      background: #e6f3ff;
+      font-size: 14px;
+    }
+
+    .status.visible { display: block; }
+
+    .empty-state {
+      display: none;
+      padding: 20px;
+      border-radius: 12px;
+      background: white;
+      color: var(--muted);
+    }
+
+    .place-image {
+      display: grid;
+      place-items: center;
+      min-height: 130px;
+      margin-bottom: 14px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #2d83c6, #102a43);
+      font-size: 45px;
+    }
+
+    .place-category {
+      display: inline-block;
+      margin-bottom: 8px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      color: #1454a1;
+      background: #e9f2ff;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .contact-form { display: grid; gap: 12px; }
+
+    .contact-form label {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .contact-form input,
+    .contact-form textarea {
+      display: block;
+      width: 100%;
+      margin-top: 5px;
+      padding: 12px 13px;
+      border: 1px solid #d4dfeb;
+      border-radius: 10px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .contact-form textarea {
+      min-height: 115px;
+      resize: vertical;
+    }
+
+    .small-note { color: var(--muted); font-size: 13px; }
+
+    footer {
+      padding: 32px 5%;
+      background: var(--navy-deep);
+      color: #dbe7f4;
+    }
+
+    .footer-inner {
+      width: min(1180px, 100%);
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    footer p { margin: 5px 0; font-size: 14px; }
+
+    footer a { color: var(--gold); text-decoration: none; }
+
+    .back-to-top {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 50;
+      display: none;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: white;
+      box-shadow: 0 5px 20px rgba(0,0,0,.2);
+    }
+
+    .back-to-top.visible { display: block; }
+
+    :focus-visible {
+      outline: 3px solid #f59e0b;
+      outline-offset: 3px;
+    }
+
+    @media (max-width: 850px) {
+      .hero-inner {
+        grid-template-columns: 1fr;
+        gap: 25px;
+        padding: 60px 0;
+      }
+
+      .hero-aside { max-width: 580px; }
+
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 620px) {
+      .site-header {
+        padding: 11px 5%;
+        flex-wrap: wrap;
+      }
+
+      .menu-toggle { display: inline-flex; }
+
+      .nav-links {
+        display: none;
+        width: 100%;
+        align-items: stretch;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .nav-links.open { display: flex; }
+
+      .nav-links a { padding: 10px 12px; }
+
+      .hero-inner { padding: 48px 0; }
+
+      .hero-copy { font-size: 16px; }
+
+      .search-box { flex-direction: column; }
+
+      .search-box .btn { width: 100%; }
+
+      .container { padding: 35px 0; }
+
+      .grid, .about-grid { grid-template-columns: 1fr; }
+
+      .section-heading {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .card { padding: 21px; }
+
+      .detail-actions .btn { flex: 1 1 100%; }
+    }
+  </style>
+</head>
+<body>
