@@ -1,4 +1,4 @@
-<!doctype html>
+html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -10,7 +10,7 @@
 <style>
 [hidden] { display: none !important; }
 body { margin: 0; }
-
+/* Layout: one narrow column (max 560px). Blue hero band with a road-stripe edge, then cards on a blue-tinted ground. */
 :root {
   --bg: #f2f5fb;
   --surface: #ffffff;
@@ -71,20 +71,21 @@ button, input { font: inherit; color: inherit; }
 .lang { display: flex; background: rgba(255,255,255,.14); border-radius: 999px; padding: 3px; gap: 2px; }
 .lang button { border: 0; background: transparent; color: var(--hero-fg); min-width: 44px; min-height: 36px; border-radius: 999px; font-weight: 600; font-size: .85rem; letter-spacing: .06em; cursor: pointer; }
 .lang button[aria-pressed="true"] { background: var(--yellow); color: var(--yellow-ink); }
-    /* Bajaj icon colours */
+
+/* Bajaj icon colours */
 .bj-body { fill: var(--yellow); }
 .bj-top { fill: #ffffff; }
 .bj-glass { fill: #1b3b9c; }
 .bj-wheel { fill: #0b1127; stroke: #ffffff; stroke-width: 2; }
 .bj-hub { fill: #ffffff; }
-
-/* Hero */
+  /* Hero */
 .hero { background: var(--hero-bg); color: var(--hero-fg); position: relative; }
 .hero .wrap { padding-block: 26px 44px; display: grid; gap: 16px; }
 .eyebrow { font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; color: var(--hero-muted); font-weight: 600; }
 .hero h1 { font-size: clamp(2.6rem, 13vw, 4rem); font-weight: 800; letter-spacing: -0.03em; }
 .hero h1 span { color: var(--yellow); }
 .hero p.lead { color: var(--hero-muted); max-width: 44ch; font-size: 1.05rem; }
+.hero .art { width: 150px; max-width: 45%; }
 .road { position: absolute; left: 0; right: 0; bottom: 0; height: 14px; background: #0b1533; }
 .road::after { content: ""; position: absolute; left: 0; right: 0; top: 6px; height: 3px;
   background: repeating-linear-gradient(90deg, var(--yellow) 0 22px, transparent 22px 40px); }
@@ -144,8 +145,7 @@ form { display: grid; gap: 16px; }
 .fare .meta { display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--muted); font-size: .95rem; font-variant-numeric: tabular-nums; }
 .fare .meta b { color: var(--fg); font-weight: 600; }
 .fare .note { color: var(--muted); }
-    
-/* Confirmation ticket */
+  /* Confirmation ticket */
 .ok { display: grid; gap: 6px; }
 .pill { display: inline-flex; align-items: center; gap: 8px; align-self: start; justify-self: start; background: var(--good-soft); color: var(--good); font-weight: 600; font-size: .88rem; padding: 6px 12px; border-radius: 999px; }
 .pill i { width: 8px; height: 8px; border-radius: 50%; background: var(--good); display: block; }
@@ -153,7 +153,7 @@ form { display: grid; gap: 16px; }
 .ticket .head { padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 2px dashed var(--line); flex-wrap: wrap; }
 .ticket .ref { font-family: var(--font-display); font-weight: 800; font-size: 1.6rem; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
 .mini { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; min-height: 40px; padding: 0 14px; cursor: pointer; font-weight: 600; color: var(--blue); }
-.rows { display: grid; padding: 6px 18px 12px; margin: 0; }
+.rows { display: grid; padding: 6px 18px 12px; }
 .row { display: grid; grid-template-columns: 8.5rem 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
 .row:last-child { border-bottom: 0; }
 .row dt { color: var(--muted); font-size: .92rem; }
@@ -167,7 +167,7 @@ form { display: grid; gap: 16px; }
 @media (max-width: 380px) { .row { grid-template-columns: 1fr; gap: 2px; } }
 @media (prefers-reduced-motion: no-preference) {
   .view { animation: rise .25s ease-out; }
-  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @keyframes rise { from { opacity: .0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 }
 </style>
 </head>
@@ -261,13 +261,13 @@ form { display: grid; gap: 16px; }
         </div>
         <datalist id="placeList"></datalist>
         <div class="fare" id="fareBox" aria-live="polite"></div>
+        <p class="err" id="errSend" aria-live="polite"></p>
         <button class="btn btn-primary btn-block" type="submit" id="bookBtn" data-i18n="book"></button>
       </form>
       <p class="foot" data-i18n="sample"></p>
     </div>
   </main>
 </section>
-
 <section id="view-confirm" class="view" hidden>
   <main>
     <div class="wrap stack">
@@ -288,8 +288,7 @@ form { display: grid; gap: 16px; }
           <div class="row"><dt data-i18n="passenger"></dt><dd id="cPass"></dd></div>
           <div class="row"><dt data-i18n="route"></dt><dd id="cRoute"></dd></div>
           <div class="row"><dt data-i18n="fare"></dt><dd id="cFare"></dd></div>
-          <div class="row"><dt data-i18n="eta"></dt><dd id="cEta"></dd></div>
-          <div class="row"><dt data-i18n="driver"></dt><dd id="cDriver"></dd></div>
+          <div class="row"><dt data-i18n="status"></dt><dd data-i18n="waiting"></dd></div>
         </dl>
       </div>
       <p class="sub" data-i18n="payNote"></p>
@@ -303,7 +302,11 @@ form { display: grid; gap: 16px; }
 </section>
 
 <script>
-    (function () {
+(function () {
+  // ---- Supabase (the publishable key is safe in the browser; access is limited by database rules) ----
+  var SUPABASE_URL = "https://fkyqbuwsbayjypyujgqj.supabase.co";
+  var SUPABASE_KEY = "sb_publishable_uokTWBlF8-3PAlXNh0lkrw_ixHfr92T";
+
   // ---- Sample data (km on a rough local grid; not survey data) ----
   var PLACES = [
     { name: "Bus Station (Autogaraj)", x: -1.2, y: 0.6 },
@@ -314,11 +317,6 @@ form { display: grid; gap: 16px; }
     { name: "Sheikh Hassan Yabare Hospital", x: 1.5, y: -0.8 }
   ];
   var ROUTES = [[0, 2], [1, 3], [4, 1]];
-  var DRIVERS = [
-    { name: "Abdirahman Yusuf", plate: "SO-B 21874" },
-    { name: "Mohamud Ali", plate: "SO-B 30419" },
-    { name: "Ahmed Hassan", plate: "SO-B 18652" }
-  ];
 
   var STR = {
     en: {
@@ -346,9 +344,12 @@ form { display: grid; gap: 16px; }
       errPickup: "Enter a pickup location.",
       errDest: "Enter a destination.",
       errSame: "Pickup and destination must be different.",
-      confirmed: "Confirmed",
-      confTitle: "Your Bajaj is booked",
-      confSub: "Your driver is on the way.",
+      confirmed: "Received",
+      confTitle: "We got your booking",
+      confSub: "A driver will contact you on the number you gave.",
+      status: "Status", waiting: "Waiting for a driver",
+      sending: "Sending...",
+      errSend: "Your booking was not sent. Check your internet and try again.",
       ref: "Booking number", copy: "Copy", copied: "Copied",
       passenger: "Passenger", route: "Route", fare: "Estimated fare",
       eta: "Driver arrives in", etaVal: "{a} to {b} min",
@@ -356,7 +357,7 @@ form { display: grid; gap: 16px; }
       tbc: "To be agreed with driver",
       payNote: "Pay the driver in cash at the end of the ride.",
       another: "Book another ride", goHome: "Back to home",
-      sample: "Sample site. Drivers, fares and routes are examples, and no booking is actually sent."
+      sample: "Fares are estimates. The driver confirms the final price."
     },
     so: {
       tagline: "Bajaj ku socodsii Jigjiga oo dhan",
@@ -383,9 +384,12 @@ form { display: grid; gap: 16px; }
       errPickup: "Fadlan geli meesha laguu qaadayo.",
       errDest: "Fadlan geli meesha aad u socoto.",
       errSame: "Meesha qaadista iyo meesha aad u socoto waa inay kala duwanaadaan.",
-      confirmed: "La xaqiijiyay",
-      confTitle: "Bajajkaaga waa la dalbay",
-      confSub: "Darawalkaaga waa kuu soo socdaa.",
+      confirmed: "La helay",
+      confTitle: "Dalabkaaga waa la helay",
+      confSub: "Darawal ayaa kula soo xiriiri doona lambarka aad bixisay.",
+      status: "Xaalad", waiting: "Waxaa la sugayaa darawal",
+      sending: "Waa la dirayaa...",
+      errSend: "Dalabkaaga lama dirin. Hubi internetkaaga oo mar kale isku day.",
       ref: "Lambarka dalabka", copy: "Koobi", copied: "La koobiyay",
       passenger: "Rakaabka", route: "Wadada", fare: "Kharashka la qiyaasay",
       eta: "Darawalku wuu imanayaa", etaVal: "{a} ilaa {b} daqiiqo",
@@ -393,10 +397,10 @@ form { display: grid; gap: 16px; }
       tbc: "Darawalka kala heshiiso",
       payNote: "Darawalka ku bixi lacag caddaan ah marka safarku dhammaado.",
       another: "Dalbo safar kale", goHome: "Ku laabo hoyga",
-      sample: "Bog tijaabo ah. Darawalyada, kharashyada iyo waddooyinku waa tusaalayaal, dalabna runtii lama dirayo."
+      sample: "Kharashyadu waa qiyaas. Darawalku wuxuu xaqiijinayaa qiimaha ugu dambeeya."
     }
   };
-        var lang = "en";
+  var lang = "en";
   try {
     var saved = localStorage.getItem("jb-lang");
     if (saved === "so" || saved === "en") lang = saved;
@@ -447,8 +451,8 @@ form { display: grid; gap: 16px; }
       var btn = document.createElement("button");
       btn.type = "button"; btn.className = "route";
       var rt = document.createElement("span"); rt.className = "rt";
-      var bold = document.createElement("b"); bold.textContent = a.name + " \u2192 " + b.name;
-      var sm = document.createElement("small"); sm.textContent = e.km + " " + t("km") + " \u00b7 " + e.mins + " " + t("min");
+      var bold = document.createElement("b"); bold.textContent = a.name + " → " + b.name;
+      var sm = document.createElement("small"); sm.textContent = e.km + " " + t("km") + " · " + e.mins + " " + t("min");
       rt.appendChild(bold); rt.appendChild(sm);
       var rp = document.createElement("span"); rp.className = "rp"; rp.textContent = fmt(e.fare) + " " + t("birr");
       btn.appendChild(rt); btn.appendChild(rp);
@@ -484,12 +488,11 @@ form { display: grid; gap: 16px; }
     if (!last) return;
     $("cRef").textContent = last.ref;
     $("cPass").innerHTML = esc(last.name) + "<small>" + esc(last.phone) + "</small>";
-    $("cRoute").innerHTML = esc(last.pickup) + '<span class="arrow">\u2192</span>' + esc(last.dest);
+    $("cRoute").innerHTML = esc(last.pickup) + '<span class="arrow">→</span>' + esc(last.dest);
     $("cFare").textContent = last.fare != null ? fmt(last.fare) + " " + t("birr") : t("tbc");
-    $("cEta").textContent = t("etaVal").replace("{a}", last.etaA).replace("{b}", last.etaB);
-    $("cDriver").innerHTML = esc(last.driver.name) + "<small>" + esc(t("plate")) + " " + esc(last.driver.plate) + "</small>";
-    }
-        // ---- Views ----
+  }
+
+  // ---- Views ----
   function show(view) {
     current = view;
     ["home", "book", "confirm"].forEach(function (v) { $("view-" + v).hidden = v !== view; });
@@ -498,7 +501,6 @@ form { display: grid; gap: 16px; }
     if (h) h.focus({ preventScroll: true });
     renderFare();
   }
-
   // ---- Form ----
   function clearErrors() {
     ["Name", "Phone", "Pickup", "Dest"].forEach(function (k) { $("err" + k).textContent = ""; });
@@ -515,6 +517,25 @@ form { display: grid; gap: 16px; }
   }
   function prettyPhone(d) { return d.slice(0, 4) + " " + d.slice(4, 7) + " " + d.slice(7); }
 
+  function makeRef() {
+    var now = new Date();
+    var mmdd = ("0" + (now.getMonth() + 1)).slice(-2) + ("0" + now.getDate()).slice(-2);
+    return "JB-" + mmdd + "-" + ("000" + Math.floor(Math.random() * 10000)).slice(-4);
+  }
+  function sendBooking(rec, tries) {
+    tries = tries || 0;
+    var ref = makeRef();
+    return fetch(SUPABASE_URL + "/rest/v1/bookings", {
+      method: "POST",
+      headers: { "apikey": SUPABASE_KEY, "Content-Type": "application/json", "Prefer": "return=minimal" },
+      body: JSON.stringify(Object.assign({}, rec, { ref: ref }))
+    }).then(function (res) {
+      if (res.status === 409 && tries < 3) return sendBooking(rec, tries + 1);   // ref clash, try a new one
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return ref;
+    });
+  }
+
   $("bookForm").addEventListener("submit", function (ev) {
     ev.preventDefault();
     clearErrors();
@@ -530,21 +551,23 @@ form { display: grid; gap: 16px; }
 
     var a = findPlace(pickup), b = findPlace(dest);
     var e = a && b ? estimate(a, b) : null;
-    var now = new Date();
-    var mmdd = ("0" + (now.getMonth() + 1)).slice(-2) + ("0" + now.getDate()).slice(-2);
-    var seq = ("00" + Math.floor(Math.random() * 1000)).slice(-3);
-    var etaA = 4 + Math.floor(Math.random() * 3);
-    last = {
-      ref: "JB-" + mmdd + "-" + seq,
-      name: name, phone: prettyPhone(phone),
+    var rec = {
+      name: name, phone: phone,
       pickup: a ? a.name : pickup, dest: b ? b.name : dest,
-      fare: e ? e.fare : null,
-      etaA: etaA, etaB: etaA + 3,
-      driver: DRIVERS[Math.floor(Math.random() * DRIVERS.length)]
+      fare: e ? e.fare : null, lang: lang, status: "new"
     };
-    $("copyBtn").textContent = t("copy");
-    renderConfirm();
-    show("confirm");
+    var btn = $("bookBtn");
+    btn.disabled = true; btn.textContent = t("sending"); $("errSend").textContent = "";
+    sendBooking(rec).then(function (ref) {
+      last = { ref: ref, name: name, phone: prettyPhone(phone), pickup: rec.pickup, dest: rec.dest, fare: rec.fare };
+      $("copyBtn").textContent = t("copy");
+      renderConfirm();
+      show("confirm");
+    }).catch(function () {
+      $("errSend").textContent = t("errSend");
+    }).then(function () {
+      btn.disabled = false; btn.textContent = t("book");
+    });
   });
 
   ["pickup", "dest"].forEach(function (id) { $(id).addEventListener("input", renderFare); $(id).addEventListener("change", renderFare); });
