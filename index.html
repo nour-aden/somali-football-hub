@@ -175,8 +175,7 @@
       border-radius: 999px;
     }
     .order-link:hover { background: var(--roast); color: var(--bean); }
-
-    /* Buttons */
+      /* Buttons */
     .btn {
       display: inline-block;
       font-size: 1rem;
@@ -271,8 +270,7 @@
       font-weight: 600;
       fill: var(--roast);
     }
-
-    /* The one orchestrated moment: the curve draws itself once */
+        /* The one orchestrated moment: the curve draws itself once */
     @media (prefers-reduced-motion: no-preference) {
       .curve .roast-line {
         stroke-dashoffset: 1;
@@ -361,7 +359,6 @@
       color: var(--cherry);
       font-weight: 600;
     }
-
     /* Roasting steps */
     .steps {
       list-style: none;
@@ -479,8 +476,7 @@
     .plan:has(input:focus-visible) {
       outline: 3px solid var(--cherry);
       outline-offset: 3px;
-    }
-
+  }
     /* Visit */
     .visit { background: var(--bean-deep); }
 
@@ -547,7 +543,6 @@
       .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 2.5rem; border-top: 0; }
       .steps li { border-top: 2px solid var(--gold); }
     }
-
     /* Phone: the coffee table becomes a stack of rows */
     @media (max-width: 760px) {
       .spec thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
@@ -611,4 +606,246 @@
           <li><a href="#visit">Visit</a></li>
         </ul>
       </nav>
-      <a class="order-link" href="#coffees">Your order: <span id="cart-count">0</span> b
+      <a class="order-link" href="#coffees">Your order: <span id="cart-count">0</span> bags</a>
+    </div>
+  </header>
+
+  <main id="main">
+     <!-- Hero -->
+    <section class="hero" id="top">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <h1>Coffee roasted in the country it grows in.</h1>
+          <p class="lead">We buy from small washing stations in Gedeo, Guji and Sidama, roast in batches of 12&nbsp;kg in Addis Ababa, and ship within 48 hours of roasting.</p>
+          <div class="actions">
+            <a class="btn btn-primary" href="#coffees">Shop this week's coffees</a>
+            <a class="btn btn-ghost" href="#visit">Visit the roastery</a>
+          </div>
+        </div>
+
+        <figure class="curve">
+          <svg viewBox="0 0 600 440" role="img" aria-labelledby="curve-title curve-desc">
+            <title id="curve-title">Roast profile for a washed Yirgacheffe</title>
+            <desc id="curve-desc">Bean temperature starts at 200 degrees Celsius when the beans are charged, falls to 90 degrees at 1 minute 30 seconds, then climbs steadily. First crack happens at 9 minutes 30 seconds near 196 degrees. The batch is dropped at 11 minutes at about 206 degrees.</desc>
+
+            <g class="grid">
+              <line x1="40" y1="88" x2="580" y2="88"/>
+              <line x1="40" y1="209" x2="580" y2="209"/>
+              <line x1="40" y1="331" x2="580" y2="331"/>
+              <line x1="40" y1="380" x2="580" y2="380" class="axis"/>
+            </g>
+            <g class="ticks" text-anchor="end">
+              <text x="32" y="92">200°</text>
+              <text x="32" y="213">150°</text>
+              <text x="32" y="335">100°</text>
+            </g>
+            <g class="ticks" text-anchor="middle">
+              <text x="40" y="402">0</text>
+              <text x="130" y="402">2</text>
+              <text x="220" y="402">4</text>
+              <text x="310" y="402">6</text>
+              <text x="400" y="402">8</text>
+              <text x="490" y="402">10</text>
+              <text x="580" y="402">12 min</text>
+            </g>
+
+            <path class="roast-line" pathLength="1"
+              d="M40 88 C58 250 86 346 107 356 C142 346 176 268 220 234 S292 190 310 173 S382 138 400 125 S450 106 467 98 S512 82 535 74"/>
+
+            <g class="marks">
+              <circle cx="40" cy="88" r="4.5"/>
+              <circle cx="107" cy="356" r="4.5"/>
+              <circle cx="467" cy="98" r="7" class="crack"/>
+              <circle cx="535" cy="74" r="4.5"/>
+            </g>
+
+            <g class="notes">
+              <text x="52" y="76">Charge at 200°</text>
+              <text x="119" y="376">Turning point, 1:30</text>
+              <text x="456" y="136" text-anchor="end" class="crack-note">First crack, 9:30</text>
+              <text x="540" y="58" text-anchor="end">Drop, 11:00</text>
+            </g>
+          </svg>
+          <figcaption>A washed Yirgacheffe, roasted on Tuesday. Every batch is logged like this.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- Coffees -->
+    <section class="section" id="coffees" aria-labelledby="coffees-h">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="coffees-h">This week's coffees</h2>
+          <p>Roasted Tuesday, packed in 250&nbsp;g bags with a one-way valve. Prices in Ethiopian birr.</p>
+        </div>
+
+        <table class="spec">
+          <thead>
+            <tr>
+              <th scope="col">Coffee</th>
+              <th scope="col">Altitude</th>
+              <th scope="col">Process</th>
+              <th scope="col">Tastes like</th>
+              <th scope="col">250 g</th>
+              <th scope="col"><span class="sr">Add to order</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row" data-label="Coffee">Yirgacheffe Kochere<span class="sub">Gedeo zone</span></th>
+              <td data-label="Altitude">1,900 to 2,200 m</td>
+              <td data-label="Process">Washed</td>
+              <td data-label="Tastes like">Jasmine, bergamot, lemon tea</td>
+              <td data-label="250 g" class="price">560 birr</td>
+              <td class="act"><button class="btn btn-add" type="button" data-name="Yirgacheffe Kochere">Add to order</button></td>
+            </tr>
+            <tr>
+              <th scope="row" data-label="Coffee">Guji Hambela<span class="sub">Guji zone</span></th>
+              <td data-label="Altitude">2,000 to 2,200 m</td>
+              <td data-label="Process">Natural</td>
+              <td data-label="Tastes like">Blueberry, dark chocolate, red wine</td>
+              <td data-label="250 g" class="price">680 birr</td>
+              <td class="act"><button class="btn btn-add" type="button" data-name="Guji Hambela">Add to order</button></td>
+            </tr>
+            <tr>
+              <th scope="row" data-label="Coffee">Sidama Bensa<span class="sub">Sidama region</span></th>
+              <td data-label="Altitude">1,950 to 2,100 m</td>
+              <td data-label="Process">Washed</td>
+              <td data-label="Tastes like">Peach, honey, black tea</td>
+              <td data-label="250 g" class="price">600 birr</td>
+              <td class="act"><button class="btn btn-add" type="button" data-name="Sidama Bensa">Add to order</button></td>
+            </tr>
+            <tr>
+              <th scope="row" data-label="Coffee">Limu Kossa<span class="sub">Jimma zone</span></th>
+              <td data-label="Altitude">1,700 to 1,900 m</td>
+              <td data-label="Process">Washed</td>
+              <td data-label="Tastes like">Red apple, brown sugar, cocoa</td>
+              <td data-label="250 g" class="price">520 birr</td>
+              <td class="act"><button class="btn btn-add" type="button" data-name="Limu Kossa">Add to order</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="status" id="cart-status" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+       <!-- Roasting -->
+    <section class="section dark" id="roasting" aria-labelledby="roasting-h">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="roasting-h">What happens in eleven minutes</h2>
+          <p>We roast on a 12&nbsp;kg drum and follow the curve above, adjusting heat by smell, sound and color as much as by the thermometer.</p>
+        </div>
+
+        <ol class="steps">
+          <li>
+            <span class="time">0:00</span>
+            <h3>Charge</h3>
+            <p>Green beans drop into a drum preheated to 200&nbsp;°C. Bean temperature falls fast, then turns.</p>
+          </li>
+          <li>
+            <span class="time">1:30</span>
+            <h3>Dry and brown</h3>
+            <p>The beans lose moisture and turn from green to yellow to tan. Sugars start to caramelize.</p>
+          </li>
+          <li>
+            <span class="time">9:30</span>
+            <h3>First crack</h3>
+            <p>The beans pop as steam escapes. We lower the gas and slow the climb to protect the acidity.</p>
+          </li>
+          <li>
+            <span class="time">11:00</span>
+            <h3>Drop and cool</h3>
+            <p>The batch falls into a cooling tray and reaches room temperature in four minutes.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Subscribe -->
+    <section class="section" id="subscribe" aria-labelledby="subscribe-h">
+      <div class="wrap split">
+        <div class="section-head">
+          <h2 id="subscribe-h">Fresh bags on your schedule</h2>
+          <p>We choose the coffee, roast it the day before it ships, and deliver anywhere in Addis Ababa. Pause or cancel any time.</p>
+        </div>
+
+        <form class="plans" action="#" onsubmit="return false">
+          <fieldset>
+            <legend>Delivery</legend>
+            <label class="plan">
+              <input type="radio" name="plan" value="weekly" checked>
+              <span class="plan-name">Every week</span>
+              <span class="plan-note">Save 10%</span>
+              <span class="plan-price">504 birr per bag</span>
+            </label>
+            <label class="plan">
+              <input type="radio" name="plan" value="biweekly">
+              <span class="plan-name">Every two weeks</span>
+              <span class="plan-note">Save 7%</span>
+              <span class="plan-price">521 birr per bag</span>
+            </label>
+            <label class="plan">
+              <input type="radio" name="plan" value="monthly">
+              <span class="plan-name">Every month</span>
+              <span class="plan-note">Save 5%</span>
+              <span class="plan-price">532 birr per bag</span>
+            </label>
+          </fieldset>
+          <button class="btn btn-primary" type="submit">Start subscription</button>
+        </form>
+      </div>
+    </section>
+        <!-- Visit -->
+    <section class="section visit" id="visit" aria-labelledby="visit-h">
+      <div class="wrap visit-grid">
+        <div>
+          <h2 id="visit-h">Visit the roastery</h2>
+          <p class="lead">Watch a batch roast, drink the coffee it becomes, and take a bag home.</p>
+          <p class="cupping"><strong>Free cupping every Saturday at 10:00.</strong> We taste the week's coffees side by side. No booking needed.</p>
+          <address>
+            Bole Medhanialem<br>
+            Addis Ababa, Ethiopia<br>
+            <a href="mailto:hello@jebenacoffee.example">hello@jebenacoffee.example</a>
+          </address>
+        </div>
+
+        <div class="hours">
+          <p class="glyph" lang="am" aria-hidden="true">ቡና</p>
+          <table>
+            <caption class="sr">Opening hours</caption>
+            <tbody>
+              <tr><th scope="row">Monday to Friday</th><td>7:00 to 20:00</td></tr>
+              <tr><th scope="row">Saturday</th><td>7:00 to 20:00</td></tr>
+              <tr><th scope="row">Sunday</th><td>8:00 to 18:00</td></tr>
+            </tbody>
+          </table>
+          <p class="note">On Sundays we serve coffee the traditional way, from a jebena, with popcorn.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap foot">
+      <p class="foot-brand">Jebena Coffee Works</p>
+      <p>Single-origin coffee, roasted in Addis Ababa.</p>
+      <p class="fine">&copy; 2026 Jebena Coffee Works. A demo website.</p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var count = 0;
+      var counter = document.getElementById('cart-count');
+      var status = document.getElementById('cart-status');
+      document.querySelectorAll('.btn-add').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          count += 1;
+          counter.textContent = count;
+          status.textContent = 'Added ' + btn.getAttribute('data-name') + '. Your order has ' + count + (count === 1 ? ' bag.' : ' bags.');
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
