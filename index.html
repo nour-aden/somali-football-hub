@@ -1,3 +1,4 @@
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -9,7 +10,7 @@
 <style>
 [hidden] { display: none !important; }
 body { margin: 0; }
-/* Layout: one narrow column (max 560px). Blue hero band with a road-stripe edge, then cards on a blue-tinted ground. */
+/* Layout: one narrow column (max 560px). Blue hero band with a road-stripe edge, blue ride cards, light delivery cards, then how-it-works. */
 :root {
   --bg: #f2f5fb;
   --surface: #ffffff;
@@ -17,7 +18,6 @@ body { margin: 0; }
   --muted: #55627f;
   --line: #d8dfee;
   --blue: #1b3b9c;
-  --blue-ink: #ffffff;
   --blue-soft: #e4eafb;
   --yellow: #f5b820;
   --yellow-ink: #1a1500;
@@ -33,7 +33,7 @@ body { margin: 0; }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0b1127; --surface: #141c38; --fg: #eaeefb; --muted: #9aa7c7; --line: #26315a;
-    --blue: #8fa8ff; --blue-ink: #0b1127; --blue-soft: #1c2a5c;
+    --blue: #8fa8ff; --blue-soft: #1c2a5c;
     --yellow: #f5b820; --yellow-ink: #1a1500;
     --good: #6ee0a6; --good-soft: #14362a; --bad: #ff8a80;
     --hero-bg: #12266b; --hero-fg: #ffffff; --hero-muted: #b9c6f0;
@@ -42,7 +42,7 @@ body { margin: 0; }
 }
 :root[data-theme="dark"] {
   --bg: #0b1127; --surface: #141c38; --fg: #eaeefb; --muted: #9aa7c7; --line: #26315a;
-  --blue: #8fa8ff; --blue-ink: #0b1127; --blue-soft: #1c2a5c;
+  --blue: #8fa8ff; --blue-soft: #1c2a5c;
   --yellow: #f5b820; --yellow-ink: #1a1500;
   --good: #6ee0a6; --good-soft: #14362a; --bad: #ff8a80;
   --hero-bg: #12266b; --hero-fg: #ffffff; --hero-muted: #b9c6f0;
@@ -53,7 +53,7 @@ body { margin: 0; }
 body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.5; }
 h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.1; }
 p { margin: 0; }
-button, input { font: inherit; color: inherit; }
+button, input, textarea { font: inherit; color: inherit; }
 :focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
 
 .wrap {
@@ -61,6 +61,9 @@ button, input { font: inherit; color: inherit; }
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
+
+/* Line icons (shared by all services) */
+.ico { width: 32px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 
 /* Top bar */
 .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--hero-bg); color: var(--hero-fg); }
@@ -71,20 +74,20 @@ button, input { font: inherit; color: inherit; }
 .lang button { border: 0; background: transparent; color: var(--hero-fg); min-width: 44px; min-height: 36px; border-radius: 999px; font-weight: 600; font-size: .85rem; letter-spacing: .06em; cursor: pointer; }
 .lang button[aria-pressed="true"] { background: var(--yellow); color: var(--yellow-ink); }
 
-/* Bajaj icon colours */
+/* Logo colours */
 .bj-body { fill: var(--yellow); }
 .bj-top { fill: #ffffff; }
 .bj-glass { fill: #1b3b9c; }
 .bj-wheel { fill: #0b1127; stroke: #ffffff; stroke-width: 2; }
 .bj-hub { fill: #ffffff; }
-  /* Hero */
+
+/* Hero */
 .hero { background: var(--hero-bg); color: var(--hero-fg); position: relative; }
-.hero .wrap { padding-block: 26px 44px; display: grid; gap: 16px; }
+.hero .wrap { padding-block: 20px 36px; display: grid; gap: 10px; }
 .eyebrow { font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; color: var(--hero-muted); font-weight: 600; }
-.hero h1 { font-size: clamp(2.6rem, 13vw, 4rem); font-weight: 800; letter-spacing: -0.03em; }
+.hero h1 { font-size: clamp(2.4rem, 12vw, 3.6rem); font-weight: 800; letter-spacing: -0.03em; }
 .hero h1 span { color: var(--yellow); }
-.hero p.lead { color: var(--hero-muted); max-width: 44ch; font-size: 1.05rem; }
-.hero .art { width: 150px; max-width: 45%; }
+.hero p.lead { color: var(--hero-muted); max-width: 38ch; font-size: 1.05rem; }
 .road { position: absolute; left: 0; right: 0; bottom: 0; height: 14px; background: #0b1533; }
 .road::after { content: ""; position: absolute; left: 0; right: 0; top: 6px; height: 3px;
   background: repeating-linear-gradient(90deg, var(--yellow) 0 22px, transparent 22px 40px); }
@@ -93,27 +96,39 @@ button, input { font: inherit; color: inherit; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 22px; border-radius: 14px; border: 0; font-weight: 600; font-size: 1.05rem; cursor: pointer; text-decoration: none; }
 .btn-primary { background: var(--yellow); color: var(--yellow-ink); }
 .btn-primary:hover { filter: brightness(1.05); }
+.btn-primary[disabled] { opacity: .7; cursor: progress; }
 .btn-ghost { background: transparent; color: var(--blue); border: 2px solid var(--line); }
 .btn-block { width: 100%; }
 .btn-row { display: grid; gap: 10px; }
 
 /* Sections */
 main { padding-block: 22px 28px; }
-.stack { display: grid; gap: 18px; }
+.stack { display: grid; gap: 24px; }
+.sec { display: grid; gap: 12px; min-width: 0; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; min-width: 0; }
 .h2 { font-size: 1.35rem; font-weight: 700; }
 .sub { color: var(--muted); margin-top: 6px; }
+  /* Service cards: rides (blue, large) and delivery (light, compact) */
+.ride-grid, .del-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.ride, .del { display: flex; flex-direction: column; gap: 8px; text-align: left; cursor: pointer; min-width: 0; }
+.ride { background: var(--hero-bg); color: var(--hero-fg); border: 0; border-radius: 20px; padding: 16px; min-height: 176px; }
+.ride .ico { width: 58px; height: 47px; color: var(--yellow); stroke-width: 1.6; }
+.ride h3 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; margin-top: 4px; }
+.ride p { color: var(--hero-muted); font-size: .88rem; line-height: 1.35; }
+.ride .from { margin-top: auto; align-self: flex-start; background: var(--yellow); color: var(--yellow-ink); font-weight: 700; font-size: .82rem; padding: 4px 10px; border-radius: 999px; font-variant-numeric: tabular-nums; }
+.del { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; min-height: 160px; }
+.del:hover { border-color: var(--blue); }
+.del .icowrap { width: 52px; height: 52px; border-radius: 14px; background: var(--blue-soft); color: var(--blue); display: grid; place-items: center; }
+.del h3 { font-size: 1.15rem; font-weight: 700; }
+.del p { color: var(--muted); font-size: .85rem; line-height: 1.35; }
+.del .from { margin-top: auto; color: var(--blue); font-weight: 700; font-size: .85rem; font-variant-numeric: tabular-nums; }
 
-.tabs { display: grid; grid-template-columns: 1fr 1fr; background: var(--blue-soft); border-radius: 14px; padding: 4px; gap: 4px; }
-.tabs button { min-height: 44px; border: 0; background: transparent; border-radius: 10px; font-weight: 600; color: var(--muted); cursor: pointer; }
-.tabs button[aria-current="page"] { background: var(--surface); color: var(--fg); box-shadow: 0 1px 2px rgba(10,20,60,.12); }
-
-/* Facts */
-.facts { display: grid; gap: 10px; padding: 0; margin: 0; list-style: none; }
-.facts li { display: flex; align-items: center; gap: 12px; }
+/* How it works */
+.steps { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 12px; }
+.steps li { display: flex; gap: 12px; align-items: flex-start; }
 .dot { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--blue-soft); color: var(--blue); display: grid; place-items: center; font-weight: 700; font-size: .85rem; }
 
-/* Routes */
+/* Popular routes */
 .routes { display: grid; gap: 10px; margin-top: 12px; }
 .route { display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; min-height: 56px; cursor: pointer; }
 .route:hover { border-color: var(--blue); }
@@ -122,13 +137,22 @@ main { padding-block: 22px 28px; }
 .route .rt small { color: var(--muted); }
 .route .rp { flex: none; font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; color: var(--blue); font-variant-numeric: tabular-nums; }
 
-/* Form */
+/* Booking page */
+.back { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px 0 6px; border: 0; background: transparent; color: var(--blue); font-weight: 600; cursor: pointer; border-radius: 12px; justify-self: start; }
+.back svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.chip { display: grid; justify-items: center; align-content: center; gap: 4px; padding: 10px 4px; min-height: 68px; min-width: 0; border: 2px solid var(--line); border-radius: 14px; background: var(--surface); cursor: pointer; font-weight: 600; font-size: .85rem; color: var(--fg); }
+.chip .ico { width: 30px; height: 24px; color: var(--blue); }
+.chip[aria-pressed="true"] { border-color: var(--blue); background: var(--blue-soft); }
+
 form { display: grid; gap: 16px; }
 .field { display: grid; gap: 6px; min-width: 0; }
 .field label { font-weight: 600; font-size: .92rem; }
-.field input { width: 100%; min-height: 52px; padding: 0 14px; border-radius: 12px; border: 2px solid var(--line); background: var(--bg); font-size: 1rem; }
-.field input:focus { border-color: var(--blue); outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--yellow) 55%, transparent); }
-.field input[aria-invalid="true"] { border-color: var(--bad); }
+.field input, .field textarea { width: 100%; padding: 0 14px; border-radius: 12px; border: 2px solid var(--line); background: var(--bg); font-size: 1rem; }
+.field input { min-height: 52px; }
+.field textarea { min-height: 92px; padding: 12px 14px; resize: vertical; line-height: 1.4; }
+.field input:focus, .field textarea:focus { border-color: var(--blue); outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--yellow) 55%, transparent); }
+.field [aria-invalid="true"] { border-color: var(--bad); }
 .err { color: var(--bad); font-size: .88rem; min-height: 0; }
 .err:empty { display: none; }
 .places { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end; }
@@ -144,7 +168,8 @@ form { display: grid; gap: 16px; }
 .fare .meta { display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--muted); font-size: .95rem; font-variant-numeric: tabular-nums; }
 .fare .meta b { color: var(--fg); font-weight: 600; }
 .fare .note { color: var(--muted); }
-  /* Confirmation ticket */
+
+/* Confirmation ticket */
 .ok { display: grid; gap: 6px; }
 .pill { display: inline-flex; align-items: center; gap: 8px; align-self: start; justify-self: start; background: var(--good-soft); color: var(--good); font-weight: 600; font-size: .88rem; padding: 6px 12px; border-radius: 999px; }
 .pill i { width: 8px; height: 8px; border-radius: 50%; background: var(--good); display: block; }
@@ -152,7 +177,7 @@ form { display: grid; gap: 16px; }
 .ticket .head { padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 2px dashed var(--line); flex-wrap: wrap; }
 .ticket .ref { font-family: var(--font-display); font-weight: 800; font-size: 1.6rem; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
 .mini { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; min-height: 40px; padding: 0 14px; cursor: pointer; font-weight: 600; color: var(--blue); }
-.rows { display: grid; padding: 6px 18px 12px; }
+.rows { display: grid; padding: 6px 18px 12px; margin: 0; }
 .row { display: grid; grid-template-columns: 8.5rem 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
 .row:last-child { border-bottom: 0; }
 .row dt { color: var(--muted); font-size: .92rem; }
@@ -160,17 +185,29 @@ form { display: grid; gap: 16px; }
 .row dd small { display: block; color: var(--muted); font-weight: 400; }
 .arrow { color: var(--muted); padding: 0 4px; }
 
-.foot { color: var(--muted); font-size: .85rem; padding-block: 8px 28px; }
+.foot { color: var(--muted); font-size: .85rem; padding-block: 0 28px; }
 
 @media (min-width: 520px) { .btn-row { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 380px) { .row { grid-template-columns: 1fr; gap: 2px; } }
+@media (max-width: 380px) { .row { grid-template-columns: 1fr; gap: 2px; } .chip { font-size: .8rem; } }
 @media (prefers-reduced-motion: no-preference) {
   .view { animation: rise .25s ease-out; }
-  @keyframes rise { from { opacity: .0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .ride, .del, .chip { transition: transform .12s ease; }
+  .ride:active, .del:active, .chip:active { transform: scale(.97); }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 }
 </style>
 </head>
 <body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-bajaj" viewBox="0 0 32 26"><path d="M6 11 8.5 5H18Q19.5 5 20.3 6.4L23 11"/><path d="M3 11H25Q28 11 28 14V18H3Z"/><circle cx="8" cy="19.5" r="3"/><circle cx="23" cy="19.5" r="3"/></symbol>
+    <symbol id="i-taxi" viewBox="0 0 32 26"><path d="M7 11 10 5.5H22L25 11"/><path d="M3 11H29V18H3Z"/><circle cx="9" cy="19.5" r="3"/><circle cx="23" cy="19.5" r="3"/><rect x="14" y="2.5" width="4" height="2.2" rx=".6"/></symbol>
+    <symbol id="i-parcel" viewBox="0 0 32 26"><path d="M16 3 28 8V18L16 23 4 18V8Z"/><path d="M4 8 16 13 28 8"/><path d="M16 13V23"/></symbol>
+    <symbol id="i-food" viewBox="0 0 32 26"><path d="M5 12H27Q27 21 16 21Q5 21 5 12Z"/><path d="M11 8Q9.5 6 11 4M16 8Q14.5 6 16 4M21 8Q19.5 6 21 4"/><path d="M12 23.5H20"/></symbol>
+    <symbol id="i-market" viewBox="0 0 32 26"><path d="M9 11 13 4M23 11 19 4"/><path d="M3 11H29L26 22H6Z"/><path d="M12 14.5V18.5M16 14.5V18.5M20 14.5V18.5"/></symbol>
+    <symbol id="i-cargo" viewBox="0 0 32 26"><path d="M3 6H18V18H3Z"/><path d="M18 10H24L28 14V18H18"/><circle cx="9" cy="19.5" r="2.8"/><circle cx="23" cy="19.5" r="2.8"/></symbol>
+  </defs>
+</svg>
 
 <header class="top">
   <div class="wrap">
@@ -197,23 +234,42 @@ form { display: grid; gap: 16px; }
       <p class="eyebrow" data-i18n="tagline"></p>
       <h1>Jigjiga <span>Bajaj</span></h1>
       <p class="lead" data-i18n="welcome"></p>
-      <div class="btn-row"><button class="btn btn-primary" type="button" id="ctaBook" data-i18n="cta"></button></div>
     </div>
     <div class="road" aria-hidden="true"></div>
   </div>
   <main>
     <div class="wrap stack">
+      <section class="sec" aria-labelledby="hRides">
+        <div>
+          <h2 class="h2" id="hRides" data-i18n="secRides"></h2>
+          <p class="sub" data-i18n="secRidesSub"></p>
+        </div>
+        <div class="ride-grid" id="rideGrid"></div>
+      </section>
+
+      <section class="sec" aria-labelledby="hDeliver">
+        <div>
+          <h2 class="h2" id="hDeliver" data-i18n="secDeliver"></h2>
+          <p class="sub" data-i18n="secDeliverSub"></p>
+        </div>
+        <div class="del-grid" id="delGrid"></div>
+      </section>
+
       <div class="card">
-        <ul class="facts">
-          <li><span class="dot">1</span><span data-i18n="why1"></span></li>
-          <li><span class="dot">2</span><span data-i18n="why2"></span></li>
-          <li><span class="dot">3</span><span data-i18n="why3"></span></li>
-        </ul>
+        <h2 class="h2" data-i18n="howTitle"></h2>
+        <ol class="steps">
+          <li><span class="dot">1</span><span data-i18n="how1"></span></li>
+          <li><span class="dot">2</span><span data-i18n="how2"></span></li>
+          <li><span class="dot">3</span><span data-i18n="how3"></span></li>
+        </ol>
+        <p class="sub" data-i18n="cashNote"></p>
       </div>
+
       <div class="card">
         <h2 class="h2" data-i18n="popular"></h2>
         <div class="routes" id="routes"></div>
       </div>
+
       <p class="foot" data-i18n="sample"></p>
     </div>
   </main>
@@ -222,13 +278,17 @@ form { display: grid; gap: 16px; }
 <section id="view-book" class="view" hidden>
   <main>
     <div class="wrap stack">
-      <div class="tabs" role="navigation">
-        <button type="button" id="tabHome" data-i18n="navHome"></button>
-        <button type="button" id="tabBook" aria-current="page" data-i18n="navBook"></button>
-      </div>
+      <button type="button" class="back" id="backBtn">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 8 12l7 7"/></svg>
+        <span data-i18n="navHome"></span>
+      </button>
       <div>
-        <h2 class="h2" id="bookTitle" tabindex="-1" data-i18n="bookTitle"></h2>
+        <h2 class="h2" id="bookTitle" tabindex="-1"></h2>
         <p class="sub" data-i18n="bookSub"></p>
+      </div>
+      <div class="sec">
+        <span class="sub" style="margin:0;font-weight:600" data-i18n="serviceLabel"></span>
+        <div class="chips" id="chips"></div>
       </div>
       <form id="bookForm" class="card" novalidate>
         <div class="field">
@@ -244,12 +304,12 @@ form { display: grid; gap: 16px; }
         <div class="places">
           <div class="pair">
             <div class="field">
-              <label for="pickup" data-i18n="pickup"></label>
+              <label for="pickup" id="lblPickup"></label>
               <input id="pickup" name="pickup" type="text" list="placeList" autocomplete="off" data-i18n-ph="placePh">
               <p class="err" id="errPickup" aria-live="polite"></p>
             </div>
             <div class="field">
-              <label for="dest" data-i18n="dest"></label>
+              <label for="dest" id="lblDest"></label>
               <input id="dest" name="dest" type="text" list="placeList" autocomplete="off" data-i18n-ph="placePh">
               <p class="err" id="errDest" aria-live="polite"></p>
             </div>
@@ -259,6 +319,16 @@ form { display: grid; gap: 16px; }
           </button>
         </div>
         <datalist id="placeList"></datalist>
+        <div class="field" id="fDetails" hidden>
+          <label for="details" id="lblDetails"></label>
+          <textarea id="details" name="details" rows="3"></textarea>
+          <p class="err" id="errDetails" aria-live="polite"></p>
+        </div>
+        <div class="field" id="fReceiver" hidden>
+          <label for="receiver" data-i18n="receiver"></label>
+          <input id="receiver" name="receiver" type="tel" inputmode="tel" data-i18n-ph="phonePh">
+          <p class="err" id="errReceiver" aria-live="polite"></p>
+        </div>
         <div class="fare" id="fareBox" aria-live="polite"></div>
         <p class="err" id="errSend" aria-live="polite"></p>
         <button class="btn btn-primary btn-block" type="submit" id="bookBtn" data-i18n="book"></button>
@@ -284,8 +354,10 @@ form { display: grid; gap: 16px; }
           <button type="button" class="mini" id="copyBtn" data-i18n="copy"></button>
         </div>
         <dl class="rows">
+          <div class="row"><dt data-i18n="service"></dt><dd id="cService"></dd></div>
           <div class="row"><dt data-i18n="passenger"></dt><dd id="cPass"></dd></div>
           <div class="row"><dt data-i18n="route"></dt><dd id="cRoute"></dd></div>
+          <div class="row" id="rowDetails" hidden><dt data-i18n="detailsRow"></dt><dd id="cDetails"></dd></div>
           <div class="row"><dt data-i18n="fare"></dt><dd id="cFare"></dd></div>
           <div class="row"><dt data-i18n="status"></dt><dd data-i18n="waiting"></dd></div>
         </dl>
@@ -306,7 +378,17 @@ form { display: grid; gap: 16px; }
   var SUPABASE_URL = "https://fkyqbuwsbayjypyujgqj.supabase.co";
   var SUPABASE_KEY = "sb_publishable_uokTWBlF8-3PAlXNh0lkrw_ixHfr92T";
 
-  // ---- Sample data (km on a rough local grid; not survey data) ----
+  // ---- Services and sample prices (Birr). base + perKm x distance, rounded to 5 ----
+  var SERVICES = [
+    { id: "bajaj",  kind: "ride",     base: 25,  perKm: 9,  speed: 18, fee: false },
+    { id: "taxi",   kind: "ride",     base: 60,  perKm: 18, speed: 24, fee: false },
+    { id: "parcel", kind: "delivery", base: 40,  perKm: 8,  speed: 20, fee: false },
+    { id: "food",   kind: "delivery", base: 35,  perKm: 7,  speed: 20, fee: true },
+    { id: "market", kind: "delivery", base: 45,  perKm: 8,  speed: 18, fee: true },
+    { id: "cargo",  kind: "delivery", base: 120, perKm: 25, speed: 18, fee: false }
+  ];
+
+  // ---- Sample places (km on a rough local grid; not survey data) ----
   var PLACES = [
     { name: "Bus Station (Autogaraj)", x: -1.2, y: 0.6 },
     { name: "Central Market", x: 0, y: 0 },
@@ -319,84 +401,124 @@ form { display: grid; gap: 16px; }
 
   var STR = {
     en: {
-      tagline: "Bajaj rides across Jigjiga",
-      welcome: "Book a Bajaj in a minute. Tell us where you are and where you are going, see the fare first, and a driver comes to you.",
-      cta: "Book a Bajaj",
-      why1: "See the fare before you book",
-      why2: "Pay the driver in cash",
-      why3: "Rides anywhere in town",
-      popular: "Popular routes",
-      navHome: "Home", navBook: "Book",
-      bookTitle: "Book your ride",
-      bookSub: "Tell us where to pick you up. You see the fare before you confirm.",
+      tagline: "Rides and delivery in Jigjiga",
+      welcome: "Pick what you need, see the price first, then book in a minute.",
+      secRides: "Rides", secRidesSub: "Get picked up wherever you are.",
+      secDeliver: "Delivery", secDeliverSub: "Send something, or have it brought to you.",
+      from: "From",
+      s_bajaj: "Bajaj", d_bajaj: "Cheap rides around town",
+      s_taxi: "Taxi", d_taxi: "Car rides with more room and comfort",
+      s_parcel: "Parcels", d_parcel: "Documents and small packages",
+      s_food: "Food", d_food: "Meals from your favourite restaurant",
+      s_market: "Market", d_market: "Groceries and everyday items",
+      s_cargo: "Cargo", d_cargo: "Heavy loads and moving",
+      howTitle: "How it works",
+      how1: "Choose a service.",
+      how2: "Enter where from and where to, and see the price.",
+      how3: "Send your booking. A driver contacts you.",
+      cashNote: "You pay the driver in cash.",
+      popular: "Popular Bajaj trips",
+      navHome: "Home",
+      bookTitleRide: "Book your ride",
+      bookTitleDeliver: "Order a delivery",
+      bookSub: "You see the price before you send your booking.",
+      serviceLabel: "Service",
       name: "Your name", namePh: "For example, Hodan Ali",
       phone: "Phone number", phonePh: "09 12 34 56 78",
-      pickup: "Pickup location", dest: "Destination", placePh: "Choose or type a place",
-      swap: "Swap pickup and destination",
-      fareTitle: "Fare estimate",
-      farePrompt: "Choose a pickup and a destination to see the fare.",
-      fareUnknown: "We do not have this route yet. You and the driver agree the fare. Short rides usually start around 40 Birr.",
-      distance: "Distance", time: "Ride time", km: "km", min: "min", birr: "Birr", about: "About",
-      book: "Book now",
+      pickup: "Pickup location", dest: "Destination",
+      pickupD: "Pick up from", destD: "Deliver to",
+      placePh: "Choose or type a place",
+      swap: "Swap the two places",
+      details: "What should we deliver?",
+      ph_parcel: "For example, documents or a small box",
+      ph_food: "Restaurant name and what you want to order",
+      ph_market: "List the items, for example 2 kg onions, 1 kg rice",
+      ph_cargo: "What is the load and how big is it?",
+      receiver: "Receiver's phone (optional, if not you)",
+      fareTitle: "Price estimate",
+      farePrompt: "Choose both places to see the price.",
+      fareUnknown: "We do not have this route yet. You and the driver agree the price. {name} usually starts from {from} Birr.",
+      feeNote: "Delivery fee only. Items are paid for separately.",
+      distance: "Distance", time: "Time", km: "km", min: "min", birr: "Birr",
+      book: "Send booking",
+      sending: "Sending...",
       errName: "Enter your name.",
       errPhone: "Enter a valid Ethiopian mobile number, like 0912 345 678.",
-      errPickup: "Enter a pickup location.",
-      errDest: "Enter a destination.",
-      errSame: "Pickup and destination must be different.",
+      errPickup: "Enter where to pick up.",
+      errDest: "Enter where to go.",
+      errSame: "The two places must be different.",
+      errDetails: "Tell us what to deliver.",
+      errSend: "Your booking was not sent. Check your internet and try again.",
       confirmed: "Received",
       confTitle: "We got your booking",
       confSub: "A driver will contact you on the number you gave.",
-      status: "Status", waiting: "Waiting for a driver",
-      sending: "Sending...",
-      errSend: "Your booking was not sent. Check your internet and try again.",
       ref: "Booking number", copy: "Copy", copied: "Copied",
-      passenger: "Passenger", route: "Route", fare: "Estimated fare",
-      eta: "Driver arrives in", etaVal: "{a} to {b} min",
-      driver: "Your driver", plate: "Plate",
-      tbc: "To be agreed with driver",
-      payNote: "Pay the driver in cash at the end of the ride.",
-      another: "Book another ride", goHome: "Back to home",
-      sample: "Fares are estimates. The driver confirms the final price."
+      service: "Service", passenger: "Name", route: "Route", detailsRow: "Details",
+      fare: "Estimated price", tbc: "To be agreed with driver",
+      status: "Status", waiting: "Waiting for a driver",
+      payNote: "Pay the driver in cash when the ride or delivery is done.",
+      another: "Book another", goHome: "Back to home",
+      sample: "Prices are estimates. The driver confirms the final price."
     },
     so: {
-      tagline: "Bajaj ku socodsii Jigjiga oo dhan",
-      welcome: "Hal daqiiqo ku dalbo Bajaj. Noo sheeg meesha aad joogto iyo meesha aad u socoto, hore u arag kharashka, darawalna wuu kuu iman doonaa.",
-      cta: "Dalbo Bajaj",
-      why1: "Kharashka hore u arag",
-      why2: "Darawalka ku bixi lacag caddaan ah",
-      why3: "Safar meel kasta oo magaalada ah",
-      popular: "Waddooyinka caanka ah",
-      navHome: "Hoyga", navBook: "Dalbo",
-      bookTitle: "Dalbo safarkaaga",
-      bookSub: "Noo sheeg meesha laguu qaadayo. Kharashka ayaad arkaysaa kahor intaadan xaqiijin.",
+      tagline: "Socdaal iyo gaarsiin Jigjiga",
+      welcome: "Dooro waxaad u baahan tahay, hore u arag qiimaha, kadibna hal daqiiqo ku dalbo.",
+      secRides: "Socdaal", secRidesSub: "Laguu qaado meel kasta oo aad joogto.",
+      secDeliver: "Gaarsiin", secDeliverSub: "Dir wax, ama lagu keeno meesha aad joogto.",
+      from: "Laga bilaabo",
+      s_bajaj: "Bajaj", d_bajaj: "Safar jaban oo magaalada ah",
+      s_taxi: "Taksi", d_taxi: "Gaari leh meel ballaaran iyo raaxo",
+      s_parcel: "Baakado", d_parcel: "Dukumeenti iyo xidhmooyin yar yar",
+      s_food: "Cunto", d_food: "Cunto ka timaada makhaayadda aad jeceshahay",
+      s_market: "Suuq", d_market: "Raashin iyo alaab maalinle ah",
+      s_cargo: "Xamuul", d_cargo: "Rar culus iyo guuris",
+      howTitle: "Sidee ayuu u shaqeeyaa",
+      how1: "Dooro adeeg.",
+      how2: "Geli meesha laga qaadayo iyo meesha loo socdo, kadibna arag qiimaha.",
+      how3: "Dir dalabka. Darawal ayaa kula soo xiriiri doona.",
+      cashNote: "Darawalka ku bixi lacag caddaan ah.",
+      popular: "Safarrada Bajaj ee caanka ah",
+      navHome: "Hoyga",
+      bookTitleRide: "Dalbo safarkaaga",
+      bookTitleDeliver: "Dalbo gaarsiin",
+      bookSub: "Qiimaha ayaad arkaysaa kahor intaadan dalabka dirin.",
+      serviceLabel: "Adeegga",
       name: "Magacaaga", namePh: "Tusaale, Hodan Cali",
       phone: "Lambarka taleefanka", phonePh: "09 12 34 56 78",
-      pickup: "Meesha laguu qaadayo", dest: "Meesha aad u socoto", placePh: "Dooro ama qor meel",
+      pickup: "Meesha laguu qaadayo", dest: "Meesha aad u socoto",
+      pickupD: "Laga qaado", destD: "Loo geeyo",
+      placePh: "Dooro ama qor meel",
       swap: "Beddel labada meel",
-      fareTitle: "Qiyaasta kharashka",
-      farePrompt: "Dooro meesha laguu qaadayo iyo meesha aad u socoto si aad u aragto kharashka.",
-      fareUnknown: "Wadadan weli ma haysano. Adiga iyo darawalka ayaa isku afgarta kharashka. Safarrada gaagaaban badanaa waxay ka bilaabmaan ilaa 40 Birr.",
-      distance: "Masaafada", time: "Wakhtiga safarka", km: "km", min: "daq", birr: "Birr", about: "Ku dhawaad",
-      book: "Dalbo hadda",
+      details: "Maxaa la gaarsiiyaa?",
+      ph_parcel: "Tusaale, dukumeenti ama sanduuq yar",
+      ph_food: "Magaca makhaayadda iyo waxaad rabto",
+      ph_market: "Qor alaabta, tusaale 2 kg basal, 1 kg bariis",
+      ph_cargo: "Maxay tahay rarka, intee la eg?",
+      receiver: "Lambarka qaataha (ikhtiyaari, haddii aanad adigu ahayn)",
+      fareTitle: "Qiyaasta qiimaha",
+      farePrompt: "Dooro labada meel si aad u aragto qiimaha.",
+      fareUnknown: "Wadadan weli ma haysano. Adiga iyo darawalka ayaa isku afgarta qiimaha. {name} badanaa wuxuu ka bilaabmaa ilaa {from} Birr.",
+      feeNote: "Kharashka gaarsiinta oo keliya. Alaabta si gaar ah ayaa loo bixiyaa.",
+      distance: "Masaafada", time: "Wakhtiga", km: "km", min: "daq", birr: "Birr",
+      book: "Dir dalabka",
+      sending: "Waa la dirayaa...",
       errName: "Fadlan geli magacaaga.",
       errPhone: "Geli lambar taleefan sax ah oo Itoobiya ah, tusaale 0912 345 678.",
-      errPickup: "Fadlan geli meesha laguu qaadayo.",
-      errDest: "Fadlan geli meesha aad u socoto.",
-      errSame: "Meesha qaadista iyo meesha aad u socoto waa inay kala duwanaadaan.",
+      errPickup: "Fadlan geli meesha laga qaadayo.",
+      errDest: "Fadlan geli meesha loo socdo.",
+      errSame: "Labada meel waa inay kala duwanaadaan.",
+      errDetails: "Fadlan noo sheeg waxa la gaarsiinayo.",
+      errSend: "Dalabkaaga lama dirin. Hubi internetkaaga oo mar kale isku day.",
       confirmed: "La helay",
       confTitle: "Dalabkaaga waa la helay",
       confSub: "Darawal ayaa kula soo xiriiri doona lambarka aad bixisay.",
-      status: "Xaalad", waiting: "Waxaa la sugayaa darawal",
-      sending: "Waa la dirayaa...",
-      errSend: "Dalabkaaga lama dirin. Hubi internetkaaga oo mar kale isku day.",
       ref: "Lambarka dalabka", copy: "Koobi", copied: "La koobiyay",
-      passenger: "Rakaabka", route: "Wadada", fare: "Kharashka la qiyaasay",
-      eta: "Darawalku wuu imanayaa", etaVal: "{a} ilaa {b} daqiiqo",
-      driver: "Darawalkaaga", plate: "Taarikada",
-      tbc: "Darawalka kala heshiiso",
-      payNote: "Darawalka ku bixi lacag caddaan ah marka safarku dhammaado.",
-      another: "Dalbo safar kale", goHome: "Ku laabo hoyga",
-      sample: "Kharashyadu waa qiyaas. Darawalku wuxuu xaqiijinayaa qiimaha ugu dambeeya."
+      service: "Adeegga", passenger: "Magaca", route: "Wadada", detailsRow: "Faahfaahin",
+      fare: "Qiimaha la qiyaasay", tbc: "Darawalka kala heshiiso",
+      status: "Xaalad", waiting: "Waxaa la sugayaa darawal",
+      payNote: "Darawalka ku bixi lacag caddaan ah marka safarka ama gaarsiintu dhammaato.",
+      another: "Dalbo mid kale", goHome: "Ku laabo hoyga",
+      sample: "Qiimayaashu waa qiyaas. Darawalku wuxuu xaqiijinayaa qiimaha ugu dambeeya."
     }
   };
   var lang = "en";
@@ -406,29 +528,65 @@ form { display: grid; gap: 16px; }
     else if ((navigator.language || "").toLowerCase().indexOf("so") === 0) lang = "so";
   } catch (e) {}
 
-  var current = "home";
+  var svcId = "bajaj";
   var last = null;
 
   function $(id) { return document.getElementById(id); }
   function t(k) { return STR[lang][k] != null ? STR[lang][k] : k; }
   function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function svc(id) { for (var i = 0; i < SERVICES.length; i++) if (SERVICES[i].id === id) return SERVICES[i]; return SERVICES[0]; }
+  function iconHtml(id) { return '<svg class="ico" aria-hidden="true"><use href="#i-' + id + '"/></svg>'; }
 
-  // ---- Fare logic ----
+  // ---- Price logic ----
+  function fromPrice(s) { return Math.round((s.base + s.perKm * 0.8) / 5) * 5; }
   function findPlace(text) {
     var s = (text || "").trim().toLowerCase();
     if (!s) return null;
     for (var i = 0; i < PLACES.length; i++) if (PLACES[i].name.toLowerCase() === s) return PLACES[i];
     return null;
   }
-  function estimate(a, b) {
-    var d = Math.hypot(a.x - b.x, a.y - b.y) * 1.3;   // straight line x 1.3 for road winding
+  function estimate(a, b, s) {
+    var d = Math.hypot(a.x - b.x, a.y - b.y) * 1.3;          // straight line x 1.3 for road winding
     d = Math.max(d, 0.8);
-    var fare = Math.round((25 + 9 * d) / 5) * 5;       // 25 Birr base + 9 Birr per km, nearest 5
-    var mins = Math.max(5, Math.round(d / 18 * 60));   // about 18 km/h in town
+    var fare = Math.round((s.base + s.perKm * d) / 5) * 5;
+    var mins = Math.max(5, Math.round(d / s.speed * 60));
     return { km: Math.round(d * 10) / 10, fare: fare, mins: mins };
   }
 
   // ---- Rendering ----
+  function serviceCard(s) {
+    var ride = s.kind === "ride";
+    var from = t("from") + " " + fmt(fromPrice(s)) + " " + t("birr");
+    var icon = ride ? iconHtml(s.id) : '<span class="icowrap">' + iconHtml(s.id) + "</span>";
+    return '<button type="button" class="' + (ride ? "ride" : "del") + '" data-svc="' + s.id + '">' + icon +
+      "<h3>" + esc(t("s_" + s.id)) + "</h3><p>" + esc(t("d_" + s.id)) + '</p><span class="from">' + esc(from) + "</span></button>";
+  }
+  function renderServices() {
+    var rides = "", dels = "";
+    SERVICES.forEach(function (s) { if (s.kind === "ride") rides += serviceCard(s); else dels += serviceCard(s); });
+    $("rideGrid").innerHTML = rides;
+    $("delGrid").innerHTML = dels;
+  }
+  function renderChips() {
+    var h = "";
+    SERVICES.forEach(function (s) {
+      h += '<button type="button" class="chip" data-chip="' + s.id + '" aria-pressed="' + (s.id === svcId) + '">' +
+        iconHtml(s.id) + "<span>" + esc(t("s_" + s.id)) + "</span></button>";
+    });
+    $("chips").innerHTML = h;
+  }
+  function applyService() {
+    var s = svc(svcId), del = s.kind === "delivery";
+    $("bookTitle").textContent = t(del ? "bookTitleDeliver" : "bookTitleRide");
+    $("lblPickup").textContent = t(del ? "pickupD" : "pickup");
+    $("lblDest").textContent = t(del ? "destD" : "dest");
+    $("lblDetails").textContent = t("details");
+    $("details").setAttribute("placeholder", del ? t("ph_" + s.id) : "");
+    $("fDetails").hidden = !del;
+    $("fReceiver").hidden = !del;
+  }
+
   function applyText() {
     document.documentElement.lang = lang === "so" ? "so" : "en";
     var els = document.querySelectorAll("[data-i18n]");
@@ -439,14 +597,15 @@ form { display: grid; gap: 16px; }
     for (var k = 0; k < ar.length; k++) ar[k].setAttribute("aria-label", t(ar[k].getAttribute("data-i18n-aria")));
     $("langEn").setAttribute("aria-pressed", String(lang === "en"));
     $("langSo").setAttribute("aria-pressed", String(lang === "so"));
-    renderRoutes(); renderFare();
+    renderServices(); renderChips(); applyService(); renderRoutes(); renderFare();
     if (last) renderConfirm();
   }
 
   function renderRoutes() {
     var box = $("routes"); box.innerHTML = "";
+    var s = svc("bajaj");
     ROUTES.forEach(function (r) {
-      var a = PLACES[r[0]], b = PLACES[r[1]], e = estimate(a, b);
+      var a = PLACES[r[0]], b = PLACES[r[1]], e = estimate(a, b, s);
       var btn = document.createElement("button");
       btn.type = "button"; btn.className = "route";
       var rt = document.createElement("span"); rt.className = "rt";
@@ -457,7 +616,7 @@ form { display: grid; gap: 16px; }
       btn.appendChild(rt); btn.appendChild(rp);
       btn.addEventListener("click", function () {
         $("pickup").value = a.name; $("dest").value = b.name;
-        clearErrors(); show("book");
+        openBook("bajaj");
       });
       box.appendChild(btn);
     });
@@ -465,45 +624,69 @@ form { display: grid; gap: 16px; }
 
   function renderFare() {
     var box = $("fareBox");
+    var s = svc(svcId);
     var pv = $("pickup").value, dv = $("dest").value;
     var a = findPlace(pv), b = findPlace(dv);
     var html = '<div class="lab">' + esc(t("fareTitle")) + "</div>";
     if (a && b && a !== b) {
-      var e = estimate(a, b);
+      var e = estimate(a, b, s);
       html += '<div class="amt">' + esc(fmt(e.fare)) + "<small>" + esc(t("birr")) + "</small></div>" +
         '<div class="meta"><span>' + esc(t("distance")) + ": <b>" + e.km + " " + esc(t("km")) + "</b></span>" +
         "<span>" + esc(t("time")) + ": <b>" + e.mins + " " + esc(t("min")) + "</b></span></div>";
+      if (s.fee) html += '<p class="note">' + esc(t("feeNote")) + "</p>";
     } else if (pv.trim() && dv.trim() && !(a && b)) {
-      html += '<p class="note">' + esc(t("fareUnknown")) + "</p>";
+      html += '<p class="note">' + esc(t("fareUnknown").replace("{name}", t("s_" + s.id)).replace("{from}", fmt(fromPrice(s)))) + "</p>";
     } else {
       html += '<p class="note">' + esc(t("farePrompt")) + "</p>";
     }
     box.innerHTML = html;
   }
 
-  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
-
   function renderConfirm() {
     if (!last) return;
     $("cRef").textContent = last.ref;
+    $("cService").textContent = t("s_" + last.service);
     $("cPass").innerHTML = esc(last.name) + "<small>" + esc(last.phone) + "</small>";
     $("cRoute").innerHTML = esc(last.pickup) + '<span class="arrow">→</span>' + esc(last.dest);
+    $("rowDetails").hidden = !last.details;
+    $("cDetails").textContent = last.details || "";
     $("cFare").textContent = last.fare != null ? fmt(last.fare) + " " + t("birr") : t("tbc");
   }
 
-  // ---- Views ----
-  function show(view) {
-    current = view;
+  // ---- Views (with the phone's back button) ----
+  function show(view, push) {
     ["home", "book", "confirm"].forEach(function (v) { $("view-" + v).hidden = v !== view; });
     window.scrollTo(0, 0);
     var h = view === "book" ? $("bookTitle") : view === "confirm" ? $("confTitle") : null;
     if (h) h.focus({ preventScroll: true });
     renderFare();
+    if (push !== false) {
+      try { (view === "home" ? history.replaceState : history.pushState).call(history, { view: view }, ""); } catch (e) {}
+    }
   }
+  window.addEventListener("popstate", function (ev) {
+    var v = ev.state && ev.state.view;
+    if (v === "confirm" && !last) v = "home";
+    show(v === "book" || v === "confirm" ? v : "home", false);
+  });
+  try { history.replaceState({ view: "home" }, ""); } catch (e) {}
+
+  function openBook(id) {
+    if (id) svcId = id;
+    clearErrors();
+    renderChips();
+    applyService();
+    show("book");
+  }
+
   // ---- Form ----
+  var ERR_IDS = ["Name", "Phone", "Pickup", "Dest", "Details", "Receiver"];
   function clearErrors() {
-    ["Name", "Phone", "Pickup", "Dest"].forEach(function (k) { $("err" + k).textContent = ""; });
-    ["name", "phone", "pickup", "dest"].forEach(function (k) { $(k).removeAttribute("aria-invalid"); });
+    ERR_IDS.forEach(function (k) {
+      $("err" + k).textContent = "";
+      $(k.toLowerCase()).removeAttribute("aria-invalid");
+    });
+    $("errSend").textContent = "";
   }
   function fail(inputId, errId, msgKey) {
     $(errId).textContent = t(msgKey); $(inputId).setAttribute("aria-invalid", "true");
@@ -538,27 +721,32 @@ form { display: grid; gap: 16px; }
   $("bookForm").addEventListener("submit", function (ev) {
     ev.preventDefault();
     clearErrors();
-    var name = $("name").value.trim(), phoneRaw = $("phone").value;
+    var s = svc(svcId), del = s.kind === "delivery";
+    var name = $("name").value.trim();
     var pickup = $("pickup").value.trim(), dest = $("dest").value.trim();
-    var phone = normPhone(phoneRaw), bad = null;
+    var detailsVal = $("details").value.trim(), recvRaw = $("receiver").value.trim();
+    var phone = normPhone($("phone").value), recv = recvRaw ? normPhone(recvRaw) : null, bad = null;
     if (name.length < 2) { fail("name", "errName", "errName"); bad = bad || "name"; }
     if (!phone) { fail("phone", "errPhone", "errPhone"); bad = bad || "phone"; }
     if (!pickup) { fail("pickup", "errPickup", "errPickup"); bad = bad || "pickup"; }
     if (!dest) { fail("dest", "errDest", "errDest"); bad = bad || "dest"; }
     if (pickup && dest && pickup.toLowerCase() === dest.toLowerCase()) { fail("dest", "errDest", "errSame"); bad = bad || "dest"; }
+    if (del && detailsVal.length < 3) { fail("details", "errDetails", "errDetails"); bad = bad || "details"; }
+    if (del && recvRaw && !recv) { fail("receiver", "errReceiver", "errPhone"); bad = bad || "receiver"; }
     if (bad) { $(bad).focus(); return; }
 
     var a = findPlace(pickup), b = findPlace(dest);
-    var e = a && b ? estimate(a, b) : null;
+    var e = a && b ? estimate(a, b, s) : null;
+    var details = del ? detailsVal + (recv ? " | Receiver: " + recv : "") : null;
     var rec = {
-      name: name, phone: phone,
+      service: s.id, name: name, phone: phone,
       pickup: a ? a.name : pickup, dest: b ? b.name : dest,
-      fare: e ? e.fare : null, lang: lang, status: "new"
+      details: details, fare: e ? e.fare : null, lang: lang, status: "new"
     };
     var btn = $("bookBtn");
-    btn.disabled = true; btn.textContent = t("sending"); $("errSend").textContent = "";
+    btn.disabled = true; btn.textContent = t("sending");
     sendBooking(rec).then(function (ref) {
-      last = { ref: ref, name: name, phone: prettyPhone(phone), pickup: rec.pickup, dest: rec.dest, fare: rec.fare };
+      last = { ref: ref, service: s.id, name: name, phone: prettyPhone(phone), pickup: rec.pickup, dest: rec.dest, details: details, fare: rec.fare };
       $("copyBtn").textContent = t("copy");
       renderConfirm();
       show("confirm");
@@ -581,7 +769,7 @@ form { display: grid; gap: 16px; }
     function done() { btn.textContent = t("copied"); setTimeout(function () { btn.textContent = t("copy"); }, 1600); }
     function fallback() {
       var r = document.createRange(); r.selectNodeContents($("cRef"));
-      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
     }
     try {
       navigator.clipboard.writeText(last.ref).then(done, fallback);
@@ -589,12 +777,22 @@ form { display: grid; gap: 16px; }
   });
 
   // ---- Navigation ----
-  $("ctaBook").addEventListener("click", function () { show("book"); });
+  $("view-home").addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-svc]");
+    if (b) openBook(b.getAttribute("data-svc"));
+  });
+  $("chips").addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-chip]");
+    if (!b) return;
+    svcId = b.getAttribute("data-chip");
+    renderChips(); applyService(); renderFare();
+  });
   $("brandBtn").addEventListener("click", function () { show("home"); });
-  $("tabHome").addEventListener("click", function () { show("home"); });
+  $("backBtn").addEventListener("click", function () { show("home"); });
   $("homeBtn").addEventListener("click", function () { show("home"); });
   $("againBtn").addEventListener("click", function () {
-    $("pickup").value = ""; $("dest").value = ""; clearErrors(); show("book");
+    ["pickup", "dest", "details", "receiver"].forEach(function (id) { $(id).value = ""; });
+    openBook(svcId);
   });
 
   document.querySelectorAll(".lang button").forEach(function (b) {
