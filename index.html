@@ -1,316 +1,1971 @@
-<!DOCTYPE html>
-<html lang="so">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jigjiga Bajaj | Dalbo Bajaj</title>
+jigjiga-bajaj/
+├── .env.example
+├── index.html
+├── package.json
+├── postcss.config.js
+├── tailwind.config.js
+├── tsconfig.json
+├── vite.config.ts
+├── supabase/
+│   ├── schema.sql
+│   └── functions/
+│       └── accept_ride.sql
+└── src/
+    ├── main.tsx
+    ├── App.tsx
+    ├── index.css
+    ├── types/
+    │   └── index.ts
+    ├── lib/
+    │   ├── supabase.ts
+    │   ├── i18n.ts
+    │   └── pricing.ts
+    ├── context/
+    │   ├── AuthContext.tsx
+    │   └── LanguageContext.tsx
+    ├── components/
+    │   ├── Navbar.tsx
+    │   ├── Footer.tsx
+    │   ├── ProtectedRoute.tsx
+    │   └── MapPlaceholder.tsx
+    ├── pages/
+    │   ├── Home.tsx
+    │   ├── TrackBooking.tsx
+    │   ├── Login.tsx
+    │   ├── DriverRegister.tsx
+    │   ├── DriverDashboard.tsx
+    │   └── AdminDashboard.tsx
+    └── loc/
+        ├── so.json
+        └── en.json
+        -- 1. ENUMS & CONSTANTS
+CREATE TYPE user_role AS ENUM ('customer', 'driver', 'admin');
+CREATE TYPE driver_status AS ENUM ('pending', 'approved', 'rejected', 'suspended');
+CREATE TYPE booking_status AS ENUM ('pending', 'accepted', 'in_progress', 'completed', 'cancelled');
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+-- 2. PROFILES TABLE
+CREATE TABLE public.profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    full_name TEXT NOT NULL,
+    phone_number TEXT NOT NULL UNIQUE,
+    role user_role NOT NULL DEFAULT 'customer',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
 
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f7f2;
-      color: #202a24;
-      line-height: 1.6;
-    }
+-- 3. DRIVER DETAILS TABLE
+CREATE TABLE public.driver_details (
+    id UUID PRIMARY KEY REFERENCES public.profiles(id) ON DELETE CASCADE,
+    plate_number TEXT NOT NULL UNIQUE,
+    license_number TEXT NOT NULL UNIQUE,
+    bajaj_color TEXT NOT NULL,
+    status driver_status NOT NULL DEFAULT 'pending',
+    is_online BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
 
-    header {
-      background: #123d32;
-      color: white;
-      padding: 18px 5%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
+-- 4. PRICING RULES TABLE
+CREATE TABLE public.pricing_config (
+    id INT PRIMARY KEY DEFAULT 1,
+    base_fare NUMERIC(10, 2) NOT NULL DEFAULT 30.00,       -- Base ETB
+    per_km_rate NUMERIC(10, 2) NOT NULL DEFAULT 15.00,     -- Per KM ETB
+    min_fare NUMERIC(10, 2) NOT NULL DEFAULT 40.00,        -- Minimum ETB
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT single_row CHECK (id = 1)
+);
 
-    header h1 {
-      font-size: 24px;
-    }
+-- Insert default Jigjiga pricing configuration
+INSERT INTO public.pricing_config (id, base_fare, per_km_rate, min_fare)
+VALUES (1, 30.00, 15.00, 40.00)
+ON CONFLICT (id) DO NOTHING;
 
-    header a {
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-    }
+-- 5. BOOKINGS TABLE
+CREATE TABLE public.bookings (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    reference_code TEXT UNIQUE NOT NULL,
+    customer_name TEXT NOT NULL,
+    customer_phone TEXT NOT NULL,
+    customer_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+    pickup_address TEXT NOT NULL,
+    destination_address TEXT NOT NULL,
+    estimated_distance_km NUMERIC(5,2) NOT NULL,
+    estimated_fare NUMERIC(10,2) NOT NULL,
+    status booking_status NOT NULL DEFAULT 'pending',
+    driver_id UUID REFERENCES public.driver_details(id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    accepted_at TIMESTAMPTZ,
+    completed_at TIMESTAMPTZ
+);
 
-    .hero {
-      padding: 55px 5%;
-      background: #e4eddf;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 35px;
-      align-items: center;
-    }
+-- 6. INDEXES FOR PERFORMANCE
+CREATE INDEX idx_bookings_status ON public.bookings(status);
+CREATE INDEX idx_bookings_reference ON public.bookings(reference_code);
+CREATE INDEX idx_bookings_driver ON public.bookings(driver_id);
+CREATE INDEX idx_drivers_status_online ON public.driver_details(status, is_online);
 
-    .hero h2 {
-      font-size: clamp(32px, 5vw, 52px);
-      line-height: 1.15;
-      margin-bottom: 18px;
-    }
+-- 7. ROW LEVEL SECURITY (RLS)
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.driver_details ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.pricing_config ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.bookings ENABLE ROW LEVEL SECURITY;
 
-    .hero p {
-      margin-bottom: 22px;
-      color: #526258;
-    }
+-- Helper function to check admin role safely
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE id = auth.uid() AND role = 'admin'
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
-    .hero-icon {
-      text-align: center;
-      font-size: 150px;
-    }
+-- Profiles Policies
+CREATE POLICY "Public read for drivers profiles" ON public.profiles
+    FOR SELECT USING (true);
+CREATE POLICY "Users can update own profile" ON public.profiles
+    FOR UPDATE USING (auth.uid() = id);
 
-    .button {
-      display: inline-block;
-      background: #176c4b;
-      color: white;
-      padding: 13px 22px;
-      border: none;
-      border-radius: 9px;
-      text-decoration: none;
-      font-weight: bold;
-      cursor: pointer;
-    }
+-- Driver Details Policies
+CREATE POLICY "Public read for driver details" ON public.driver_details
+    FOR SELECT USING (true);
+CREATE POLICY "Drivers can update own status and online state" ON public.driver_details
+    FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Admin full management driver_details" ON public.driver_details
+    FOR ALL USING (public.is_admin());
 
-    section {
-      padding: 45px 5%;
-    }
+-- Pricing Config Policies
+CREATE POLICY "Anyone can read pricing" ON public.pricing_config
+    FOR SELECT USING (true);
+CREATE POLICY "Admin manage pricing" ON public.pricing_config
+    FOR ALL USING (public.is_admin());
 
-    .booking {
-      max-width: 650px;
-      margin: auto;
-      background: white;
-      border-radius: 16px;
-      padding: 28px;
-      box-shadow: 0 5px 25px #0000000d;
-    }
+-- Bookings Policies
+CREATE POLICY "Anyone can create bookings" ON public.bookings
+    FOR INSERT WITH CHECK (true);
+CREATE POLICY "Public search booking by ref or owner or driver or admin" ON public.bookings
+    FOR SELECT USING (
+        true -- Allows tracking by reference_code for guest users
+    );
+CREATE POLICY "Drivers or Admins update bookings" ON public.bookings
+    FOR UPDATE USING (
+        public.is_admin() OR 
+        EXISTS (SELECT 1 FROM public.driver_details WHERE id = auth.uid() AND status = 'approved')
+    );
 
-    .booking h2 {
-      margin-bottom: 8px;
-    }
+-- 8. ATOMIC RIDE ACCEPTANCE STORED PROCEDURE (Prevents Race Conditions)
+CREATE OR REPLACE FUNCTION public.accept_ride(p_booking_id UUID, p_driver_id UUID)
+RETURNS BOOLEAN AS $$
+DECLARE
+    v_updated INT;
+BEGIN
+    -- Atomic conditional update: only succeeds if booking status is still 'pending'
+    UPDATE public.bookings
+    SET status = 'accepted',
+        driver_id = p_driver_id,
+        accepted_at = NOW()
+    WHERE id = p_booking_id
+      AND status = 'pending';
 
-    .booking > p {
-      margin-bottom: 20px;
-      color: #66736b;
-    }
+    GET DIAGNOSTICS v_updated = ROW_COUNT;
 
-    label {
-      display: block;
-      margin: 15px 0 6px;
-      font-weight: bold;
-    }
+    IF v_updated = 1 THEN
+        RETURN TRUE;
+    ELSE
+        RETURN FALSE;
+    END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
-    input, select, textarea {
-      width: 100%;
-      padding: 13px;
-      border: 1px solid #cbd5cc;
-      border-radius: 8px;
-      font-size: 16px;
-      background: white;
-    }
-
-    .booking button {
-      width: 100%;
-      margin-top: 22px;
-      font-size: 16px;
-    }
-
-    .notice {
-      display: none;
-      background: #e4f4e8;
-      padding: 18px;
-      border-radius: 10px;
-      margin-top: 20px;
-      overflow-wrap: anywhere;
-    }
-
-    .features {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 18px;
-      margin-top: 25px;
-    }
-
-    .feature {
-      background: white;
-      border-radius: 12px;
-      padding: 22px;
-    }
-
-    .feature h3 {
-      margin-bottom: 8px;
-    }
-
-    footer {
-      background: #123d32;
-      color: white;
-      padding: 28px 5%;
-      text-align: center;
-    }
-
-    @media (max-width: 700px) {
-      .hero {
-        grid-template-columns: 1fr;
-        padding: 38px 6%;
+-- Enable Realtime for Bookings Table
+ALTER PUBLICATION supabase_realtime ADD TABLE public.bookings;
+{
+  "name": "jigjiga-bajaj",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.8",
+    "clsx": "^2.1.0",
+    "lucide-react": "^0.359.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.22.3",
+    "tailwind-merge": "^2.2.2"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.2.2",
+    "vite": "^5.1.6"
+  }
+}
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        brand: {
+          50: '#fffbeb',
+          100: '#fef3c7',
+          500: '#f59e0b',
+          600: '#d97706',
+          700: '#b45309',
+        },
+        somali: {
+          blue: '#4189DD',
+          green: '#2D8A4E',
+        }
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
       }
+    },
+  },
+  plugins: [],
+};
+VITE_SUPABASE_URL=https://your-supabase-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+export type UserRole = 'customer' | 'driver' | 'admin';
+export type DriverStatus = 'pending' | 'approved' | 'rejected' | 'suspended';
+export type BookingStatus = 'pending' | 'accepted' | 'in_progress' | 'completed' | 'cancelled';
 
-      .hero-icon {
-        font-size: 100px;
-      }
+export interface Profile {
+  id: string;
+  full_name: string;
+  phone_number: string;
+  role: UserRole;
+  created_at: string;
+}
 
-      .features {
-        grid-template-columns: 1fr;
-      }
+export interface DriverDetails {
+  id: string;
+  plate_number: string;
+  license_number: string;
+  bajaj_color: string;
+  status: DriverStatus;
+  is_online: boolean;
+  profiles?: Profile;
+}
 
-      section {
-        padding: 32px 5%;
+export interface Booking {
+  id: string;
+  reference_code: string;
+  customer_name: string;
+  customer_phone: string;
+  customer_id?: string;
+  pickup_address: string;
+  destination_address: string;
+  estimated_distance_km: number;
+  estimated_fare: number;
+  status: BookingStatus;
+  driver_id?: string;
+  driver_details?: DriverDetails;
+  created_at: string;
+  accepted_at?: string;
+  completed_at?: string;
+}
+
+export interface PricingConfig {
+  id: number;
+  base_fare: number;
+  per_km_rate: number;
+  min_fare: number;
+}
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key';
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+import { PricingConfig } from '../types';
+
+export const DEFAULT_PRICING: PricingConfig = {
+  id: 1,
+  base_fare: 30,  // 30 ETB Base
+  per_km_rate: 15, // 15 ETB per KM
+  min_fare: 40,   // 40 ETB Minimum
+};
+
+/**
+ * Calculates estimated fare in Ethiopian Birr (ETB) based on distance.
+ */
+export function calculateFare(distanceKm: number, config: PricingConfig = DEFAULT_PRICING): number {
+  if (distanceKm <= 0) return config.min_fare;
+  const calculated = config.base_fare + (distanceKm * config.per_km_rate);
+  return Math.max(Math.round(calculated), config.min_fare);
+}
+
+/**
+ * Generates a memorable 6-character booking code (e.g., JJ-8921)
+ */
+export function generateReferenceCode(): string {
+  const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+  let result = 'JJ-';
+  for (let i = 0; i < 4; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+    {
+  "brand_name": "Jigjiga Bajaj",
+  "tagline": "Dhaqdhaqaaqa Magaalada ee Degdegga ah & Ammaan ah",
+  "nav_home": "Hoyga",
+  "nav_book": "Qabso Bajaj",
+  "nav_track": "Ilaali Safarka",
+  "nav_driver": "Nodokada Darawal",
+  "nav_login": "Galinta System-ka",
+  "nav_dashboard": "Dashboard-ka",
+  "hero_title": "Gaadiid Bajaj Oo Traast Leheh oo ku yaala Jigjiga",
+  "hero_subtitle": "Ka hel bajaaj si fudud, qiimo jaban, oo ammaan ah goor kasta iyo mahad kasta oo Jigjiga ah.",
+  "book_now": "Dalbo Bajaj Hada",
+  "pickup_location": "Saldhigga Qaadashada",
+  "destination": "Goobta Target-ka",
+  "customer_name": "Magacaaga",
+  "customer_phone": "Nambarka Taleefanka",
+  "est_fare": "Qiimaha Qiyaasta",
+  "confirm_booking": "Xaqiiji Safarka",
+  "reference_number": "Nambarka Tixraaca",
+  "status_pending": "Wuxuu Dhowrayaa Darawal",
+  "status_accepted": "Darawalku Wa Wado",
+  "status_in_progress": "Safarku Wa Socdaa",
+  "status_completed": "Wuu Dhamaaday",
+  "status_cancelled": "Waa La Bixiay",
+  "online_status": "Awooda Online-ka",
+  "offline_status": "Awooda Offline-ka"
+}
+    {
+  "brand_name": "Jigjiga Bajaj",
+  "tagline": "Fast, Safe & Reliable Local Transit",
+  "nav_home": "Home",
+  "nav_book": "Book Ride",
+  "nav_track": "Track Ride",
+  "nav_driver": "Drive with Us",
+  "nav_login": "Login",
+  "nav_dashboard": "Dashboard",
+  "hero_title": "Reliable Bajaj Rides Across Jigjiga",
+  "hero_subtitle": "Book a quick, affordable, and safe ride anytime, anywhere in Jigjiga.",
+  "book_now": "Book a Bajaj Now",
+  "pickup_location": "Pickup Location",
+  "destination": "Destination",
+  "customer_name": "Your Full Name",
+  "customer_phone": "Phone Number",
+  "est_fare": "Estimated Fare",
+  "confirm_booking": "Confirm Bajaj Request",
+  "reference_number": "Reference Code",
+  "status_pending": "Waiting for Driver",
+  "status_accepted": "Driver En Route",
+  "status_in_progress": "Trip In Progress",
+  "status_completed": "Completed",
+  "status_cancelled": "Cancelled",
+  "online_status": "Online & Available",
+  "offline_status": "Offline"
+}
+    import React, { createContext, useContext, useState } from 'react';
+import so from '../loc/so.json';
+import en from '../loc/en.json';
+
+type Language = 'so' | 'en';
+type Translations = typeof so;
+
+interface LanguageContextType {
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  t: (key: keyof Translations) => string;
+}
+
+const translationsMap = { so, en };
+
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+
+export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [language, setLanguage] = useState<Language>('so'); // Default Somali
+
+  const t = (key: keyof Translations): string => {
+    return translationsMap[language][key] || translationsMap['en'][key] || key;
+  };
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+};
+
+export const useLanguage = () => {
+  const context = useContext(LanguageContext);
+  if (!context) throw new Error('useLanguage must be used within LanguageProvider');
+  return context;
+};
+    import React, { createContext, useContext, useEffect, useState } from 'react';
+import { User, Session } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabase';
+import { Profile, DriverDetails } from '../types';
+
+interface AuthContextType {
+  user: User | null;
+  session: Session | null;
+  profile: Profile | null;
+  driverDetails: DriverDetails | null;
+  loading: boolean;
+  signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [driverDetails, setDriverDetails] = useState<DriverDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchUserData = async (userId: string) => {
+    try {
+      const { data: prof } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (prof) {
+        setProfile(prof as Profile);
+        if (prof.role === 'driver') {
+          const { data: drv } = await supabase
+            .from('driver_details')
+            .select('*')
+            .eq('id', userId)
+            .single();
+          setDriverDetails(drv as DriverDetails);
+        }
       }
+    } catch (err) {
+      console.error('Error fetching user data:', err);
     }
-  </style>
-</head>
+  };
 
-<body>
-  <header>
-    <h1>🛺 Jigjiga Bajaj</h1>
-    <a href="#booking">Dalbo Bajaj</a>
-  </header>
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserData(session.user.id).finally(() => setLoading(false));
+      } else {
+        setLoading(false);
+      }
+    });
 
-  <main>
-    <div class="hero">
-      <div>
-        <h2>Bajaj-gaaga ku dalbo si fudud.</h2>
-        <p>
-          Adeegga dalabka bajaj ee Jigjiga.
-          Geli meesha aad joogto iyo meesha aad u socoto
-          si aad u codsato safarkaaga.
-        </p>
-        <a class="button" href="#booking">Hadda Dalbo</a>
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserData(session.user.id);
+      } else {
+        setProfile(null);
+        setDriverDetails(null);
+      }
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const refreshProfile = async () => {
+    if (user) await fetchUserData(user.id);
+  };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    setProfile(null);
+    setDriverDetails(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, session, profile, driverDetails, loading, signOut, refreshProfile }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
+  return context;
+};
+    import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Car, Globe, Menu, X, UserCheck, Shield, LogOut } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
+
+export const Navbar: React.FC = () => {
+  const { language, setLanguage, t } = useLanguage();
+  const { user, profile, signOut } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
+  return (
+    <header className="bg-slate-900 text-white sticky top-0 z-50 shadow-md">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-3">
+            <div className="bg-amber-500 p-2 rounded-xl text-slate-950 font-bold">
+              <Car className="w-6 h-6" />
+            </div>
+            <div>
+              <span className="text-xl font-bold tracking-tight text-white block">
+                JIGJIGA<span className="text-amber-400">BAJAJ</span>
+              </span>
+              <span className="text-[10px] text-amber-300 font-medium tracking-wide block uppercase">
+                Somali Region
+              </span>
+            </div>
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+            <Link to="/" className="hover:text-amber-400 transition">{t('nav_home')}</Link>
+            <Link to="/track" className="hover:text-amber-400 transition">{t('nav_track')}</Link>
+            {!user && (
+              <Link to="/register-driver" className="hover:text-amber-400 transition">{t('nav_driver')}</Link>
+            )}
+
+            {user && profile?.role === 'driver' && (
+              <Link to="/driver-dashboard" className="text-amber-400 hover:underline flex items-center gap-1 font-semibold">
+                <UserCheck className="w-4 h-4" /> Driver Panel
+              </Link>
+            )}
+
+            {user && profile?.role === 'admin' && (
+              <Link to="/admin-dashboard" className="text-emerald-400 hover:underline flex items-center gap-1 font-semibold">
+                <Shield className="w-4 h-4" /> Admin Console
+              </Link>
+            )}
+          </nav>
+
+          {/* Controls & Auth */}
+          <div className="hidden md:flex items-center space-x-4">
+            {/* Language Switcher */}
+            <button
+              onClick={() => setLanguage(language === 'so' ? 'en' : 'so')}
+              className="flex items-center gap-1 bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-700 transition"
+            >
+              <Globe className="w-3.5 h-3.5 text-amber-400" />
+              <span>{language === 'so' ? 'Somali (SO)' : 'English (EN)'}</span>
+            </button>
+
+            {user ? (
+              <button
+                onClick={handleSignOut}
+                className="flex items-center gap-1 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition"
+              >
+                <LogOut className="w-3.5 h-3.5" /> Logout
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 py-2 rounded-lg font-bold text-xs transition"
+              >
+                {t('nav_login')}
+              </Link>
+            )}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden flex items-center space-x-2">
+            <button
+              onClick={() => setLanguage(language === 'so' ? 'en' : 'so')}
+              className="bg-slate-800 text-amber-400 p-2 rounded-lg text-xs font-bold"
+            >
+              {language.toUpperCase()}
+            </button>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 text-slate-300 hover:text-white"
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div class="hero-icon" aria-label="Bajaj">🛺</div>
+      {/* Mobile Menu Drawer */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-slate-800 border-b border-slate-700 px-4 pt-2 pb-4 space-y-3 text-sm">
+          <Link to="/" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-200">{t('nav_home')}</Link>
+          <Link to="/track" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-200">{t('nav_track')}</Link>
+          {!user && (
+            <Link to="/register-driver" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-amber-400 font-semibold">{t('nav_driver')}</Link>
+          )}
+          {user && profile?.role === 'driver' && (
+            <Link to="/driver-dashboard" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-amber-400 font-bold">Driver Dashboard</Link>
+          )}
+          {user && profile?.role === 'admin' && (
+            <Link to="/admin-dashboard" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-emerald-400 font-bold">Admin Console</Link>
+          )}
+          {user ? (
+            <button onClick={() => { handleSignOut(); setMobileMenuOpen(false); }} className="w-full text-left py-2 text-rose-400 font-semibold">Logout</button>
+          ) : (
+            <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block w-full text-center bg-amber-500 text-slate-950 font-bold py-2 rounded-lg">{t('nav_login')}</Link>
+          )}
+        </div>
+      )}
+    </header>
+  );
+};
+    import React from 'react';
+import { Navigation, MapPin } from 'lucide-react';
+
+interface MapProps {
+  pickup?: string;
+  destination?: string;
+}
+
+export const MapPlaceholder: React.FC<MapProps> = ({ pickup, destination }) => {
+  return (
+    <div className="relative w-full h-48 md:h-64 bg-slate-800 rounded-xl overflow-hidden border border-slate-700 flex flex-col justify-between p-4 bg-cover bg-center"
+      style={{ backgroundImage: 'radial-gradient(#334155 1px, transparent 1px)', backgroundSize: '16px 16px' }}>
+      <div className="flex justify-between items-center z-10">
+        <span className="bg-slate-900/80 backdrop-blur-md text-amber-400 text-xs px-2.5 py-1 rounded-full font-mono border border-slate-700 flex items-center gap-1">
+          <Navigation className="w-3 h-3 animate-pulse" /> Jigjiga Live Map Matrix
+        </span>
+      </div>
+
+      <div className="space-y-2 z-10 bg-slate-950/80 backdrop-blur-md p-3 rounded-lg border border-slate-800">
+        <div className="flex items-center gap-2 text-xs text-slate-300">
+          <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span className="truncate"><strong className="text-white">Pickup:</strong> {pickup || 'Select pickup point'}</span>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-slate-300">
+          <MapPin className="w-4 h-4 text-rose-400 shrink-0" />
+          <span className="truncate"><strong className="text-white">Dest:</strong> {destination || 'Select destination'}</span>
+        </div>
+      </div>
     </div>
+  );
+};
+  import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Car, MapPin, Phone, User, CheckCircle, ArrowRight, ShieldCheck } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
+import { calculateFare, generateReferenceCode, DEFAULT_PRICING } from '../lib/pricing';
+import { supabase } from '../lib/supabase';
+import { MapPlaceholder } from '../components/MapPlaceholder';
+import { PricingConfig } from '../types';
 
-    <section id="booking">
-      <div class="booking">
-        <h2>Dalbo Bajaj</h2>
-        <p>Buuxi xogta hoose si aad u codsato safar.</p>
+const JIGJIGA_LOCATIONS = [
+  'Jigjiga City Center (Suuqa V)',
+  'Garoonka Diyaaradaha (Jigjiga Airport)',
+  'Jaamacadda Jigjiga (Jigjiga University Main Gate)',
+  'Xafada 06 (Kebele 06)',
+  'Ospitaalka Sheekh Xasan Yare',
+  'Suuqa Taywan',
+  'Stadionka Jigjiga',
+  'Hotel Green Valley Area'
+];
 
-        <form id="rideForm">
-          <label for="name">Magacaaga</label>
-          <input id="name" name="name" required
-                 maxlength="100" placeholder="Geli magacaaga">
+export const Home: React.FC = () => {
+  const { t } = useLanguage();
+  const navigate = useNavigate();
 
-          <label for="phone">Lambarka telefoonka</label>
-          <input id="phone" name="phone" required
-                 type="tel" maxlength="20"
-                 placeholder="Geli telefoonkaaga">
+  const [pickup, setPickup] = useState(JIGJIGA_LOCATIONS[0]);
+  const [destination, setDestination] = useState(JIGJIGA_LOCATIONS[2]);
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [distance, setDistance] = useState(3.5);
+  const [pricing, setPricing] = useState<PricingConfig>(DEFAULT_PRICING);
+  const [estimatedFare, setEstimatedFare] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-          <label for="pickup">Meesha lagaa qaadayo</label>
-          <input id="pickup" name="pickup" required
-                 maxlength="200"
-                 placeholder="Tusaale: Suuqa weyn">
+  useEffect(() => {
+    // Load pricing rules from Supabase
+    supabase.from('pricing_config').select('*').single().then(({ data }) => {
+      if (data) setPricing(data as PricingConfig);
+    });
+  }, []);
 
-          <label for="destination">Meesha aad u socoto</label>
-          <input id="destination" name="destination" required
-                 maxlength="200"
-                 placeholder="Tusaale: Jaamacadda">
+  useEffect(() => {
+    // Recalculate fare when distance or pricing changes
+    setEstimatedFare(calculateFare(distance, pricing));
+  }, [distance, pricing]);
 
-          <label for="passengers">Tirada rakaabka</label>
-          <select id="passengers" name="passengers" required>
-            <option value="1">1 qof</option>
-            <option value="2">2 qof</option>
-            <option value="3">3 qof</option>
-          </select>
+  const handleBookingSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customerName || !customerPhone) {
+      setError('Suger! Fadlan geli magacaaga iyo nambarka taleefanka.');
+      return;
+    }
 
-          <button class="button" type="submit">
-            Codso Bajaj
+    setLoading(true);
+    setError('');
+
+    const refCode = generateReferenceCode();
+
+    try {
+      const { data, error: insertError } = await supabase
+        .from('bookings')
+        .insert({
+          reference_code: refCode,
+          customer_name: customerName,
+          customer_phone: customerPhone,
+          pickup_address: pickup,
+          destination_address: destination,
+          estimated_distance_km: distance,
+          estimated_fare: estimatedFare,
+          status: 'pending'
+        })
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+
+      // Navigate to tracking page upon successful booking
+      navigate(`/track?ref=${data.reference_code}`);
+    } catch (err: any) {
+      setError(err.message || 'Error placing booking request. Try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between">
+      {/* Hero Header */}
+      <section className="bg-gradient-to-b from-slate-900 to-slate-950 border-b border-slate-800 py-12 px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto text-center space-y-4">
+          <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs px-3 py-1.5 rounded-full font-semibold">
+            <ShieldCheck className="w-4 h-4" /> Official Jigjiga Transport Service
+          </div>
+          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+            {t('hero_title')}
+          </h1>
+          <p className="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto">
+            {t('hero_subtitle')}
+          </p>
+        </div>
+      </section>
+
+      {/* Booking Container */}
+      <main className="max-w-4xl mx-auto w-full px-4 sm:px-6 -mt-6 mb-12">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+          
+          {/* Booking Form */}
+          <form onSubmit={handleBookingSubmit} className="space-y-5">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <Car className="w-5 h-5 text-amber-400" /> {t('book_now')}
+            </h2>
+
+            {error && (
+              <div className="bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs p-3 rounded-lg">
+                {error}
+              </div>
+            )}
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">
+                {t('pickup_location')}
+              </label>
+              <div className="relative">
+                <MapPin className="w-4 h-4 text-emerald-400 absolute left-3 top-3" />
+                <select
+                  value={pickup}
+                  onChange={(e) => setPickup(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 text-white text-xs rounded-xl pl-9 pr-3 py-2.5 focus:border-amber-500 focus:outline-none"
+                >
+                  {JIGJIGA_LOCATIONS.map((loc) => (
+                    <option key={loc} value={loc}>{loc}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">
+                {t('destination')}
+              </label>
+              <div className="relative">
+                <MapPin className="w-4 h-4 text-rose-400 absolute left-3 top-3" />
+                <select
+                  value={destination}
+                  onChange={(e) => setDestination(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 text-white text-xs rounded-xl pl-9 pr-3 py-2.5 focus:border-amber-500 focus:outline-none"
+                >
+                  {JIGJIGA_LOCATIONS.map((loc) => (
+                    <option key={loc} value={loc}>{loc}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  {t('customer_name')}
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Axmed Cabdi"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-700 text-white text-xs rounded-xl pl-9 pr-3 py-2.5 focus:border-amber-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  {t('customer_phone')}
+                </label>
+                <div className="relative">
+                  <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                  <input
+                    type="tel"
+                    required
+                    placeholder="0911XXXXXX"
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-700 text-white text-xs rounded-xl pl-9 pr-3 py-2.5 focus:border-amber-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">
+                Distance Estimate: <span className="text-amber-400 font-bold">{distance} KM</span>
+              </label>
+              <input
+                type="range"
+                min="1"
+                max="15"
+                step="0.5"
+                value={distance}
+                onChange={(e) => setDistance(parseFloat(e.target.value))}
+                className="w-full accent-amber-500 cursor-pointer"
+              />
+            </div>
+
+            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
+              <div>
+                <span className="text-xs text-slate-400 block">{t('est_fare')}</span>
+                <span className="text-2xl font-black text-amber-400">{estimatedFare} <span className="text-xs text-slate-200">ETB</span></span>
+              </div>
+              <span className="text-[10px] text-slate-500 bg-slate-900 px-2 py-1 rounded">Base Rate Included</span>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-bold py-3 px-4 rounded-xl transition flex items-center justify-center gap-2 text-sm"
+            >
+              {loading ? 'Hada baa la diri garaa...' : t('confirm_booking')} <ArrowRight className="w-4 h-4" />
+            </button>
+          </form>
+
+          {/* Interactive Preview / Map */}
+          <div className="flex flex-col justify-between space-y-4">
+            <MapPlaceholder pickup={pickup} destination={destination} />
+
+            <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800 space-y-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-amber-400">Sababta Aad Na Wafeysato</h3>
+              <ul className="space-y-2 text-xs text-slate-300">
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                  Garaashyada Sharafta leh & Darawalo La Anshaxiyay
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                  Qiimo cad oo la xaqiijiyay (No unexpected price hikes)
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                  Adeeg degdeg ah oo toos ah dhamaan magaalada Jigjiga
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+};
+    import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Search, Clock, CheckCircle, Car, User, Phone, MapPin, RefreshCw } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { Booking } from '../types';
+import { MapPlaceholder } from '../components/MapPlaceholder';
+
+export const TrackBooking: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const [refInput, setRefInput] = useState(searchParams.get('ref') || '');
+  const [booking, setBooking] = useState<Booking | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const fetchBooking = async (code: string) => {
+    if (!code) return;
+    setLoading(true);
+    setError('');
+
+    try {
+      const { data, error: fetchErr } = await supabase
+        .from('bookings')
+        .select(`
+          *,
+          driver_details (
+            plate_number,
+            bajaj_color,
+            profiles ( full_name, phone_number )
+          )
+        `)
+        .eq('reference_code', code.trim().toUpperCase())
+        .single();
+
+      if (fetchErr || !data) {
+        setError('Booking reference not found. Check the code and try again.');
+        setBooking(null);
+      } else {
+        setBooking(data as any);
+      }
+    } catch (err) {
+      setError('Error retrieving booking status.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const initialRef = searchParams.get('ref');
+    if (initialRef) {
+      fetchBooking(initialRef);
+    }
+  }, [searchParams]);
+
+  // Real-time listener for booking status changes
+  useEffect(() => {
+    if (!booking) return;
+
+    const channel = supabase
+      .channel(`booking-track-${booking.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'bookings', filter: `id=eq.${booking.id}` },
+        () => {
+          fetchBooking(booking.reference_code);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [booking?.id]);
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <span className="bg-amber-500/20 text-amber-400 border border-amber-500/30 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 animate-spin" /> Looking for nearby Bajaj...</span>;
+      case 'accepted':
+        return <span className="bg-blue-500/20 text-blue-400 border border-blue-500/30 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5"><Car className="w-3.5 h-3.5" /> Bajaj En Route to Pickup</span>;
+      case 'in_progress':
+        return <span className="bg-purple-500/20 text-purple-400 border border-purple-500/30 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5"><RefreshCw className="w-3.5 h-3.5 animate-spin" /> Trip In Progress</span>;
+      case 'completed':
+        return <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5" /> Trip Completed</span>;
+      default:
+        return <span className="bg-rose-500/20 text-rose-400 border border-rose-500/30 px-3 py-1 rounded-full text-xs font-bold">Cancelled</span>;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 sm:p-8">
+      <div className="max-w-2xl mx-auto space-y-6">
+        <div className="text-center space-y-2">
+          <h1 className="text-2xl font-bold text-white">Track Your Bajaj Ride</h1>
+          <p className="text-xs text-slate-400">Enter your unique reference code to view live assignment and ride progress.</p>
+        </div>
+
+        {/* Search Bar */}
+        <div className="flex gap-2">
+          <input
+            type="text"
+            placeholder="e.g. JJ-8921"
+            value={refInput}
+            onChange={(e) => setRefInput(e.target.value)}
+            className="flex-1 bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl text-sm font-mono focus:border-amber-500 focus:outline-none uppercase"
+          />
+          <button
+            onClick={() => fetchBooking(refInput)}
+            disabled={loading}
+            className="bg-amber-500 hover:bg-amber-600 font-bold text-slate-950 px-5 py-3 rounded-xl text-sm flex items-center gap-2 transition"
+          >
+            <Search className="w-4 h-4" /> Track
+          </button>
+        </div>
+
+        {error && (
+          <div className="bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs p-4 rounded-xl text-center">
+            {error}
+          </div>
+        )}
+
+        {/* Status Card */}
+        {booking && (
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6 shadow-xl">
+            <div className="flex flex-wrap justify-between items-center gap-4 pb-4 border-b border-slate-800">
+              <div>
+                <span className="text-[10px] text-slate-400 block font-mono">REFERENCE CODE</span>
+                <span className="text-xl font-mono font-bold text-amber-400">{booking.reference_code}</span>
+              </div>
+              <div>{getStatusBadge(booking.status)}</div>
+            </div>
+
+            <MapPlaceholder pickup={booking.pickup_address} destination={booking.destination_address} />
+
+            {/* Ride Info */}
+            <div className="grid grid-cols-2 gap-4 text-xs bg-slate-950 p-4 rounded-xl border border-slate-800">
+              <div>
+                <span className="text-slate-400 block">Pickup Location</span>
+                <span className="font-semibold text-white flex items-center gap-1 mt-1">
+                  <MapPin className="w-3.5 h-3.5 text-emerald-400" /> {booking.pickup_address}
+                </span>
+              </div>
+              <div>
+                <span className="text-slate-400 block">Destination</span>
+                <span className="font-semibold text-white flex items-center gap-1 mt-1">
+                  <MapPin className="w-3.5 h-3.5 text-rose-400" /> {booking.destination_address}
+                </span>
+              </div>
+              <div className="mt-2">
+                <span className="text-slate-400 block">Estimated Distance</span>
+                <span className="font-semibold text-white">{booking.estimated_distance_km} KM</span>
+              </div>
+              <div className="mt-2">
+                <span className="text-slate-400 block">Total Fare</span>
+                <span className="font-bold text-amber-400 text-sm">{booking.estimated_fare} ETB</span>
+              </div>
+            </div>
+
+            {/* Assigned Driver Box */}
+            {booking.driver_details ? (
+              <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-xl space-y-2">
+                <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider">Assigned Bajaj & Driver</h3>
+                <div className="flex justify-between items-center text-xs">
+                  <div>
+                    <p className="font-bold text-white text-sm">{(booking.driver_details as any)?.profiles?.full_name}</p>
+                    <p className="text-slate-300">Plate: <span className="font-mono text-amber-300">{(booking.driver_details as any)?.plate_number}</span> ({booking.driver_details.bajaj_color})</p>
+                  </div>
+                  <a
+                    href={`tel:${(booking.driver_details as any)?.profiles?.phone_number}`}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-2 rounded-lg flex items-center gap-1 text-xs"
+                  >
+                    <Phone className="w-3.5 h-3.5" /> Call Driver
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 text-center text-xs text-slate-400">
+                Waiting for an approved driver in Jigjiga to accept this ride request.
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+    import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
+import { Booking } from '../types';
+import { Power, Check, Phone, Navigation, DollarSign, Clock } from 'lucide-react';
+
+export const DriverDashboard: React.FC = () => {
+  const { user, driverDetails, refreshProfile } = useAuth();
+  const [isOnline, setIsOnline] = useState(driverDetails?.is_online || false);
+  const [availableBookings, setAvailableBookings] = useState<Booking[]>([]);
+  const [activeBooking, setActiveBooking] = useState<Booking | null>(null);
+  const [myHistory, setMyHistory] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [actionError, setActionError] = useState('');
+
+  // Synchronize local online toggle with state
+  useEffect(() => {
+    if (driverDetails) setIsOnline(driverDetails.is_online);
+  }, [driverDetails]);
+
+  // Load available pending rides & active assigned ride
+  const loadDriverRides = async () => {
+    if (!user) return;
+
+    // Load available pending requests
+    const { data: pending } = await supabase
+      .from('bookings')
+      .select('*')
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false });
+
+    if (pending) setAvailableBookings(pending as Booking[]);
+
+    // Load driver's active ride
+    const { data: active } = await supabase
+      .from('bookings')
+      .select('*')
+      .eq('driver_id', user.id)
+      .in('status', ['accepted', 'in_progress'])
+      .single();
+
+    setActiveBooking(active as Booking || null);
+
+    // Load driver history
+    const { data: history } = await supabase
+      .from('bookings')
+      .select('*')
+      .eq('driver_id', user.id)
+      .eq('status', 'completed')
+      .order('completed_at', { ascending: false });
+
+    if (history) setMyHistory(history as Booking[]);
+  };
+
+  useEffect(() => {
+    loadDriverRides();
+
+    // Setup real-time updates for new pending bookings
+    const channel = supabase
+      .channel('driver-rides-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => {
+        loadDriverRides();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
+
+  const toggleOnline = async () => {
+    if (!user) return;
+    const nextState = !isOnline;
+    setIsOnline(nextState);
+    await supabase.from('driver_details').update({ is_online: nextState }).eq('id', user.id);
+    refreshProfile();
+  };
+
+  const handleAcceptRide = async (bookingId: string) => {
+    if (!user) return;
+    setLoading(true);
+    setActionError('');
+
+    try {
+      // Call atomic RPC stored procedure to prevent double acceptance
+      const { data, error } = await supabase.rpc('accept_ride', {
+        p_booking_id: bookingId,
+        p_driver_id: user.id,
+      });
+
+      if (error || !data) {
+        setActionError('Ride was already accepted by another driver or is no longer available.');
+      } else {
+        await loadDriverRides();
+      }
+    } catch (err: any) {
+      setActionError('Failed to accept ride.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateRideStatus = async (status: 'in_progress' | 'completed') => {
+    if (!activeBooking) return;
+    setLoading(true);
+    const updatePayload: any = { status };
+    if (status === 'completed') updatePayload.completed_at = new Date().toISOString();
+
+    await supabase.from('bookings').update(updatePayload).eq('id', activeBooking.id);
+    await loadDriverRides();
+    setLoading(false);
+  };
+
+  const totalEarnings = myHistory.reduce((sum, item) => sum + Number(item.estimated_fare), 0);
+
+  if (driverDetails?.status === 'pending') {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
+        <div className="bg-slate-900 border border-slate-800 p-8 rounded-2xl max-w-md text-center space-y-4">
+          <Clock className="w-12 h-12 text-amber-400 mx-auto animate-pulse" />
+          <h2 className="text-xl font-bold text-white">Application Under Review</h2>
+          <p className="text-xs text-slate-400">
+            Your registration for Bajaj (<span className="text-amber-400 font-mono">{driverDetails.plate_number}</span>) has been submitted. An administrator in Jigjiga will approve your profile shortly.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 sm:p-8 space-y-6">
+      {/* Header & Status Switch */}
+      <div className="max-w-4xl mx-auto flex flex-wrap justify-between items-center gap-4 bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Driver Workstation</h1>
+          <p className="text-xs text-slate-400">Plate: <span className="font-mono text-amber-400">{driverDetails?.plate_number}</span> ({driverDetails?.bajaj_color})</p>
+        </div>
+
+        <button
+          onClick={toggleOnline}
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition ${
+            isOnline
+              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 hover:bg-emerald-500/30'
+              : 'bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700'
+          }`}
+        >
+          <Power className="w-4 h-4" />
+          {isOnline ? 'ONLINE (Ready for Rides)' : 'OFFLINE'}
+        </button>
+      </div>
+
+      <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Earnings Stats */}
+        <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-2">
+          <span className="text-xs text-slate-400 block font-semibold">Total Earned Today</span>
+          <span className="text-3xl font-black text-amber-400">{totalEarnings} <span className="text-xs text-slate-200">ETB</span></span>
+          <span className="text-[10px] text-slate-500 block">{myHistory.length} completed trips</span>
+        </div>
+
+        {/* Active Booking Box */}
+        <div className="md:col-span-2 bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+          <h2 className="text-base font-bold text-white flex items-center gap-2">
+            <Navigation className="w-4 h-4 text-amber-400" /> Active Ride Assignment
+          </h2>
+
+          {activeBooking ? (
+            <div className="bg-slate-950 p-4 rounded-xl border border-amber-500/30 space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="font-mono font-bold text-amber-400 text-sm">{activeBooking.reference_code}</span>
+                <span className="text-xs bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2.5 py-1 rounded-full uppercase font-bold">
+                  {activeBooking.status}
+                </span>
+              </div>
+
+              <div className="text-xs space-y-1">
+                <p className="text-slate-300"><strong>Customer:</strong> {activeBooking.customer_name}</p>
+                <p className="text-slate-300"><strong>Pickup:</strong> {activeBooking.pickup_address}</p>
+                <p className="text-slate-300"><strong>Destination:</strong> {activeBooking.destination_address}</p>
+                <p className="text-amber-400 font-bold text-sm">Fare: {activeBooking.estimated_fare} ETB</p>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <a
+                  href={`tel:${activeBooking.customer_phone}`}
+                  className="bg-slate-800 hover:bg-slate-700 text-white px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1"
+                >
+                  <Phone className="w-3.5 h-3.5" /> Call
+                </a>
+
+                {activeBooking.status === 'accepted' && (
+                  <button
+                    onClick={() => updateRideStatus('in_progress')}
+                    disabled={loading}
+                    className="bg-purple-600 hover:bg-purple-500 text-white font-bold px-4 py-2 rounded-lg text-xs flex-1"
+                  >
+                    Start Trip
+                  </button>
+                )}
+
+                {activeBooking.status === 'in_progress' && (
+                  <button
+                    onClick={() => updateRideStatus('completed')}
+                    disabled={loading}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-xs flex-1"
+                  >
+                    Complete Trip
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="text-xs text-slate-500 py-6 text-center border border-dashed border-slate-800 rounded-xl">
+              No active ride assignment right now.
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Available Pending Requests Feed */}
+      <div className="max-w-4xl mx-auto space-y-4">
+        <h2 className="text-lg font-bold text-white">Available Ride Requests in Jigjiga</h2>
+
+        {actionError && (
+          <div className="bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs p-3 rounded-lg">
+            {actionError}
+          </div>
+        )}
+
+        {!isOnline && (
+          <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl text-center text-xs text-amber-400 font-medium">
+            Turn your status to ONLINE above to accept pending rides.
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {availableBookings.map((ride) => (
+            <div key={ride.id} className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="font-mono text-xs font-bold text-slate-400">{ride.reference_code}</span>
+                <span className="text-amber-400 font-black text-base">{ride.estimated_fare} ETB</span>
+              </div>
+
+              <div className="text-xs space-y-1 text-slate-300">
+                <p><strong>From:</strong> {ride.pickup_address}</p>
+                <p><strong>To:</strong> {ride.destination_address}</p>
+                <p className="text-slate-400">Distance: {ride.estimated_distance_km} KM</p>
+              </div>
+
+              <button
+                onClick={() => handleAcceptRide(ride.id)}
+                disabled={!isOnline || loading}
+                className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-40 text-slate-950 font-bold py-2.5 rounded-lg text-xs transition flex items-center justify-center gap-1"
+              >
+                <Check className="w-4 h-4" /> Accept Ride
+              </button>
+            </div>
+          ))}
+
+          {availableBookings.length === 0 && (
+            <div className="col-span-full bg-slate-900 border border-slate-800 p-8 text-center text-xs text-slate-500 rounded-xl">
+              No pending ride requests at the moment.
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+    import React, { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
+import { DriverDetails, Booking, PricingConfig } from '../types';
+import { Shield, Users, Car, Settings, CheckCircle, XCircle, Search, Save } from 'lucide-react';
+
+export const AdminDashboard: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<'drivers' | 'bookings' | 'pricing'>('drivers');
+  const [drivers, setDrivers] = useState<DriverDetails[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [pricing, setPricing] = useState<PricingConfig>({ id: 1, base_fare: 30, per_km_rate: 15, min_fare: 40 });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [message, setMessage] = useState('');
+
+  const loadAdminData = async () => {
+    // Fetch drivers with profile metadata
+    const { data: drvData } = await supabase
+      .from('driver_details')
+      .select('*, profiles(full_name, phone_number)')
+      .order('created_at', { ascending: false });
+    if (drvData) setDrivers(drvData as any);
+
+    // Fetch all bookings
+    const { data: bkData } = await supabase
+      .from('bookings')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (bkData) setBookings(bkData as Booking[]);
+
+    // Fetch pricing config
+    const { data: prcData } = await supabase
+      .from('pricing_config')
+      .select('*')
+      .single();
+    if (prcData) setPricing(prcData as PricingConfig);
+  };
+
+  useEffect(() => {
+    loadAdminData();
+  }, []);
+
+  const updateDriverStatus = async (driverId: string, status: 'approved' | 'rejected' | 'suspended') => {
+    await supabase.from('driver_details').update({ status }).eq('id', driverId);
+    setMessage(`Driver status updated to ${status}.`);
+    loadAdminData();
+  };
+
+  const savePricing = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await supabase.from('pricing_config').upsert(pricing);
+    setMessage('Pricing configuration updated successfully.');
+  };
+
+  const filteredBookings = bookings.filter(b => 
+    b.reference_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    b.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    b.customer_phone.includes(searchTerm)
+  );
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 sm:p-8 space-y-6">
+      <div className="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-4 border-b border-slate-800 pb-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+            <Shield className="w-6 h-6 text-emerald-400" /> Admin Control Center
+          </h1>
+          <p className="text-xs text-slate-400">Jigjiga Bajaj Fleet Operations & Fare Management</p>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="flex gap-2 bg-slate-900 p-1 rounded-xl border border-slate-800">
+          <button
+            onClick={() => setActiveTab('drivers')}
+            className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+              activeTab === 'drivers' ? 'bg-amber-500 text-slate-950' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Users className="w-3.5 h-3.5" /> Drivers ({drivers.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('bookings')}
+            className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+              activeTab === 'bookings' ? 'bg-amber-500 text-slate-950' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Car className="w-3.5 h-3.5" /> Rides ({bookings.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('pricing')}
+            className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+              activeTab === 'pricing' ? 'bg-amber-500 text-slate-950' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Settings className="w-3.5 h-3.5" /> Fare Settings
+          </button>
+        </div>
+      </div>
+
+      {message && (
+        <div className="max-w-6xl mx-auto bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs p-3 rounded-lg">
+          {message}
+        </div>
+      )}
+
+      <div className="max-w-6xl mx-auto">
+        {/* DRIVERS TAB */}
+        {activeTab === 'drivers' && (
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-950 text-slate-400 border-b border-slate-800 uppercase font-mono">
+                <tr>
+                  <th className="p-4">Driver Name</th>
+                  <th className="p-4">Phone</th>
+                  <th className="p-4">Plate No.</th>
+                  <th className="p-4">Color</th>
+                  <th className="p-4">Status</th>
+                  <th className="p-4">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800">
+                {drivers.map((drv) => (
+                  <tr key={drv.id} className="hover:bg-slate-800/50">
+                    <td className="p-4 font-semibold text-white">{(drv.profiles as any)?.full_name || 'N/A'}</td>
+                    <td className="p-4 text-slate-300 font-mono">{(drv.profiles as any)?.phone_number || 'N/A'}</td>
+                    <td className="p-4 font-mono text-amber-400">{drv.plate_number}</td>
+                    <td className="p-4 text-slate-300">{drv.bajaj_color}</td>
+                    <td className="p-4">
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        drv.status === 'approved' ? 'bg-emerald-500/20 text-emerald-400' :
+                        drv.status === 'pending' ? 'bg-amber-500/20 text-amber-400' : 'bg-rose-500/20 text-rose-400'
+                      }`}>
+                        {drv.status.toUpperCase()}
+                      </span>
+                    </td>
+                    <td className="p-4 space-x-2">
+                      {drv.status !== 'approved' && (
+                        <button
+                          onClick={() => updateDriverStatus(drv.id, 'approved')}
+                          className="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded text-[10px] font-bold"
+                        >
+                          Approve
+                        </button>
+                      )}
+                      {drv.status !== 'suspended' && (
+                        <button
+                          onClick={() => updateDriverStatus(drv.id, 'suspended')}
+                          className="bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 px-2.5 py-1 rounded text-[10px] font-bold"
+                        >
+                          Suspend
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* BOOKINGS TAB */}
+        {activeTab === 'bookings' && (
+          <div className="space-y-4">
+            <div className="relative max-w-xs">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+              <input
+                type="text"
+                placeholder="Filter by ref or phone..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-800 text-white text-xs rounded-xl pl-9 pr-3 py-2.5 focus:border-amber-500 focus:outline-none"
+              />
+            </div>
+
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-950 text-slate-400 border-b border-slate-800 uppercase font-mono">
+                  <tr>
+                    <th className="p-4">Ref Code</th>
+                    <th className="p-4">Customer</th>
+                    <th className="p-4">Route</th>
+                    <th className="p-4">Fare</th>
+                    <th className="p-4">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800">
+                  {filteredBookings.map((b) => (
+                    <tr key={b.id} className="hover:bg-slate-800/50">
+                      <td className="p-4 font-mono font-bold text-amber-400">{b.reference_code}</td>
+                      <td className="p-4">
+                        <div className="font-semibold text-white">{b.customer_name}</div>
+                        <div className="text-[10px] text-slate-400">{b.customer_phone}</div>
+                      </td>
+                      <td className="p-4 text-slate-300">
+                        <div>From: {b.pickup_address}</div>
+                        <div>To: {b.destination_address}</div>
+                      </td>
+                      <td className="p-4 font-bold text-amber-400">{b.estimated_fare} ETB</td>
+                      <td className="p-4 font-bold capitalize text-slate-300">{b.status}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* PRICING TAB */}
+        {activeTab === 'pricing' && (
+          <form onSubmit={savePricing} className="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-md space-y-4">
+            <h2 className="text-base font-bold text-white">Configure Jigjiga Bajaj Pricing Rules</h2>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Base Fare (ETB)</label>
+              <input
+                type="number"
+                value={pricing.base_fare}
+                onChange={(e) => setPricing({ ...pricing, base_fare: Number(e.target.value) })}
+                className="w-full bg-slate-950 border border-slate-700 text-white text-xs rounded-xl px-3 py-2.5"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Rate Per KM (ETB)</label>
+              <input
+                type="number"
+                value={pricing.per_km_rate}
+                onChange={(e) => setPricing({ ...pricing, per_km_rate: Number(e.target.value) })}
+                className="w-full bg-slate-950 border border-slate-700 text-white text-xs rounded-xl px-3 py-2.5"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Minimum Fare (ETB)</label>
+              <input
+                type="number"
+                value={pricing.min_fare}
+                onChange={(e) => setPricing({ ...pricing, min_fare: Number(e.target.value) })}
+                className="w-full bg-slate-950 border border-slate-700 text-white text-xs rounded-xl px-3 py-2.5"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-2"
+            >
+              <Save className="w-4 h-4" /> Save Fare Configuration
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+};
+    import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
+import { Car, User, Phone, Lock, FileText, CheckCircle } from 'lucide-react';
+
+export const DriverRegister: React.FC = () => {
+  const navigate = useNavigate();
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [plateNumber, setPlateNumber] = useState('');
+  const [licenseNumber, setLicenseNumber] = useState('');
+  const [bajajColor, setBajajColor] = useState('Yellow/Blue');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      // 1. Create auth user
+      const { data: authData, error: authErr } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (authErr || !authData.user) throw new Error(authErr?.message || 'Registration failed');
+
+      const userId = authData.user.id;
+
+      // 2. Insert Profile
+      const { error: profErr } = await supabase.from('profiles').insert({
+        id: userId,
+        full_name: fullName,
+        phone_number: phone,
+        role: 'driver',
+      });
+      if (profErr) throw profErr;
+
+      // 3. Insert Driver Details
+      const { error: drvErr } = await supabase.from('driver_details').insert({
+        id: userId,
+        plate_number: plateNumber,
+        license_number: licenseNumber,
+        bajaj_color: bajajColor,
+        status: 'pending',
+      });
+      if (drvErr) throw drvErr;
+
+      navigate('/driver-dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Error creating account.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 max-w-md w-full space-y-6">
+        <div className="text-center space-y-2">
+          <div className="bg-amber-500/10 border border-amber-500/30 w-12 h-12 rounded-xl flex items-center justify-center mx-auto text-amber-400">
+            <Car className="w-6 h-6" />
+          </div>
+          <h1 className="text-xl font-bold text-white">Join as a Bajaj Driver</h1>
+          <p className="text-xs text-slate-400">Register your bajaj to start taking online rides in Jigjiga.</p>
+        </div>
+
+        {error && (
+          <div className="bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs p-3 rounded-lg">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleRegister} className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">Full Name</label>
+            <input
+              type="text"
+              required
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-700 text-white text-xs rounded-xl px-3 py-2.5 focus:border-amber-500 focus:outline-none"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Phone Number</label>
+              <input
+                type="tel"
+                required
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 text-white text-xs rounded-xl px-3 py-2.5 focus:border-amber-500 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Email</label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 text-white text-xs rounded-xl px-3 py-2.5 focus:border-amber-500 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">Password</label>
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-700 text-white text-xs rounded-xl px-3 py-2.5 focus:border-amber-500 focus:outline-none"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Bajaj Plate No.</label>
+              <input
+                type="text"
+                required
+                placeholder="ET-3-XXXXX"
+                value={plateNumber}
+                onChange={(e) => setPlateNumber(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 text-white text-xs rounded-xl px-3 py-2.5 uppercase focus:border-amber-500 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Driver License No.</label>
+              <input
+                type="text"
+                required
+                value={licenseNumber}
+                onChange={(e) => setLicenseNumber(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 text-white text-xs rounded-xl px-3 py-2.5 focus:border-amber-500 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">Bajaj Color</label>
+            <select
+              value={bajajColor}
+              onChange={(e) => setBajajColor(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-700 text-white text-xs rounded-xl px-3 py-2.5 focus:border-amber-500 focus:outline-none"
+            >
+              <option value="Yellow/Blue">Yellow / Blue (Standard)</option>
+              <option value="Blue/White">Blue / White</option>
+              <option value="Red">Red</option>
+              <option value="Green">Green</option>
+            </select>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-bold py-3 rounded-xl text-xs transition"
+          >
+            {loading ? 'Submitting Application...' : 'Register Bajaj & Driver'}
           </button>
         </form>
 
-        <div id="notice" class="notice" role="status"
-             aria-live="polite"></div>
+        <p className="text-center text-xs text-slate-400">
+          Already registered? <Link to="/login" className="text-amber-400 font-semibold hover:underline">Log in here</Link>
+        </p>
       </div>
-    </section>
+    </div>
+  );
+};
+    import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
+import { Lock, Mail } from 'lucide-react';
 
-    <section>
-      <h2>Maxaad adeeggan uga faa'iidaysan kartaa?</h2>
+export const Login: React.FC = () => {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-      <div class="features">
-        <article class="feature">
-          <h3>🛺 Dalab Fudud</h3>
-          <p>Ku codso safarkaaga telefoonkaaga.</p>
-        </article>
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
 
-        <article class="feature">
-          <h3>📍 Goobaha Safarka</h3>
-          <p>Sheeg meesha lagaa qaadayo iyo meesha aad u socoto.</p>
-        </article>
+    const { data, error: loginErr } = await supabase.auth.signInWithPassword({ email, password });
 
-        <article class="feature">
-          <h3>🤝 Darawallo</h3>
-          <p>Waxaa loo diyaarin karaa nidaam darawallo badan ay isticmaalaan.</p>
-        </article>
+    if (loginErr || !data.user) {
+      setError(loginErr?.message || 'Login failed');
+      setLoading(false);
+      return;
+    }
+
+    const { data: prof } = await supabase.from('profiles').select('role').eq('id', data.user.id).single();
+
+    setLoading(false);
+    if (prof?.role === 'admin') {
+      navigate('/admin-dashboard');
+    } else {
+      navigate('/driver-dashboard');
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 max-w-sm w-full space-y-6">
+        <div className="text-center space-y-1">
+          <h1 className="text-xl font-bold text-white">System Login</h1>
+          <p className="text-xs text-slate-400">Access driver portal or admin console</p>
+        </div>
+
+        {error && (
+          <div className="bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs p-3 rounded-lg">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">Email</label>
+            <div className="relative">
+              <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 text-white text-xs rounded-xl pl-9 pr-3 py-2.5 focus:border-amber-500 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">Password</label>
+            <div className="relative">
+              <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 text-white text-xs rounded-xl pl-9 pr-3 py-2.5 focus:border-amber-500 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-bold py-3 rounded-xl text-xs transition"
+          >
+            {loading ? 'Logging in...' : 'Sign In'}
+          </button>
+        </form>
+
+        <p className="text-center text-xs text-slate-400">
+          Want to register your Bajaj? <Link to="/register-driver" className="text-amber-400 font-semibold hover:underline">Register driver</Link>
+        </p>
       </div>
-    </section>
-  </main>
-    <footer>
-    <h3>Jigjiga Bajaj</h3>
-    <p>Gaadiid fudud oo bulshada Jigjiga loogu talagalay.</p>
-    <p>&copy; 2026 Jigjiga Bajaj</p>
-  </footer>
+    </div>
+  );
+};
+    import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext';
 
-  <script>
-    const form = document.getElementById("rideForm");
-    const notice = document.getElementById("notice");
+import { Navbar } from './components/Navbar';
+import { Home } from './pages/Home';
+import { TrackBooking } from './pages/TrackBooking';
+import { DriverRegister } from './pages/DriverRegister';
+import { DriverDashboard } from './pages/DriverDashboard';
+import { AdminDashboard } from './pages/AdminDashboard';
+import { Login } from './pages/Login';
 
-    form.addEventListener("submit", function(event) {
-      event.preventDefault();
+// Protected Route Wrapper for Admin Console
+const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, profile, loading } = useAuth();
+  if (loading) return <div className="p-8 text-center text-slate-400">Loading auth...</div>;
+  if (!user || profile?.role !== 'admin') return <Navigate to="/login" replace />;
+  return <>{children}</>;
+};
 
-      const name = document.getElementById("name").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-      const pickup = document.getElementById("pickup").value.trim();
-      const destination =
-        document.getElementById("destination").value.trim();
-      const passengers =
-        document.getElementById("passengers").value;
+// Protected Route Wrapper for Driver Workstation
+const DriverRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, profile, loading } = useAuth();
+  if (loading) return <div className="p-8 text-center text-slate-400">Loading auth...</div>;
+  if (!user || (profile?.role !== 'driver' && profile?.role !== 'admin')) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+};
 
-      if (!name || !phone || !pickup || !destination) {
-        alert("Fadlan buuxi dhammaan meelaha loo baahan yahay.");
-        return;
-      }
+export const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <LanguageProvider>
+        <BrowserRouter>
+          <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+            <Navbar />
+            <div className="flex-1">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/track" element={<TrackBooking />} />
+                <Route path="/register-driver" element={<DriverRegister />} />
+                <Route path="/login" element={<Login />} />
+                
+                <Route
+                  path="/driver-dashboard"
+                  element={
+                    <DriverRoute>
+                      <DriverDashboard />
+                    </DriverRoute>
+                  }
+                />
 
-      const reference =
-        "JBG-" + Date.now().toString().slice(-8);
+                <Route
+                  path="/admin-dashboard"
+                  element={
+                    <AdminRoute>
+                      <AdminDashboard />
+                    </AdminRoute>
+                  }
+                />
 
-      notice.replaceChildren();
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </div>
+          </div>
+        </BrowserRouter>
+      </LanguageProvider>
+    </AuthProvider>
+  );
+};
+                  import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { App } from './App';
+import './index.css';
 
-      const heading = document.createElement("h3");
-      heading.textContent = "Codsiga waa la diyaariyey";
-
-      const details = document.createElement("p");
-      details.textContent =
-        "Tixraaca: " + reference +
-        " | Magaca: " + name +
-        " | Qaadista: " + pickup +
-        " | Tagista: " + destination +
-        " | Rakaab: " + passengers;
-
-      const warning = document.createElement("p");
-      warning.textContent =
-        "MUHIIM: Codsigan wuxuu ku jiraa browser-ka oo keliya. " +
-        "Looma dirin darawal, mana jiro booking dhab ah " +
-        "ilaa backend iyo database lagu xiro.";
-
-      notice.append(heading, details, warning);
-      notice.style.display = "block";
-      notice.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    });
-  </script>
-
-</body>
-</html>
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+                  
