@@ -393,3 +393,249 @@ function makeCard(topic) {
 }
 
 func
+// LifeFix: display the six solution topics
+const lifeFixTopics = [
+  {
+    id: "career",
+    icon: "💼",
+    title: "Career & Jobs",
+    description: "Find jobs, prepare your CV, and practice interviews.",
+    steps: [
+      "Choose a job that matches your skills and interests.",
+      "Prepare a clear CV with your education and experience.",
+      "Search trusted job websites and company career pages.",
+      "Write a short, professional application for each job.",
+      "Practice interview questions and follow up politely."
+    ]
+  },
+  {
+    id: "learning",
+    icon: "📚",
+    title: "Learning & Education",
+    description: "Build skills and make learning easier.",
+    steps: [
+      "Choose one skill or subject you want to learn.",
+      "Set a small, realistic learning goal.",
+      "Study in short, regular sessions.",
+      "Practice what you learn with exercises or projects.",
+      "Review your progress every week."
+    ]
+  },
+  {
+    id: "money",
+    icon: "💰",
+    title: "Money & Budget",
+    description: "Organize your spending and plan your budget.",
+    steps: [
+      "Write down your monthly income.",
+      "List essential expenses such as food, housing, and transport.",
+      "Record your spending each day.",
+      "Set a realistic limit for non-essential purchases.",
+      "Review your budget weekly and save what you can."
+    ]
+  },
+  {
+    id: "technology",
+    icon: "💻",
+    title: "Technology Help",
+    description: "Solve common phone, computer, and internet problems.",
+    steps: [
+      "Identify the exact problem and any error message.",
+      "Check your internet connection and battery or power.",
+      "Restart the device or application.",
+      "Install official updates if available.",
+      "Back up important data before major changes and seek trusted support if needed."
+    ]
+  },
+  {
+    id: "daily-life",
+    icon: "🏠",
+    title: "Daily Life",
+    description: "Manage your time and everyday responsibilities.",
+    steps: [
+      "Write down the tasks you need to complete.",
+      "Choose the three most important tasks.",
+      "Break large tasks into small steps.",
+      "Set a time for each task and take short breaks.",
+      "Review what worked and plan for tomorrow."
+    ]
+  },
+  {
+    id: "small-business",
+    icon: "🛍️",
+    title: "Small Business",
+    description: "Explore practical steps for starting and improving a business.",
+    steps: [
+      "Identify a real customer need.",
+      "Ask potential customers what they need and can afford.",
+      "Estimate startup costs and ongoing expenses.",
+      "Test your idea on a small scale before investing heavily.",
+      "Track sales, expenses, customer feedback, and local legal requirements."
+    ]
+  }
+];
+
+(function initialiseLifeFixTopics() {
+  const solutionsSection = document.getElementById("solutions");
+  const guideSection = document.getElementById("detailSection");
+
+  if (!solutionsSection || !guideSection) {
+    console.error(
+      "LifeFix setup: Could not find #solutions or #detailSection."
+    );
+    return;
+  }
+
+  const grid = solutionsSection.querySelector(".grid");
+  if (!grid) {
+    console.error("LifeFix setup: Solutions grid was not found.");
+    return;
+  }
+
+  grid.innerHTML = "";
+
+  lifeFixTopics.forEach(function(topic) {
+    const card = document.createElement("article");
+    card.className = "card solution-card";
+    card.dataset.search =
+      (topic.title + " " + topic.description + " " +
+       topic.steps.join(" ")).toLowerCase();
+
+    const icon = document.createElement("div");
+    icon.className = "category-icon";
+    icon.textContent = topic.icon;
+
+    const title = document.createElement("h3");
+    title.textContent = topic.title;
+
+    const description = document.createElement("p");
+    description.textContent = topic.description;
+
+    const link = document.createElement("a");
+    link.className = "text-link";
+    link.href = "#detailSection";
+    link.textContent = "Explore solutions →";
+
+    link.addEventListener("click", function(event) {
+      event.preventDefault();
+      showLifeFixGuide(topic.id);
+    });
+
+    card.append(icon, title, description, link);
+    grid.appendChild(card);
+  });
+
+  function showLifeFixGuide(topicId) {
+    const topic = lifeFixTopics.find(function(item) {
+      return item.id === topicId;
+    });
+
+    if (!topic) return;
+
+    guideSection.innerHTML = "";
+
+    const container = document.createElement("div");
+    container.className = "card";
+
+    const heading = document.createElement("div");
+    heading.className = "detail-top";
+
+    const icon = document.createElement("div");
+    icon.className = "category-icon";
+    icon.textContent = topic.icon;
+
+    const title = document.createElement("h2");
+    title.textContent = topic.title;
+
+    heading.append(icon, title);
+
+    const intro = document.createElement("p");
+    intro.className = "detail-lead";
+    intro.textContent = topic.description;
+
+    const list = document.createElement("ol");
+    list.className = "guide-list";
+
+    topic.steps.forEach(function(step) {
+      const item = document.createElement("li");
+      item.textContent = step;
+      list.appendChild(item);
+    });
+
+    const actions = document.createElement("div");
+    actions.className = "detail-actions";
+
+    const back = document.createElement("button");
+    back.type = "button";
+    back.className = "btn btn-secondary";
+    back.textContent = "← Back to solutions";
+    back.addEventListener("click", function() {
+      solutionsSection.scrollIntoView({ behavior: "smooth" });
+    });
+
+    const next = document.createElement("button");
+    next.type = "button";
+    next.className = "btn";
+    next.textContent = "Next guide →";
+    next.addEventListener("click", function() {
+      const currentIndex = lifeFixTopics.findIndex(
+        function(item) { return item.id === topic.id; }
+      );
+      const nextTopic = lifeFixTopics[
+        (currentIndex + 1) % lifeFixTopics.length
+      ];
+      showLifeFixGuide(nextTopic.id);
+    });
+
+    actions.append(back, next);
+    container.append(heading, intro, list, actions);
+    guideSection.appendChild(container);
+    guideSection.style.display = "block";
+    guideSection.scrollIntoView({ behavior: "smooth" });
+  }
+
+  // Connect the search box to the solution cards.
+  const searchInput = document.getElementById("searchInput");
+  const searchForm = document.getElementById("searchForm");
+
+  function filterLifeFixTopics() {
+    const query = searchInput
+      ? searchInput.value.trim().toLowerCase()
+      : "";
+
+    let visibleCount = 0;
+
+    Array.from(grid.children).forEach(function(card) {
+      const matches = card.dataset.search.includes(query);
+      card.style.display = matches ? "" : "none";
+      if (matches) visibleCount++;
+    });
+
+    let message = document.getElementById("lifeFixSearchMessage");
+
+    if (!message) {
+      message = document.createElement("p");
+      message.id = "lifeFixSearchMessage";
+      message.className = "status";
+      grid.parentNode.insertBefore(message, grid.nextSibling);
+    }
+
+    message.textContent = visibleCount
+      ? visibleCount + " solution topic(s) found."
+      : "No matching topics found. Try another search.";
+
+    message.classList.toggle("visible", Boolean(query));
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener("input", filterLifeFixTopics);
+  }
+
+  if (searchForm) {
+    searchForm.addEventListener("submit", function(event) {
+      event.preventDefault();
+      filterLifeFixTopics();
+      solutionsSection.scrollIntoView({ behavior: "smooth" });
+    });
+  }
+})();
