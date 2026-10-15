@@ -198,7 +198,8 @@ form { display: grid; gap: 16px; }
 </style>
 </head>
 <body>
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <defs>
     <symbol id="i-bajaj" viewBox="0 0 32 26"><path d="M6 11 8.5 5H18Q19.5 5 20.3 6.4L23 11"/><path d="M3 11H25Q28 11 28 14V18H3Z"/><circle cx="8" cy="19.5" r="3"/><circle cx="23" cy="19.5" r="3"/></symbol>
     <symbol id="i-taxi" viewBox="0 0 32 26"><path d="M7 11 10 5.5H22L25 11"/><path d="M3 11H29V18H3Z"/><circle cx="9" cy="19.5" r="3"/><circle cx="23" cy="19.5" r="3"/><rect x="14" y="2.5" width="4" height="2.2" rx=".6"/></symbol>
@@ -337,6 +338,7 @@ form { display: grid; gap: 16px; }
     </div>
   </main>
 </section>
+
 <section id="view-confirm" class="view" hidden>
   <main>
     <div class="wrap stack">
@@ -375,17 +377,18 @@ form { display: grid; gap: 16px; }
 <script>
 (function () {
   // ---- Supabase (the publishable key is safe in the browser; access is limited by database rules) ----
-  var SUPABASE_URL = "https://fkyqbuwsbayjypyujgqj.supabase.co/rest/v1/;
+  // Use the base URL only. The code adds /rest/v1/bookings itself.
+  var SUPABASE_URL = "https://fkyqbuwsbayjypyujgqj.supabase.co";
   var SUPABASE_KEY = "sb_publishable_uokTWBlF8-3PAlXNh0lkrw_ixHfr92T";
 
   // ---- Services and sample prices (Birr). base + perKm x distance, rounded to 5 ----
   var SERVICES = [
-    { id: "bajaj",  kind: "ride",     base: 20,  perKm: 9,  speed: 18, fee: false },
-    { id: "taxi",   kind: "ride",     base: 200,  perKm: 18, speed: 24, fee: false },
-    { id: "parcel", kind: "delivery", base: 45,  perKm: 8,  speed: 20, fee: false },
-    { id: "food",   kind: "delivery", base: 100,  perKm: 7,  speed: 20, fee: true },
-    { id: "market", kind: "delivery", base: 150,  perKm: 8,  speed: 18, fee: true },
-    { id: "cargo",  kind: "delivery", base: 120, perKm: 25, speed: 18, fee: false }
+    { id: "bajaj",  kind: "ride",     base: 250,  perKm: 9,  speed: 18, fee: false },
+    { id: "taxi",   kind: "ride",     base: 300,  perKm: 18, speed: 24, fee: false },
+    { id: "parcel", kind: "delivery", base: 400,  perKm: 8,  speed: 20, fee: false },
+    { id: "food",   kind: "delivery", base: 300,  perKm: 7,  speed: 20, fee: true },
+    { id: "market", kind: "delivery", base: 400,  perKm: 8,  speed: 18, fee: true },
+    { id: "cargo",  kind: "delivery", base: 550, perKm: 25, speed: 18, fee: false }
   ];
 
   // ---- Sample places (km on a rough local grid; not survey data) ----
@@ -716,9 +719,8 @@ form { display: grid; gap: 16px; }
       if (!res.ok) throw new Error("HTTP " + res.status);
       return ref;
     });
-  }
-
-  $("bookForm").addEventListener("submit", function (ev) {
+    }
+   $("bookForm").addEventListener("submit", function (ev) {
     ev.preventDefault();
     clearErrors();
     var s = svc(svcId), del = s.kind === "delivery";
