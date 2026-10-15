@@ -1,16 +1,43 @@
-<!doctype html>
+doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Jigjiga Bajaj</title>
+<meta name="description" content="Book a Bajaj, taxi or delivery in Jigjiga, Ethiopia.">
+
+<!-- App (PWA) settings. All paths are relative so they work on GitHub Pages in a repository folder. -->
+<meta name="theme-color" content="#1b3b9c" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#12266b" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Jigjiga Bajaj">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no">
+<!-- iPhone start-up screens (portrait) -->
+<link rel="apple-touch-startup-image" href="splash/1320x2868.png" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="splash/1206x2622.png" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="splash/1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="splash/1260x2736.png" media="(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="splash/1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="splash/1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="splash/1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="splash/1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="splash/1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="splash/828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="splash/1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<link rel="apple-touch-startup-image" href="splash/750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Figtree:wght@400;500;600&display=swap">
 <style>
 [hidden] { display: none !important; }
-body { margin: 0; }
-/* Layout: one narrow column (max 560px). Blue hero band with a road-stripe edge, blue ride cards, light delivery cards, then how-it-works. */
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; padding-bottom: env(safe-area-inset-bottom, 0px); -webkit-tap-highlight-color: transparent; }
 :root {
   --bg: #f2f5fb;
   --surface: #ffffff;
@@ -54,6 +81,7 @@ body { background: var(--bg); color: var(--fg); font-family: var(--font-body); f
 h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.1; }
 p { margin: 0; }
 button, input, textarea { font: inherit; color: inherit; }
+button { touch-action: manipulation; }
 :focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
 
 .wrap {
@@ -62,26 +90,23 @@ button, input, textarea { font: inherit; color: inherit; }
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
 
-/* Line icons (shared by all services) */
 .ico { width: 32px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 
-/* Top bar */
-.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--hero-bg); color: var(--hero-fg); }
+.top { position: sticky; top: 0; padding-top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--hero-bg); color: var(--hero-fg); }
 .top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 10px; }
 .brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; letter-spacing: -0.01em; background: none; border: 0; padding: 0; cursor: pointer; color: inherit; min-height: 44px; }
 .brand svg { width: 38px; height: auto; }
 .lang { display: flex; background: rgba(255,255,255,.14); border-radius: 999px; padding: 3px; gap: 2px; }
 .lang button { border: 0; background: transparent; color: var(--hero-fg); min-width: 44px; min-height: 36px; border-radius: 999px; font-weight: 600; font-size: .85rem; letter-spacing: .06em; cursor: pointer; }
 .lang button[aria-pressed="true"] { background: var(--yellow); color: var(--yellow-ink); }
+.netbar { background: var(--yellow); color: var(--yellow-ink); font-weight: 600; font-size: .9rem; text-align: center; padding: 8px 16px; }
 
-/* Logo colours */
 .bj-body { fill: var(--yellow); }
 .bj-top { fill: #ffffff; }
 .bj-glass { fill: #1b3b9c; }
 .bj-wheel { fill: #0b1127; stroke: #ffffff; stroke-width: 2; }
 .bj-hub { fill: #ffffff; }
 
-/* Hero */
 .hero { background: var(--hero-bg); color: var(--hero-fg); position: relative; }
 .hero .wrap { padding-block: 20px 36px; display: grid; gap: 10px; }
 .eyebrow { font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; color: var(--hero-muted); font-weight: 600; }
@@ -92,7 +117,6 @@ button, input, textarea { font: inherit; color: inherit; }
 .road::after { content: ""; position: absolute; left: 0; right: 0; top: 6px; height: 3px;
   background: repeating-linear-gradient(90deg, var(--yellow) 0 22px, transparent 22px 40px); }
 
-/* Buttons */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 22px; border-radius: 14px; border: 0; font-weight: 600; font-size: 1.05rem; cursor: pointer; text-decoration: none; }
 .btn-primary { background: var(--yellow); color: var(--yellow-ink); }
 .btn-primary:hover { filter: brightness(1.05); }
@@ -101,14 +125,13 @@ button, input, textarea { font: inherit; color: inherit; }
 .btn-block { width: 100%; }
 .btn-row { display: grid; gap: 10px; }
 
-/* Sections */
 main { padding-block: 22px 28px; }
 .stack { display: grid; gap: 24px; }
 .sec { display: grid; gap: 12px; min-width: 0; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; min-width: 0; }
 .h2 { font-size: 1.35rem; font-weight: 700; }
 .sub { color: var(--muted); margin-top: 6px; }
-  /* Service cards: rides (blue, large) and delivery (light, compact) */
+
 .ride-grid, .del-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .ride, .del { display: flex; flex-direction: column; gap: 8px; text-align: left; cursor: pointer; min-width: 0; }
 .ride { background: var(--hero-bg); color: var(--hero-fg); border: 0; border-radius: 20px; padding: 16px; min-height: 176px; }
@@ -123,12 +146,15 @@ main { padding-block: 22px 28px; }
 .del p { color: var(--muted); font-size: .85rem; line-height: 1.35; }
 .del .from { margin-top: auto; color: var(--blue); font-weight: 700; font-size: .85rem; font-variant-numeric: tabular-nums; }
 
-/* How it works */
 .steps { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 12px; }
 .steps li { display: flex; gap: 12px; align-items: flex-start; }
 .dot { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--blue-soft); color: var(--blue); display: grid; place-items: center; font-weight: 700; font-size: .85rem; }
 
-/* Popular routes */
+.inst { display: grid; gap: 10px; }
+.inst details { border-top: 1px solid var(--line); }
+.inst summary { cursor: pointer; font-weight: 600; min-height: 48px; display: flex; align-items: center; }
+.inst ol { margin: 0 0 12px; padding-left: 22px; display: grid; gap: 6px; }
+
 .routes { display: grid; gap: 10px; margin-top: 12px; }
 .route { display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; min-height: 56px; cursor: pointer; }
 .route:hover { border-color: var(--blue); }
@@ -137,7 +163,6 @@ main { padding-block: 22px 28px; }
 .route .rt small { color: var(--muted); }
 .route .rp { flex: none; font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; color: var(--blue); font-variant-numeric: tabular-nums; }
 
-/* Booking page */
 .back { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px 0 6px; border: 0; background: transparent; color: var(--blue); font-weight: 600; cursor: pointer; border-radius: 12px; justify-self: start; }
 .back svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
@@ -160,7 +185,6 @@ form { display: grid; gap: 16px; }
 .swap { width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--line); background: var(--surface); color: var(--blue); cursor: pointer; display: grid; place-items: center; align-self: center; }
 .swap svg { width: 22px; height: 22px; }
 
-/* Fare */
 .fare { background: var(--blue-soft); border-radius: 14px; padding: 16px; display: grid; gap: 8px; }
 .fare .lab { font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
 .fare .amt { font-family: var(--font-display); font-weight: 800; font-size: 2.6rem; letter-spacing: -0.02em; color: var(--fg); font-variant-numeric: tabular-nums; line-height: 1; }
@@ -169,13 +193,12 @@ form { display: grid; gap: 16px; }
 .fare .meta b { color: var(--fg); font-weight: 600; }
 .fare .note { color: var(--muted); }
 
-/* Confirmation ticket */
 .ok { display: grid; gap: 6px; }
 .pill { display: inline-flex; align-items: center; gap: 8px; align-self: start; justify-self: start; background: var(--good-soft); color: var(--good); font-weight: 600; font-size: .88rem; padding: 6px 12px; border-radius: 999px; }
 .pill i { width: 8px; height: 8px; border-radius: 50%; background: var(--good); display: block; }
 .ticket { padding: 0; overflow: hidden; }
 .ticket .head { padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 2px dashed var(--line); flex-wrap: wrap; }
-.ticket .ref { font-family: var(--font-display); font-weight: 800; font-size: 1.6rem; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+.ticket .ref { font-family: var(--font-display); font-weight: 800; font-size: 1.6rem; letter-spacing: .02em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .mini { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; min-height: 40px; padding: 0 14px; cursor: pointer; font-weight: 600; color: var(--blue); }
 .rows { display: grid; padding: 6px 18px 12px; margin: 0; }
 .row { display: grid; grid-template-columns: 8.5rem 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
@@ -198,8 +221,7 @@ form { display: grid; gap: 16px; }
 </style>
 </head>
 <body>
-  
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <defs>
     <symbol id="i-bajaj" viewBox="0 0 32 26"><path d="M6 11 8.5 5H18Q19.5 5 20.3 6.4L23 11"/><path d="M3 11H25Q28 11 28 14V18H3Z"/><circle cx="8" cy="19.5" r="3"/><circle cx="23" cy="19.5" r="3"/></symbol>
     <symbol id="i-taxi" viewBox="0 0 32 26"><path d="M7 11 10 5.5H22L25 11"/><path d="M3 11H29V18H3Z"/><circle cx="9" cy="19.5" r="3"/><circle cx="23" cy="19.5" r="3"/><rect x="14" y="2.5" width="4" height="2.2" rx=".6"/></symbol>
@@ -227,6 +249,7 @@ form { display: grid; gap: 16px; }
       <button type="button" id="langSo" data-lang="so" aria-pressed="false" lang="so" aria-label="Soomaali">SO</button>
     </div>
   </div>
+  <div class="netbar" id="netBar" role="status" hidden data-i18n="offlineBar"></div>
 </header>
 
 <section id="view-home" class="view">
@@ -271,6 +294,31 @@ form { display: grid; gap: 16px; }
         <div class="routes" id="routes"></div>
       </div>
 
+      <div class="card inst" id="installCard" hidden>
+        <div>
+          <h2 class="h2" data-i18n="instTitle"></h2>
+          <p class="sub" data-i18n="instIntro"></p>
+        </div>
+        <button class="btn btn-primary" type="button" id="installBtn" hidden data-i18n="instBtn"></button>
+        <details>
+          <summary data-i18n="instAndroid"></summary>
+          <ol>
+            <li data-i18n="instA1"></li>
+            <li data-i18n="instA2"></li>
+            <li data-i18n="instA3"></li>
+          </ol>
+        </details>
+        <details id="iosDetails">
+          <summary data-i18n="instIos"></summary>
+          <ol>
+            <li data-i18n="instI1"></li>
+            <li data-i18n="instI2"></li>
+            <li data-i18n="instI3"></li>
+            <li data-i18n="instI4"></li>
+          </ol>
+        </details>
+      </div>
+
       <p class="foot" data-i18n="sample"></p>
     </div>
   </main>
@@ -294,24 +342,24 @@ form { display: grid; gap: 16px; }
       <form id="bookForm" class="card" novalidate>
         <div class="field">
           <label for="name" data-i18n="name"></label>
-          <input id="name" name="name" type="text" autocomplete="name" data-i18n-ph="namePh">
+          <input id="name" name="name" type="text" autocomplete="name" maxlength="80" data-i18n-ph="namePh">
           <p class="err" id="errName" aria-live="polite"></p>
         </div>
         <div class="field">
           <label for="phone" data-i18n="phone"></label>
-          <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" data-i18n-ph="phonePh">
+          <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" data-i18n-ph="phonePh">
           <p class="err" id="errPhone" aria-live="polite"></p>
         </div>
         <div class="places">
           <div class="pair">
             <div class="field">
               <label for="pickup" id="lblPickup"></label>
-              <input id="pickup" name="pickup" type="text" list="placeList" autocomplete="off" data-i18n-ph="placePh">
+              <input id="pickup" name="pickup" type="text" list="placeList" autocomplete="off" maxlength="120" data-i18n-ph="placePh">
               <p class="err" id="errPickup" aria-live="polite"></p>
             </div>
             <div class="field">
               <label for="dest" id="lblDest"></label>
-              <input id="dest" name="dest" type="text" list="placeList" autocomplete="off" data-i18n-ph="placePh">
+              <input id="dest" name="dest" type="text" list="placeList" autocomplete="off" maxlength="120" data-i18n-ph="placePh">
               <p class="err" id="errDest" aria-live="polite"></p>
             </div>
           </div>
@@ -322,16 +370,16 @@ form { display: grid; gap: 16px; }
         <datalist id="placeList"></datalist>
         <div class="field" id="fDetails" hidden>
           <label for="details" id="lblDetails"></label>
-          <textarea id="details" name="details" rows="3"></textarea>
+          <textarea id="details" name="details" rows="3" maxlength="400"></textarea>
           <p class="err" id="errDetails" aria-live="polite"></p>
         </div>
         <div class="field" id="fReceiver" hidden>
           <label for="receiver" data-i18n="receiver"></label>
-          <input id="receiver" name="receiver" type="tel" inputmode="tel" data-i18n-ph="phonePh">
+          <input id="receiver" name="receiver" type="tel" inputmode="tel" maxlength="20" data-i18n-ph="phonePh">
           <p class="err" id="errReceiver" aria-live="polite"></p>
         </div>
         <div class="fare" id="fareBox" aria-live="polite"></div>
-        <p class="err" id="errSend" aria-live="polite"></p>
+        <p class="err" id="errSend" role="alert"></p>
         <button class="btn btn-primary btn-block" type="submit" id="bookBtn" data-i18n="book"></button>
       </form>
       <p class="foot" data-i18n="sample"></p>
@@ -375,23 +423,21 @@ form { display: grid; gap: 16px; }
 </section>
 
 <script>
-(function () {
-  // ---- Supabase (the publishable key is safe in the browser; access is limited by database rules) ----
+  (function () {
   // Use the base URL only. The code adds /rest/v1/bookings itself.
+  // Never put a secret or service_role key in this file.
   var SUPABASE_URL = "https://fkyqbuwsbayjypyujgqj.supabase.co";
   var SUPABASE_KEY = "sb_publishable_uokTWBlF8-3PAlXNh0lkrw_ixHfr92T";
 
-  // ---- Services and sample prices (Birr). base + perKm x distance, rounded to 5 ----
   var SERVICES = [
-    { id: "bajaj",  kind: "ride",     base: 250,  perKm: 9,  speed: 18, fee: false },
-    { id: "taxi",   kind: "ride",     base: 300,  perKm: 18, speed: 24, fee: false },
-    { id: "parcel", kind: "delivery", base: 400,  perKm: 8,  speed: 20, fee: false },
-    { id: "food",   kind: "delivery", base: 300,  perKm: 7,  speed: 20, fee: true },
-    { id: "market", kind: "delivery", base: 400,  perKm: 8,  speed: 18, fee: true },
-    { id: "cargo",  kind: "delivery", base: 550, perKm: 25, speed: 18, fee: false }
+    { id: "bajaj",  kind: "ride",     base: 25,  perKm: 9,  speed: 18, fee: false },
+    { id: "taxi",   kind: "ride",     base: 60,  perKm: 18, speed: 24, fee: false },
+    { id: "parcel", kind: "delivery", base: 40,  perKm: 8,  speed: 20, fee: false },
+    { id: "food",   kind: "delivery", base: 35,  perKm: 7,  speed: 20, fee: true },
+    { id: "market", kind: "delivery", base: 45,  perKm: 8,  speed: 18, fee: true },
+    { id: "cargo",  kind: "delivery", base: 120, perKm: 25, speed: 18, fee: false }
   ];
 
-  // ---- Sample places (km on a rough local grid; not survey data) ----
   var PLACES = [
     { name: "Bus Station (Autogaraj)", x: -1.2, y: 0.6 },
     { name: "Central Market", x: 0, y: 0 },
@@ -421,6 +467,19 @@ form { display: grid; gap: 16px; }
       how3: "Send your booking. A driver contacts you.",
       cashNote: "You pay the driver in cash.",
       popular: "Popular Bajaj trips",
+      instTitle: "Add the app to your phone",
+      instIntro: "Open Jigjiga Bajaj from your home screen like a normal app. It is free and uses no store.",
+      instBtn: "Install app",
+      instAndroid: "Android (Chrome)",
+      instA1: "Open this website in Chrome.",
+      instA2: "Tap the menu (three dots) at the top right.",
+      instA3: "Tap Install app, or Add to Home screen, then Install.",
+      instIos: "iPhone (Safari)",
+      instI1: "Open this website in Safari. It must be Safari, not another app.",
+      instI2: "Tap the Share button (a square with an arrow up).",
+      instI3: "Scroll down and tap Add to Home Screen.",
+      instI4: "Tap Add. The Jigjiga Bajaj icon appears on your home screen.",
+      offlineBar: "You are offline. You cannot send a booking until the internet is back.",
       navHome: "Home",
       bookTitleRide: "Book your ride",
       bookTitleDeliver: "Order a delivery",
@@ -451,7 +510,14 @@ form { display: grid; gap: 16px; }
       errDest: "Enter where to go.",
       errSame: "The two places must be different.",
       errDetails: "Tell us what to deliver.",
-      errSend: "Your booking was not sent. Check your internet and try again.",
+      errSend: "Your booking was not sent. Please try again.",
+      errOffline: "You are offline. Your booking was NOT sent. Connect to the internet and try again.",
+      errNetwork: "Could not reach the server. Your booking was NOT sent. Check your internet and try again.",
+      errAccess: "Booking is not available right now (access refused). Your booking was NOT sent.",
+      errSetup: "The booking system is not set up yet. Your booking was NOT sent.",
+      errData: "Some details are not accepted. Check your name, phone number and places, then try again.",
+      errBusy: "Too many requests. Wait a minute and try again.",
+      errServer: "The server has a problem. Your booking was NOT sent. Try again in a few minutes.",
       confirmed: "Received",
       confTitle: "We got your booking",
       confSub: "A driver will contact you on the number you gave.",
@@ -481,6 +547,19 @@ form { display: grid; gap: 16px; }
       how3: "Dir dalabka. Darawal ayaa kula soo xiriiri doona.",
       cashNote: "Darawalka ku bixi lacag caddaan ah.",
       popular: "Safarrada Bajaj ee caanka ah",
+      instTitle: "Ku dar app-ka taleefankaaga",
+      instIntro: "Jigjiga Bajaj ka fur shaashadda hore ee taleefankaaga sida app caadi ah. Waa bilaash, kuma baahna dukaan.",
+      instBtn: "Rakib app-ka",
+      instAndroid: "Android (Chrome)",
+      instA1: "Websaydhkan ka fur Chrome.",
+      instA2: "Taabo menu-ga (saddex dhibcood) ee xagga sare midig.",
+      instA3: "Taabo Install app, ama Add to Home screen, kadibna Install.",
+      instIos: "iPhone (Safari)",
+      instI1: "Websaydhkan ka fur Safari. Waa inuu noqdaa Safari, ma ahan app kale.",
+      instI2: "Taabo badhanka Share (square leh fallaar kor u socota).",
+      instI3: "Hoos u rar, kadibna taabo Add to Home Screen.",
+      instI4: "Taabo Add. Astaanta Jigjiga Bajaj waxay ka soo muuqanaysaa shaashadda hore.",
+      offlineBar: "Internet ma haysid. Dalab ma dirikaraysid ilaa internetku soo noqdo.",
       navHome: "Hoyga",
       bookTitleRide: "Dalbo safarkaaga",
       bookTitleDeliver: "Dalbo gaarsiin",
@@ -511,7 +590,14 @@ form { display: grid; gap: 16px; }
       errDest: "Fadlan geli meesha loo socdo.",
       errSame: "Labada meel waa inay kala duwanaadaan.",
       errDetails: "Fadlan noo sheeg waxa la gaarsiinayo.",
-      errSend: "Dalabkaaga lama dirin. Hubi internetkaaga oo mar kale isku day.",
+      errSend: "Dalabkaaga lama dirin. Fadlan mar kale isku day.",
+      errOffline: "Internet ma haysid. Dalabkaaga LAMA DIRIN. Ku xidh internetka oo mar kale isku day.",
+      errNetwork: "Server-ka lama gaarin. Dalabkaaga LAMA DIRIN. Hubi internetkaaga oo mar kale isku day.",
+      errAccess: "Dalabku hadda ma shaqaynayo (gelitaan la diiday). Dalabkaaga LAMA DIRIN.",
+      errSetup: "Nidaamka dalabka weli lama dhammaystirin. Dalabkaaga LAMA DIRIN.",
+      errData: "Faahfaahin qaar lama aqbalin. Hubi magacaaga, lambarkaaga iyo meelaha, kadibna mar kale isku day.",
+      errBusy: "Codsiyo aad u badan. Hal daqiiqo sug, kadibna mar kale isku day.",
+      errServer: "Server-ka waxaa ka dhashay dhibaato. Dalabkaaga LAMA DIRIN. Dhawr daqiiqo kadib isku day.",
       confirmed: "La helay",
       confTitle: "Dalabkaaga waa la helay",
       confSub: "Darawal ayaa kula soo xiriiri doona lambarka aad bixisay.",
@@ -524,7 +610,7 @@ form { display: grid; gap: 16px; }
       sample: "Qiimayaashu waa qiyaas. Darawalku wuxuu xaqiijinayaa qiimaha ugu dambeeya."
     }
   };
-  var lang = "en";
+    var lang = "en";
   try {
     var saved = localStorage.getItem("jb-lang");
     if (saved === "so" || saved === "en") lang = saved;
@@ -533,6 +619,9 @@ form { display: grid; gap: 16px; }
 
   var svcId = "bajaj";
   var last = null;
+  var attempt = null;
+  var recent = null;
+  var sending = false;
 
   function $(id) { return document.getElementById(id); }
   function t(k) { return STR[lang][k] != null ? STR[lang][k] : k; }
@@ -541,7 +630,6 @@ form { display: grid; gap: 16px; }
   function svc(id) { for (var i = 0; i < SERVICES.length; i++) if (SERVICES[i].id === id) return SERVICES[i]; return SERVICES[0]; }
   function iconHtml(id) { return '<svg class="ico" aria-hidden="true"><use href="#i-' + id + '"/></svg>'; }
 
-  // ---- Price logic ----
   function fromPrice(s) { return Math.round((s.base + s.perKm * 0.8) / 5) * 5; }
   function findPlace(text) {
     var s = (text || "").trim().toLowerCase();
@@ -550,14 +638,13 @@ form { display: grid; gap: 16px; }
     return null;
   }
   function estimate(a, b, s) {
-    var d = Math.hypot(a.x - b.x, a.y - b.y) * 1.3;          // straight line x 1.3 for road winding
+    var d = Math.hypot(a.x - b.x, a.y - b.y) * 1.3;
     d = Math.max(d, 0.8);
     var fare = Math.round((s.base + s.perKm * d) / 5) * 5;
     var mins = Math.max(5, Math.round(d / s.speed * 60));
     return { km: Math.round(d * 10) / 10, fare: fare, mins: mins };
   }
 
-  // ---- Rendering ----
   function serviceCard(s) {
     var ride = s.kind === "ride";
     var from = t("from") + " " + fmt(fromPrice(s)) + " " + t("birr");
@@ -589,7 +676,6 @@ form { display: grid; gap: 16px; }
     $("fDetails").hidden = !del;
     $("fReceiver").hidden = !del;
   }
-
   function applyText() {
     document.documentElement.lang = lang === "so" ? "so" : "en";
     var els = document.querySelectorAll("[data-i18n]");
@@ -656,7 +742,6 @@ form { display: grid; gap: 16px; }
     $("cFare").textContent = last.fare != null ? fmt(last.fare) + " " + t("birr") : t("tbc");
   }
 
-  // ---- Views (with the phone's back button) ----
   function show(view, push) {
     ["home", "book", "confirm"].forEach(function (v) { $("view-" + v).hidden = v !== view; });
     window.scrollTo(0, 0);
@@ -682,7 +767,6 @@ form { display: grid; gap: 16px; }
     show("book");
   }
 
-  // ---- Form ----
   var ERR_IDS = ["Name", "Phone", "Pickup", "Dest", "Details", "Receiver"];
   function clearErrors() {
     ERR_IDS.forEach(function (k) {
@@ -702,26 +786,60 @@ form { display: grid; gap: 16px; }
   }
   function prettyPhone(d) { return d.slice(0, 4) + " " + d.slice(4, 7) + " " + d.slice(7); }
 
+  function randomBytes(n) {
+    var b = new Uint8Array(n);
+    (window.crypto || window.msCrypto).getRandomValues(b);
+    return b;
+  }
+  function uuid() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    var b = randomBytes(16); b[6] = (b[6] & 15) | 64; b[8] = (b[8] & 63) | 128;
+    var h = Array.prototype.map.call(b, function (x) { return ("0" + x.toString(16)).slice(-2); }).join("");
+    return h.slice(0, 8) + "-" + h.slice(8, 12) + "-" + h.slice(12, 16) + "-" + h.slice(16, 20) + "-" + h.slice(20);
+  }
   function makeRef() {
+    var A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", b = randomBytes(6), s = "";
+    for (var i = 0; i < 6; i++) s += A.charAt(b[i] % A.length);
     var now = new Date();
     var mmdd = ("0" + (now.getMonth() + 1)).slice(-2) + ("0" + now.getDate()).slice(-2);
-    return "JB-" + mmdd + "-" + ("000" + Math.floor(Math.random() * 10000)).slice(-4);
+    return "JB-" + mmdd + "-" + s;
   }
-  function sendBooking(rec, tries) {
-    tries = tries || 0;
-    var ref = makeRef();
+
+  function post(body) {
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 15000);
     return fetch(SUPABASE_URL + "/rest/v1/bookings", {
       method: "POST",
       headers: { "apikey": SUPABASE_KEY, "Content-Type": "application/json", "Prefer": "return=minimal" },
-      body: JSON.stringify(Object.assign({}, rec, { ref: ref }))
+      body: JSON.stringify(body),
+      signal: ctrl ? ctrl.signal : undefined
     }).then(function (res) {
-      if (res.status === 409 && tries < 3) return sendBooking(rec, tries + 1);   // ref clash, try a new one
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      return ref;
+      clearTimeout(timer);
+      if (res.ok) return { ok: true, status: res.status };
+      return res.text().then(function (txt) {
+        var j = {}; try { j = JSON.parse(txt); } catch (e) {}
+        return { ok: false, status: res.status, code: j.code || "", msg: (j.message || "") + " " + (j.details || "") };
+      });
+    }, function () {
+      clearTimeout(timer);
+      return { ok: false, status: 0, network: true };
     });
-    }
-   $("bookForm").addEventListener("submit", function (ev) {
+  }
+    function errorText(r) {
+    var key = "errSend";
+    if (r && r.network) key = navigator.onLine === false ? "errOffline" : "errNetwork";
+    else if (r && (r.status === 401 || r.status === 403)) key = "errAccess";
+    else if (r && r.status === 404) key = "errSetup";
+    else if (r && (r.status === 400 || r.status === 422)) key = "errData";
+    else if (r && r.status === 429) key = "errBusy";
+    else if (r && r.status >= 500) key = "errServer";
+    var code = r && r.status != null ? " (" + (r.status || "network") + (r.code ? " " + r.code : "") + ")" : "";
+    return t(key) + code;
+  }
+
+  $("bookForm").addEventListener("submit", function (ev) {
     ev.preventDefault();
+    if (sending) return;
     clearErrors();
     var s = svc(svcId), del = s.kind === "delivery";
     var name = $("name").value.trim();
@@ -745,17 +863,28 @@ form { display: grid; gap: 16px; }
       pickup: a ? a.name : pickup, dest: b ? b.name : dest,
       details: details, fare: e ? e.fare : null, lang: lang, status: "new"
     };
+
+    var fp = JSON.stringify([rec.service, rec.name, rec.phone, rec.pickup, rec.dest, rec.details]);
+    if (recent && recent.fp === fp && Date.now() - recent.at < 10 * 60 * 1000) {
+      last = recent.last; renderConfirm(); show("confirm"); return;
+    }
+
+    if (navigator.onLine === false) { $("errSend").textContent = t("errOffline"); return; }
+
+    if (!attempt || attempt.fp !== fp) attempt = { fp: fp, id: uuid(), ref: makeRef() };
     var btn = $("bookBtn");
-    btn.disabled = true; btn.textContent = t("sending");
-    sendBooking(rec).then(function (ref) {
+    sending = true; btn.disabled = true; btn.textContent = t("sending");
+    sendBooking(rec, attempt).then(function (ref) {
       last = { ref: ref, service: s.id, name: name, phone: prettyPhone(phone), pickup: rec.pickup, dest: rec.dest, details: details, fare: rec.fare };
+      recent = { fp: fp, at: Date.now(), last: last };
+      attempt = null;
       $("copyBtn").textContent = t("copy");
       renderConfirm();
       show("confirm");
-    }).catch(function () {
-      $("errSend").textContent = t("errSend");
+    }).catch(function (r) {
+      $("errSend").textContent = errorText(r);
     }).then(function () {
-      btn.disabled = false; btn.textContent = t("book");
+      sending = false; btn.disabled = false; btn.textContent = t("book");
     });
   });
 
@@ -778,7 +907,6 @@ form { display: grid; gap: 16px; }
     } catch (e) { fallback(); }
   });
 
-  // ---- Navigation ----
   $("view-home").addEventListener("click", function (ev) {
     var b = ev.target.closest("[data-svc]");
     if (b) openBook(b.getAttribute("data-svc"));
@@ -805,7 +933,33 @@ form { display: grid; gap: 16px; }
     });
   });
 
-  // ---- Init ----
+  function isStandalone() {
+    return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
+  }
+  var installEvent = null;
+  window.addEventListener("beforeinstallprompt", function (ev) {
+    ev.preventDefault(); installEvent = ev; $("installBtn").hidden = false;
+  });
+  $("installBtn").addEventListener("click", function () {
+    if (!installEvent) return;
+    installEvent.prompt();
+    installEvent.userChoice.then(function () { installEvent = null; $("installBtn").hidden = true; });
+  });
+  window.addEventListener("appinstalled", function () { $("installCard").hidden = true; });
+  if (!isStandalone()) $("installCard").hidden = false;
+  if (/iPad|iPhone|iPod/.test(navigator.userAgent)) $("iosDetails").open = true;
+
+  function netState() { $("netBar").hidden = navigator.onLine !== false; }
+  window.addEventListener("online", netState);
+  window.addEventListener("offline", netState);
+  netState();
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js", { scope: "./" }).catch(function () {});
+    });
+  }
+
   var dl = $("placeList");
   PLACES.forEach(function (p) { var o = document.createElement("option"); o.value = p.name; dl.appendChild(o); });
   applyText();
