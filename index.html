@@ -1,4 +1,4 @@
-
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -6,7 +6,6 @@
 <title>Jigjiga Bajaj</title>
 <meta name="description" content="Book a Bajaj, taxi or delivery in Jigjiga, Ethiopia.">
 
-<!-- App (PWA) settings. All paths are relative so they work on GitHub Pages in a repository folder. -->
 <meta name="theme-color" content="#1b3b9c" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#12266b" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
@@ -17,7 +16,6 @@
 <meta name="apple-mobile-web-app-title" content="Jigjiga Bajaj">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="format-detection" content="telephone=no">
-<!-- iPhone start-up screens (portrait) -->
 <link rel="apple-touch-startup-image" href="splash/1320x2868.png" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
 <link rel="apple-touch-startup-image" href="splash/1206x2622.png" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
 <link rel="apple-touch-startup-image" href="splash/1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
@@ -209,8 +207,7 @@ form { display: grid; gap: 16px; }
 .arrow { color: var(--muted); padding: 0 4px; }
 
 .foot { color: var(--muted); font-size: .85rem; padding-block: 0 28px; }
-
-@media (min-width: 520px) { .btn-row { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 520px) { .btn-row { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 380px) { .row { grid-template-columns: 1fr; gap: 2px; } .chip { font-size: .8rem; } }
 @media (prefers-reduced-motion: no-preference) {
   .view { animation: rise .25s ease-out; }
@@ -221,7 +218,8 @@ form { display: grid; gap: 16px; }
 </style>
 </head>
 <body>
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <defs>
     <symbol id="i-bajaj" viewBox="0 0 32 26"><path d="M6 11 8.5 5H18Q19.5 5 20.3 6.4L23 11"/><path d="M3 11H25Q28 11 28 14V18H3Z"/><circle cx="8" cy="19.5" r="3"/><circle cx="23" cy="19.5" r="3"/></symbol>
     <symbol id="i-taxi" viewBox="0 0 32 26"><path d="M7 11 10 5.5H22L25 11"/><path d="M3 11H29V18H3Z"/><circle cx="9" cy="19.5" r="3"/><circle cx="23" cy="19.5" r="3"/><rect x="14" y="2.5" width="4" height="2.2" rx=".6"/></symbol>
@@ -423,19 +421,19 @@ form { display: grid; gap: 16px; }
 </section>
 
 <script>
-  (function () {
+(function () {
   // Use the base URL only. The code adds /rest/v1/bookings itself.
   // Never put a secret or service_role key in this file.
   var SUPABASE_URL = "https://fkyqbuwsbayjypyujgqj.supabase.co";
   var SUPABASE_KEY = "sb_publishable_uokTWBlF8-3PAlXNh0lkrw_ixHfr92T";
 
   var SERVICES = [
-    { id: "bajaj",  kind: "ride",     base: 250,  perKm: 9,  speed: 18, fee: false },
-    { id: "taxi",   kind: "ride",     base: 300,  perKm: 18, speed: 24, fee: false },
-    { id: "parcel", kind: "delivery", base: 400,  perKm: 8,  speed: 20, fee: false },
-    { id: "food",   kind: "delivery", base: 350,  perKm: 7,  speed: 20, fee: true },
-    { id: "market", kind: "delivery", base: 450,  perKm: 8,  speed: 18, fee: true },
-    { id: "cargo",  kind: "delivery", base: 1200, perKm: 25, speed: 18, fee: false }
+    { id: "bajaj",  kind: "ride",     base: 25,  perKm: 9,  speed: 18, fee: false },
+    { id: "taxi",   kind: "ride",     base: 60,  perKm: 18, speed: 24, fee: false },
+    { id: "parcel", kind: "delivery", base: 40,  perKm: 8,  speed: 20, fee: false },
+    { id: "food",   kind: "delivery", base: 35,  perKm: 7,  speed: 20, fee: true },
+    { id: "market", kind: "delivery", base: 45,  perKm: 8,  speed: 18, fee: true },
+    { id: "cargo",  kind: "delivery", base: 120, perKm: 25, speed: 18, fee: false }
   ];
 
   var PLACES = [
@@ -610,7 +608,7 @@ form { display: grid; gap: 16px; }
       sample: "Qiimayaashu waa qiyaas. Darawalku wuxuu xaqiijinayaa qiimaha ugu dambeeya."
     }
   };
-    var lang = "en";
+  var lang = "en";
   try {
     var saved = localStorage.getItem("jb-lang");
     if (saved === "so" || saved === "en") lang = saved;
@@ -825,7 +823,19 @@ form { display: grid; gap: 16px; }
       return { ok: false, status: 0, network: true };
     });
   }
-    function errorText(r) {
+
+  function sendBooking(rec, att, tries) {
+    tries = tries || 0;
+    return post(Object.assign({}, rec, { id: att.id, ref: att.ref })).then(function (r) {
+      if (r.ok) return att.ref;
+      if (r.status === 409) {
+        if (/bookings_ref|\(ref\)/i.test(r.msg) && tries < 3) { att.ref = makeRef(); return sendBooking(rec, att, tries + 1); }
+        return att.ref;
+      }
+      throw r;
+    });
+  }
+  function errorText(r) {
     var key = "errSend";
     if (r && r.network) key = navigator.onLine === false ? "errOffline" : "errNetwork";
     else if (r && (r.status === 401 || r.status === 403)) key = "errAccess";
@@ -946,7 +956,9 @@ form { display: grid; gap: 16px; }
     installEvent.userChoice.then(function () { installEvent = null; $("installBtn").hidden = true; });
   });
   window.addEventListener("appinstalled", function () { $("installCard").hidden = true; });
-  if (!isStandalone()) $("installCard").hidden = false;
+  // Inside the Android app (Capacitor) there is nothing to install, so the card stays hidden.
+  var NATIVE = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === "function" && window.Capacitor.isNativePlatform());
+  if (!isStandalone() && !NATIVE) $("installCard").hidden = false;
   if (/iPad|iPhone|iPod/.test(navigator.userAgent)) $("iosDetails").open = true;
 
   function netState() { $("netBar").hidden = navigator.onLine !== false; }
@@ -954,10 +966,19 @@ form { display: grid; gap: 16px; }
   window.addEventListener("offline", netState);
   netState();
 
-  if ("serviceWorker" in navigator) {
+  if ("serviceWorker" in navigator && !NATIVE) {
     window.addEventListener("load", function () {
       navigator.serviceWorker.register("sw.js", { scope: "./" }).catch(function () {});
     });
+  }
+
+  // Android back button (app only): from the booking or confirmation page go to the home page; on the home page leave the app.
+  if (NATIVE && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+    try {
+      window.Capacitor.Plugins.App.addListener("backButton", function () {
+        if ($("view-home").hidden) show("home"); else window.Capacitor.Plugins.App.exitApp();
+      });
+    } catch (e) {}
   }
 
   var dl = $("placeList");
