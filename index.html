@@ -934,4 +934,1462 @@ window.MACALIN = {
       topics: ["Naxwaha (grammar)", "Maahmaahyo (proverbs)", "Gabayo (poetry)", "Akhriska (reading)"] }
   ],
    
-   
+   lessons: [
+    { id: "math-6", subject: "math", grade: 6, minutes: 25, title: "Fractions and Decimals",
+      teacher: "Ms. Hodan Warsame",
+      description: "See how a fraction and a decimal can describe the same amount, and learn to switch between them quickly.",
+      objectives: ["Read and write fractions as decimals", "Compare fractions with different denominators", "Solve everyday problems with money and measurements"] },
+    { id: "math-7", subject: "math", grade: 7, minutes: 30, title: "Ratios and Percentages",
+      teacher: "Mr. Abdi Farah",
+      description: "Use ratios to share, scale and compare, then turn them into percentages for discounts, marks and growth.",
+      objectives: ["Write and simplify ratios", "Find a percentage of any amount", "Work out percentage increase and decrease"] },
+    { id: "math-8", subject: "math", grade: 8, minutes: 35, title: "Solving Linear Equations",
+      teacher: "Ms. Hodan Warsame",
+      description: "Balance both sides of an equation to find the unknown, then check your answer by substitution.",
+      objectives: ["Solve one-step and two-step equations", "Handle brackets and unknowns on both sides", "Plot a simple line on a graph"] },
+
+    { id: "eng-6", subject: "eng", grade: 6, minutes: 20, title: "Parts of Speech",
+      teacher: "Ms. Ifrah Duale",
+      description: "Meet nouns, verbs and adjectives, and learn how each one does a different job inside a sentence.",
+      objectives: ["Name the main parts of speech", "Spot them in a short passage", "Write sentences that use all three"] },
+    { id: "eng-7", subject: "eng", grade: 7, minutes: 25, title: "Writing a Strong Paragraph",
+      teacher: "Mr. Yusuf Hersi",
+      description: "Start with a clear topic sentence, add supporting details and finish with a sentence that ties it together.",
+      objectives: ["Write a topic sentence", "Support it with facts and examples", "Use linking words to connect ideas"] },
+    { id: "eng-8", subject: "eng", grade: 8, minutes: 35, title: "Building a Persuasive Essay",
+      teacher: "Ms. Ifrah Duale",
+      description: "Plan an argument, back it with evidence and answer the other side so your reader is convinced.",
+      objectives: ["Choose a clear position", "Organise reasons and evidence", "Write a conclusion that calls for action"] },
+
+    { id: "sci-6", subject: "sci", grade: 6, minutes: 25, title: "The Water Cycle",
+      teacher: "Mr. Mohamed Ali",
+      description: "Follow a drop of water as it evaporates, forms clouds, falls as rain and flows back to the sea.",
+      objectives: ["Name the four stages of the cycle", "Explain evaporation and condensation", "Draw and label the water cycle"] },
+    { id: "sci-7", subject: "sci", grade: 7, minutes: 30, title: "Cells: The Building Blocks of Life",
+      teacher: "Ms. Sagal Ahmed",
+      description: "Look inside plant and animal cells and find out what the nucleus, membrane and other parts actually do.",
+      objectives: ["Label the parts of a cell", "Compare plant and animal cells", "Explain why cells are called the units of life"] },
+    { id: "sci-8", subject: "sci", grade: 8, minutes: 35, title: "Forces and Motion",
+      teacher: "Mr. Mohamed Ali",
+      description: "Learn why things speed up, slow down or stay still, using pushes, pulls and friction you can see every day.",
+      objectives: ["Describe balanced and unbalanced forces", "Explain friction and its effects", "Calculate speed from distance and time"] },
+
+    { id: "som-6", subject: "som", grade: 6, minutes: 20, title: "Magacyada iyo Falalka",
+      teacher: "Mr. Abdi Farah",
+      description: "Learn to find magacyo (nouns) and falal (verbs) in simple Somali sentences, then write some of your own.",
+      objectives: ["Identify magacyo and falal", "Build short sentences", "Read a paragraph and mark each word type"] },
+    { id: "som-7", subject: "som", grade: 7, minutes: 25, title: "Maahmaahyada Soomaaliyeed",
+      teacher: "Ms. Sagal Ahmed",
+      description: "Explore well-known Somali proverbs, what they mean and when people use them in daily conversation.",
+      objectives: ["Explain the meaning of common maahmaahyo", "Match each proverb to a situation", "Use a proverb in your own writing"] },
+    { id: "som-8", subject: "som", grade: 8, minutes: 30, title: "Gabayga iyo Maansada",
+      teacher: "Mr. Yusuf Hersi",
+      description: "Discover the Somali tradition of poetry: how a gabay is built, how alliteration works and why poets were so respected.",
+      objectives: ["Describe the main features of a gabay", "Recognise alliteration in a poem", "Write a short verse of your own"] }
+  ]
+};
+
+</script>
+<script>
+/* ---- art.js ---- */
+/* Macalin Academy: lesson artwork
+   Draws a small illustration for each lesson as an SVG, so the site needs no image files.
+   When you have real photos, swap MacalinArt.uri(lesson) for lesson.imageUrl. */
+(function () {
+  var PAL = {
+    math: { a: "#2F6FDB", b: "#123A8A", c: "#F7C45A", d: "#BFD6FF" },
+    eng:  { a: "#F2B33D", b: "#C47608", c: "#0F2347", d: "#FFE8B0" },
+    sci:  { a: "#1AA27A", b: "#0A6A51", c: "#F7E27A", d: "#BDF0DE" },
+    som:  { a: "#E0584A", b: "#A12D27", c: "#FFFFFF", d: "#FFD3CC" }
+  };
+
+  function f(n) { return Math.round(n * 10) / 10; }
+
+  function star(cx, cy, R, fill, rot) {
+    var r = R * 0.382, pts = [];
+    for (var i = 0; i < 10; i++) {
+      var rad = i % 2 ? r : R;
+      var ang = ((rot === undefined ? -90 : rot) + i * 36) * Math.PI / 180;
+      pts.push(f(cx + rad * Math.cos(ang)) + "," + f(cy + rad * Math.sin(ang)));
+    }
+    return '<polygon points="' + pts.join(" ") + '" fill="' + fill + '"/>';
+  }
+
+  function sector(cx, cy, r, a0, a1, fill, opacity) {
+    var p0 = a0 * Math.PI / 180, p1 = a1 * Math.PI / 180;
+    var large = (a1 - a0) > 180 ? 1 : 0;
+    var d = "M" + cx + " " + cy + " L" + f(cx + r * Math.cos(p0)) + " " + f(cy + r * Math.sin(p0)) +
+      " A" + r + " " + r + " 0 " + large + " 1 " + f(cx + r * Math.cos(p1)) + " " + f(cy + r * Math.sin(p1)) + " Z";
+    return '<path d="' + d + '" fill="' + fill + '" opacity="' + (opacity || 1) + '"/>';
+  }
+
+  function text(x, y, size, fill, str, anchor) {
+    return '<text x="' + x + '" y="' + y + '" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="' +
+      size + '" fill="' + fill + '" text-anchor="' + (anchor || "middle") + '">' + str + "</text>";
+  }
+
+  function tile(x, y, rot, fill, ink, ch) {
+    return '<g transform="rotate(' + rot + " " + (x + 40) + " " + (y + 40) + ')">' +
+      '<rect x="' + x + '" y="' + y + '" width="80" height="80" rx="16" fill="' + fill + '"/>' +
+      text(x + 40, y + 57, 46, ink, ch) + "</g>";
+  }
+
+  var motifs = {
+    "math-6": function (p) {
+      return sector(130, 125, 72, -90, 180, p.c) + sector(130, 125, 72, 180, 270, p.d, 0.3) +
+        '<circle cx="130" cy="125" r="72" fill="none" stroke="#fff" stroke-width="4"/>' +
+        '<path d="M130 53V125H58" stroke="#fff" stroke-width="4" fill="none"/>' +
+        text(262, 118, 58, "#fff", "0.75") + text(262, 158, 30, p.d, "3/4");
+    },
+    "math-7": function (p) {
+      var bars = "", hs = [50, 85, 120, 150];
+      for (var i = 0; i < 4; i++) bars += '<rect x="' + (50 + i * 56) + '" y="' + (200 - hs[i]) + '" width="40" height="' + hs[i] + '" rx="8" fill="' + (i === 3 ? p.c : p.d) + '"/>';
+      return '<rect x="30" y="200" width="240" height="6" rx="3" fill="#fff" opacity=".7"/>' + bars +
+        '<circle cx="320" cy="80" r="46" fill="' + p.c + '"/>' + text(320, 101, 62, p.b, "%");
+    },
+    "math-8": function (p) {
+      return '<path d="M52 36V196H356" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round"/>' +
+        '<path d="M52 196H356M52 156H356M52 116H356M52 76H356" stroke="#fff" stroke-width="1.5" opacity=".25"/>' +
+        '<polyline points="70,180 336,52" stroke="' + p.c + '" stroke-width="7" fill="none" stroke-linecap="round"/>' +
+        '<circle cx="136" cy="148" r="9" fill="#fff"/><circle cx="203" cy="116" r="9" fill="#fff"/><circle cx="270" cy="84" r="9" fill="#fff"/>' +
+        text(118, 94, 30, "#fff", "y = 2x + 1", "start");
+    },
+    "eng-6": function (p) {
+      return tile(52, 82, -8, "#fff", p.b, "N") + tile(158, 100, 5, p.d, p.b, "V") + tile(264, 70, -4, p.c, "#fff", "A") +
+        '<rect x="60" y="190" width="280" height="8" rx="4" fill="#fff" opacity=".55"/>';
+    },
+    "eng-7": function (p) {
+      return '<rect x="92" y="28" width="216" height="184" rx="16" fill="#fff"/>' +
+        '<rect x="116" y="56" width="168" height="12" rx="6" fill="' + p.c + '"/>' +
+        '<rect x="116" y="86" width="150" height="9" rx="4.5" fill="' + p.b + '" opacity=".35"/>' +
+        '<rect x="116" y="106" width="160" height="9" rx="4.5" fill="' + p.b + '" opacity=".35"/>' +
+        '<rect x="116" y="126" width="120" height="9" rx="4.5" fill="' + p.b + '" opacity=".35"/>' +
+        '<rect x="116" y="156" width="140" height="9" rx="4.5" fill="' + p.b + '" opacity=".35"/>' +
+        '<g transform="rotate(40 318 170)"><rect x="304" y="108" width="28" height="104" rx="6" fill="' + p.c + '"/>' +
+        '<polygon points="304,212 332,212 318,240" fill="' + p.d + '"/></g>';
+    },
+    "eng-8": function (p) {
+      return '<rect x="64" y="36" width="262" height="132" rx="30" fill="#fff"/>' +
+        '<polygon points="120,166 100,214 172,166" fill="#fff"/>' +
+        '<rect x="96" y="68" width="170" height="12" rx="6" fill="' + p.c + '"/>' +
+        '<rect x="96" y="96" width="196" height="9" rx="4.5" fill="' + p.b + '" opacity=".35"/>' +
+        '<rect x="96" y="116" width="150" height="9" rx="4.5" fill="' + p.b + '" opacity=".35"/>' +
+        '<circle cx="332" cy="44" r="30" fill="' + p.c + '"/>' + text(332, 58, 42, "#fff", "!");
+    },
+    "sci-6": function (p) {
+      var cloud = '<g fill="#fff"><circle cx="138" cy="74" r="28"/><circle cx="178" cy="60" r="36"/><circle cx="222" cy="76" r="28"/><rect x="124" y="74" width="120" height="28" rx="14"/></g>';
+      var drops = "";
+      [[150, 128], [186, 142], [222, 126]].forEach(function (d) {
+        drops += '<path d="M' + d[0] + " " + d[1] + " q-9 14 0 20 q9 -6 0 -20z" + '" fill="' + p.d + '"/>';
+      });
+      return '<circle cx="332" cy="52" r="30" fill="' + p.c + '"/>' + cloud + drops +
+        '<path d="M0 196 Q50 174 100 196 T200 196 T300 196 T400 196 V240 H0Z" fill="' + p.d + '" opacity=".5"/>' +
+        '<path d="M0 214 Q50 194 100 214 T200 214 T300 214 T400 214 V240 H0Z" fill="#fff" opacity=".25"/>';
+    },
+    "sci-7": function (p) {
+      return '<circle cx="200" cy="120" r="92" fill="' + p.d + '"/>' +
+        '<circle cx="200" cy="120" r="92" fill="none" stroke="#fff" stroke-width="8"/>' +
+        '<circle cx="190" cy="112" r="34" fill="' + p.b + '"/><circle cx="200" cy="104" r="11" fill="' + p.c + '"/>' +
+        '<ellipse cx="142" cy="168" rx="20" ry="11" fill="' + p.a + '" transform="rotate(-25 142 168)"/>' +
+        '<ellipse cx="256" cy="158" rx="22" ry="12" fill="' + p.a + '" transform="rotate(20 256 158)"/>' +
+        '<ellipse cx="150" cy="78" rx="16" ry="9" fill="' + p.a + '" transform="rotate(30 150 78)"/>' +
+        '<circle cx="262" cy="92" r="7" fill="' + p.c + '"/><circle cx="236" cy="190" r="6" fill="' + p.c + '"/><circle cx="196" cy="176" r="5" fill="' + p.b + '"/>';
+    },
+    "sci-8": function (p) {
+      return '<rect x="0" y="190" width="400" height="50" fill="' + p.b + '" opacity=".55"/>' +
+        '<rect x="150" y="128" width="76" height="62" rx="10" fill="' + p.c + '"/>' +
+        '<rect x="170" y="148" width="36" height="8" rx="4" fill="' + p.b + '" opacity=".5"/>' +
+        '<path d="M244 160H322" stroke="#fff" stroke-width="10" stroke-linecap="round"/>' +
+        '<polygon points="318,134 360,160 318,186" fill="#fff"/>' +
+        '<path d="M60 140H118M40 160H118M70 180H118" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity=".6"/>' +
+        '<circle cx="82" cy="64" r="22" fill="' + p.d + '" opacity=".8"/>';
+    },
+    "som-6": function (p) {
+      return '<circle cx="200" cy="120" r="102" fill="none" stroke="#fff" stroke-width="3" opacity=".45"/>' +
+        '<circle cx="200" cy="120" r="82" fill="#fff" opacity=".12"/>' +
+        star(200, 124, 78, "#fff") + star(66, 52, 18, p.d) + star(338, 190, 22, p.d) + star(340, 50, 12, p.d) + star(60, 190, 13, p.d);
+    },
+    "som-7": function (p) {
+      var out = "";
+      for (var row = 0; row < 3; row++) {
+        for (var i = 0; i < 9; i++) {
+          var x = 10 + i * 46 + (row % 2 ? 23 : 0), y = 40 + row * 62;
+          var up = '<polygon points="' + x + "," + (y + 52) + " " + (x + 23) + "," + y + " " + (x + 46) + "," + (y + 52) + '" fill="' + ((i + row) % 2 ? "#fff" : p.d) + '" opacity="' + ((i + row) % 3 === 0 ? 1 : 0.7) + '"/>';
+          out += up;
+        }
+      }
+      return out + '<rect x="0" y="0" width="400" height="22" fill="' + p.b + '" opacity=".5"/><rect x="0" y="218" width="400" height="22" fill="' + p.b + '" opacity=".5"/>';
+    },
+    "som-8": function (p) {
+      return '<circle cx="200" cy="120" r="108" fill="none" stroke="#fff" stroke-width="3" opacity=".3"/>' +
+        '<circle cx="200" cy="120" r="84" fill="none" stroke="#fff" stroke-width="3" opacity=".5"/>' +
+        '<circle cx="200" cy="120" r="60" fill="none" stroke="#fff" stroke-width="4" opacity=".8"/>' +
+        '<circle cx="200" cy="120" r="38" fill="#fff"/>' + star(200, 122, 30, p.a) +
+        '<circle cx="332" cy="48" r="16" fill="' + p.d + '"/><circle cx="68" cy="196" r="12" fill="' + p.d + '"/>';
+    }
+  };
+
+  function svg(lesson) {
+    var p = PAL[lesson.subject], key = lesson.subject + "-" + lesson.grade;
+    var inner = motifs[key] ? motifs[key](p) : star(200, 120, 70, "#fff");
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" width="400" height="240">' +
+      '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + p.a + '"/><stop offset="1" stop-color="' + p.b + '"/></linearGradient></defs>' +
+      '<rect width="400" height="240" fill="url(#g)"/>' +
+      '<circle cx="410" cy="-10" r="120" fill="#fff" opacity=".08"/>' + inner + "</svg>";
+  }
+
+  /* ---------- flat illustrations of students ---------- */
+  // One reusable student figure. Origin (0,0) is the middle of the head; the body runs down to y=340.
+  function person(o) {
+    var sk = o.skin, top = o.top, sl = o.sleeve || top, fy = 0;
+    var g = '<g transform="translate(' + o.x + " " + o.y + ") scale(" + (o.s || 1) + ')">';
+    g += '<path d="M-96 340 L-88 128 Q-84 76 -36 68 L36 68 Q84 76 88 128 L96 340Z" fill="' + top + '"/>';
+    g += '<rect x="-16" y="38" width="32" height="38" rx="12" fill="' + sk + '"/>';
+    if (o.hair === "hijab") {
+      g += '<path d="M-56 0 Q-60 -68 0 -68 Q60 -68 56 0 Q62 56 94 100 Q48 126 0 126 Q-48 126 -94 100 Q-62 56 -56 0Z" fill="' + o.hijab + '"/>';
+      g += '<path d="M-56 0 Q-60 -68 0 -68 Q60 -68 56 0 Q40 -30 0 -32 Q-40 -30 -56 0Z" fill="#000" opacity=".08"/>';
+      g += '<ellipse cx="0" cy="6" rx="36" ry="44" fill="' + sk + '"/>';
+      fy = 6;
+    } else {
+      g += '<circle cx="-42" cy="6" r="9" fill="' + sk + '"/><circle cx="42" cy="6" r="9" fill="' + sk + '"/>';
+      g += '<ellipse cx="0" cy="0" rx="42" ry="50" fill="' + sk + '"/>';
+      g += '<path d="M-47 -2 Q-54 -64 0 -64 Q54 -64 47 -2 Q40 -34 0 -38 Q-40 -34 -47 -2Z" fill="' + (o.hairColor || "#1a1208") + '"/>';
+    }
+    g += '<g transform="translate(0 ' + fy + ')"><circle cx="-14" cy="4" r="3.6" fill="#1d1410"/><circle cx="14" cy="4" r="3.6" fill="#1d1410"/>' +
+      '<path d="M-21 -7 Q-14 -12 -7 -7M7 -7 Q14 -12 21 -7" stroke="#2a1a12" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
+      '<path d="M-13 24 Q0 36 13 24" stroke="#5b2a1c" stroke-width="3.2" fill="none" stroke-linecap="round"/>' +
+      '<circle cx="-25" cy="17" r="6" fill="#e07a6b" opacity=".35"/><circle cx="25" cy="17" r="6" fill="#e07a6b" opacity=".35"/></g>';
+    if (o.hair !== "hijab" && o.collar) g += '<path d="M-24 68 L0 100 L24 68Z" fill="' + o.collar + '"/>';
+    if (o.item === "books") {
+      g += '<path d="M-84 116 Q-108 196 -62 204M84 116 Q108 196 62 204" stroke="' + sl + '" stroke-width="32" fill="none" stroke-linecap="round"/>' +
+        '<rect x="-68" y="168" width="136" height="24" rx="5" fill="#0F2552"/><rect x="-62" y="192" width="128" height="22" rx="5" fill="#EBA81C"/><rect x="-70" y="214" width="138" height="24" rx="5" fill="#E0584A"/>' +
+        '<circle cx="-64" cy="206" r="13" fill="' + sk + '"/><circle cx="64" cy="206" r="13" fill="' + sk + '"/>';
+    } else if (o.item === "backpack") {
+      g += '<path d="M-50 72 L-58 250M50 72 L58 250" stroke="' + (o.strap || "#0F2552") + '" stroke-width="16" fill="none" stroke-linecap="round"/>' +
+        '<path d="M-84 118 Q-102 210 -86 272M84 118 Q102 210 86 272" stroke="' + sl + '" stroke-width="30" fill="none" stroke-linecap="round"/>' +
+        '<circle cx="-86" cy="276" r="13" fill="' + sk + '"/><circle cx="86" cy="276" r="13" fill="' + sk + '"/>';
+    }
+    return g + "</g>";
+   }
+   var GIRL = { skin: "#B27647", hair: "hijab", hijab: "#EBA81C", top: "#0E2350", sleeve: "#183873", item: "books" };
+  var BOY = { skin: "#7A4B2E", hair: "short", top: "#FFFFFF", collar: "#0E2350", sleeve: "#EEF2FA", item: "backpack", strap: "#E0584A" };
+  function mix(base, extra) { var o = {}, k; for (k in base) o[k] = base[k]; for (k in extra) o[k] = extra[k]; return o; }
+
+  function heroScene() {
+    var dots = "";
+    for (var r = 0; r < 5; r++) for (var c = 0; c < 5; c++) dots += '<circle cx="' + (34 + c * 16) + '" cy="' + (96 + r * 16) + '" r="2.4" fill="#EBA81C" opacity=".75"/>';
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 580" role="img" aria-label="Two smiling students holding books">' +
+      '<circle cx="300" cy="340" r="232" fill="#2B59C9"/><circle cx="300" cy="340" r="232" fill="#fff" opacity=".06"/>' +
+      '<circle cx="470" cy="128" r="40" fill="#EBA81C"/><circle cx="88" cy="470" r="26" fill="#E0584A"/>' + dots +
+      star(500, 330, 20, "#fff") + star(110, 330, 14, "#EBA81C") +
+      person(mix(BOY, { x: 140, y: 336, s: 1.05 })) +
+      person(mix(GIRL, { x: 350, y: 238, s: 1.3 })) + "</svg>";
+  }
+
+  function aboutScene() {
+    var shelf = "";
+    ["#E0584A", "#2B59C9", "#EBA81C", "#1AA27A", "#0F2552"].forEach(function (c, i) {
+      shelf += '<rect x="' + (440 + i * 22) + '" y="' + (214 - (i % 2) * 14) + '" width="18" height="' + (60 + (i % 2) * 14) + '" rx="3" fill="' + c + '"/>';
+    });
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 440" role="img" aria-label="Two students reading in a classroom">' +
+      '<defs><linearGradient id="w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#DCE8FF"/><stop offset="1" stop-color="#F2F6FF"/></linearGradient></defs>' +
+      '<rect width="600" height="440" fill="url(#w)"/>' +
+      '<rect x="56" y="36" width="340" height="180" rx="12" fill="#14342E" stroke="#C9A06A" stroke-width="9"/>' +
+      text(150, 110, 46, "#fff", "2 + 3 = 5") + text(300, 170, 40, "#EBA81C", "A B C") + text(350, 110, 44, "#fff", "&#960;") +
+      '<rect x="70" y="200" width="312" height="6" rx="3" fill="#fff" opacity=".35"/>' +
+      '<rect x="430" y="40" width="130" height="140" rx="8" fill="#BFE3FF" stroke="#fff" stroke-width="8"/><path d="M495 40V180M430 110H560" stroke="#fff" stroke-width="6"/><circle cx="526" cy="76" r="14" fill="#EBA81C"/>' +
+      '<rect x="428" y="274" width="140" height="8" rx="3" fill="#A9703A"/>' + shelf +
+      person(mix(GIRL, { x: 200, y: 268, s: 0.8 })) + person(mix(BOY, { x: 400, y: 276, s: 0.8, item: "none" })) +
+      '<rect x="30" y="340" width="540" height="26" rx="10" fill="#D49A5F"/><rect x="50" y="366" width="500" height="74" fill="#B07A44"/>' +
+      '<path d="M300 338 L220 326 L220 296 L300 308Z" fill="#fff"/><path d="M300 338 L380 326 L380 296 L300 308Z" fill="#F1F3F8"/><path d="M300 308V338" stroke="#C7CDD9" stroke-width="3"/>' +
+      '<path d="M236 312L288 320M236 322L288 330" stroke="#9AA6BF" stroke-width="3" stroke-linecap="round"/></svg>';
+  }
+
+  function ctaScene() {
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 420" role="img" aria-label="Three students outdoors">' +
+      '<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#BFE3FF"/><stop offset="1" stop-color="#FFF1CC"/></linearGradient></defs>' +
+      '<rect width="600" height="420" fill="url(#s)"/><circle cx="500" cy="80" r="44" fill="#EBA81C"/>' +
+      '<circle cx="90" cy="250" r="70" fill="#1F7A5C"/><circle cx="150" cy="270" r="58" fill="#26906C"/><rect x="82" y="300" width="14" height="80" fill="#7A4B2E"/>' +
+      '<circle cx="520" cy="270" r="66" fill="#1F7A5C"/><rect x="514" y="310" width="14" height="70" fill="#7A4B2E"/>' +
+      '<rect y="330" width="600" height="90" fill="#3FA77A"/>' +
+      person(mix(GIRL, { x: 160, y: 200, s: 0.86, hijab: "#1AA27A" })) +
+      person(mix(BOY, { x: 300, y: 212, s: 0.9 })) +
+      person(mix(GIRL, { x: 440, y: 200, s: 0.86, hijab: "#E0584A", skin: "#9A6240" })) + "</svg>";
+  }
+
+  // Picture for a grade card: a student on a coloured card with a big grade number.
+  function gradeSvg(g) {
+    var cfg = {
+      6: { a: "#2F7BE8", b: "#123A8A", p: { skin: "#9A6240", hair: "hijab", hijab: "#EBA81C", top: "#FFFFFF", sleeve: "#EEF2FA", item: "none" } },
+      7: { a: "#EBA81C", b: "#B87708", p: { skin: "#7A4B2E", hair: "short", top: "#0E2350", collar: "#FFFFFF", sleeve: "#183873", item: "none" } },
+      8: { a: "#12A184", b: "#0A6B58", p: { skin: "#B27647", hair: "hijab", hijab: "#0E2350", top: "#EBA81C", sleeve: "#D99A10", item: "none" } }
+    }[g];
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" width="400" height="240">' +
+      '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + cfg.a + '"/><stop offset="1" stop-color="' + cfg.b + '"/></linearGradient></defs>' +
+      '<rect width="400" height="240" fill="url(#g)"/><circle cx="380" cy="10" r="110" fill="#fff" opacity=".1"/>' +
+      text(310, 196, 190, "#fff", String(g)).replace('fill="#fff"', 'fill="#fff" opacity=".22"') +
+      star(70, 52, 12, "#fff") + star(352, 52, 9, "#fff") +
+      person(mix(cfg.p, { x: 170, y: 110, s: 0.66 })) + "</svg>";
+  }
+
+  // Round teacher portrait: Ms. gets a hijab, Mr. gets short hair; colours rotate by position so every teacher looks different.
+  function avatarSvg(name, i) {
+    var tones = ["#B27647", "#7A4B2E", "#9A6240", "#C08A5B"];
+    var hijabs = ["#EBA81C", "#1AA27A", "#E0584A", "#2B59C9", "#7B4FB8"];
+    var tops = ["#0E2350", "#FFFFFF", "#183873", "#2B59C9"];
+    var bgs = ["#DCE8FF", "#FFF1CC", "#D8F3EA", "#FFE0DB"];
+    var o = { skin: tones[i % 4], top: tops[i % 4], sleeve: tops[i % 4], item: "none", x: 0, y: 0, s: 1 };
+    if (/^Ms/.test(name)) { o.hair = "hijab"; o.hijab = hijabs[i % 5]; }
+    else { o.hair = "short"; o.collar = i % 2 ? "#0E2350" : "#EBA81C"; }
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-100 -90 200 200"><rect x="-100" y="-90" width="200" height="200" fill="' + bgs[i % 4] + '"/>' + person(o) + "</svg>";
+  }
+
+  var SCENES = { hero: heroScene, about: aboutScene, cta: ctaScene };
+
+  window.MacalinArt = {
+    svg: svg,
+    uri: function (lesson) { return "data:image/svg+xml;utf8," + encodeURIComponent(svg(lesson)); },
+    scene: function (name) { return SCENES[name](); },
+    sceneUri: function (name) { return "data:image/svg+xml;utf8," + encodeURIComponent(SCENES[name]()); },
+    gradeUri: function (g) { return "data:image/svg+xml;utf8," + encodeURIComponent(gradeSvg(g)); },
+    avatarUri: function (name, i) { return "data:image/svg+xml;utf8," + encodeURIComponent(avatarSvg(name, i)); }
+  };
+})();
+
+</script>
+<script>
+/* ---- api.js ---- */
+/* Macalin Academy: Supabase client
+   A tiny wrapper around the Supabase REST API (no library needed).
+   fetchLessons() reads the lessons table, saveResult() stores a finished test score.
+   Every call can fail (offline, blocked, table missing), so callers always keep the sample data as a fallback. */
+(function () {
+  "use strict";
+
+  var cfg = window.MACALIN_CONFIG || {};
+  var base = cfg.supabaseUrl ? cfg.supabaseUrl.replace(/\/+$/, "") + "/rest/v1" : "";
+
+  function request(path, options) {
+    options = options || {};
+    var controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+    var timer = setTimeout(function () { if (controller) controller.abort(); }, options.timeout || 6000);
+    var headers = { apikey: cfg.supabaseKey, "Content-Type": "application/json" };
+    for (var h in (options.headers || {})) { headers[h] = options.headers[h]; }
+    return fetch(base + path, {
+      method: options.method || "GET",
+      headers: headers,
+      body: options.body ? JSON.stringify(options.body) : undefined,
+      signal: controller ? controller.signal : undefined
+    }).then(function (res) {
+      clearTimeout(timer);
+      if (!res.ok) throw new Error("Supabase answered " + res.status);
+      return res.status === 204 ? null : res.text().then(function (t) { return t ? JSON.parse(t) : null; });
+    }, function (err) {
+      clearTimeout(timer);
+      throw err;
+    });
+  }
+
+  function deviceId() {
+    try {
+      var id = localStorage.getItem("macalin-device");
+      if (!id) {
+        id = "d-" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+        localStorage.setItem("macalin-device", id);
+      }
+      return id;
+    } catch (e) { return "anon"; }
+  }
+
+  window.MacalinApi = {
+    enabled: !!(base && cfg.supabaseKey),
+
+    fetchLessons: function () {
+      return request("/lessons?select=*&order=sort.asc");
+    },
+
+    saveResult: function (r) {
+      return request("/results", {
+        method: "POST",
+        headers: { Prefer: "return=minimal" },
+        body: { lesson_id: r.lessonId, score: r.score, total: r.total, device_id: deviceId() }
+      });
+    }
+  };
+})();
+
+</script>
+<script>
+   /* ---- content.js ---- */
+/* Macalin Academy: lesson content
+   One entry per lesson id from data.js. Each lesson has:
+   - pages:     reading pages (title, text paragraphs, optional key idea, optional example)
+   - exercises: practice questions with instant feedback
+   - test:      final questions, scored at the end
+   Question helper Q(question, rightAnswer, [wrong answers], explanation)
+   places the right answer at a varied position automatically.
+   Later this whole object can come from your database. */
+(function () {
+  function Q(q, right, wrong, why) {
+    var opts = wrong.slice();
+    var pos = q.length % (wrong.length + 1);
+    opts.splice(pos, 0, right);
+    return { q: q, options: opts, answer: pos, why: why };
+  }
+  function P(title, text, key, example) {
+    return { title: title, text: text, key: key || "", example: example || null };
+  }
+
+  window.MACALIN_CONTENT = {
+
+    /* ---------------- Mathematics ---------------- */
+    "math-6": {
+      pages: [
+        P("A fraction is part of a whole",
+          ["A fraction has two numbers. The top number (the numerator) tells you how many parts you have. The bottom number (the denominator) tells you how many equal parts make the whole."],
+          "3/4 means 3 parts out of 4 equal parts.",
+          { label: "Example", lines: ["A pizza is cut into 8 equal slices.", "You eat 3 slices.", "You ate 3/8 of the pizza."] }),
+        P("Changing a fraction into a decimal",
+          ["To change a fraction into a decimal, divide the top number by the bottom number. The fraction bar means divide."],
+          "Fraction to decimal: numerator ÷ denominator.",
+          { label: "Worked examples", lines: ["1/2 = 1 ÷ 2 = 0.5", "3/4 = 3 ÷ 4 = 0.75", "1/5 = 1 ÷ 5 = 0.2"] }),
+        P("Comparing fractions",
+          ["It is hard to compare fractions with different denominators. The easy way is to change each fraction into a decimal, then compare the decimals."],
+          "Bigger decimal means bigger fraction.",
+          { label: "Which is bigger, 2/3 or 3/5?", lines: ["2/3 = 0.67 (rounded)", "3/5 = 0.6", "0.67 is bigger than 0.6, so 2/3 is bigger."] })
+      ],
+      exercises: [
+        Q("What is 1/4 as a decimal?", "0.25", ["0.14", "0.4", "0.5"], "1 ÷ 4 = 0.25."),
+        Q("Which fraction is the same as 0.5?", "1/2", ["1/5", "1/4", "2/3"], "1 ÷ 2 = 0.5, so 1/2 equals 0.5."),
+        Q("Amina has 8 oranges and gives away 2. What fraction, in simplest form, did she give away?", "1/4", ["1/8", "1/2", "3/4"], "She gave away 2 out of 8, which is 2/8. Divide top and bottom by 2 to get 1/4.")
+      ],
+      test: [
+        Q("In the fraction 5/8, which number is the denominator?", "8", ["5", "13", "3"], "The denominator is the bottom number, 8."),
+        Q("What is 3/5 as a decimal?", "0.6", ["0.35", "0.53", "1.5"], "3 ÷ 5 = 0.6."),
+        Q("Which is the largest number?", "0.4", ["1/4", "0.35", "3/10"], "1/4 = 0.25 and 3/10 = 0.3, so 0.4 is the largest."),
+        Q("A rope is 0.75 metres long. Which fraction of a metre is that?", "3/4", ["1/4", "1/2", "7/5"], "0.75 is the same as 3/4 because 3 ÷ 4 = 0.75.")
+      ]
+    },
+
+    "math-7": {
+      pages: [
+        P("What is a ratio?",
+          ["A ratio compares two amounts. We write it with a colon, like 2:3, and read it as \"2 to 3\". To simplify a ratio, divide both numbers by the same number."],
+          "Simplify a ratio by dividing both parts by the same number.",
+          { label: "Example", lines: ["A class has 12 girls and 18 boys.", "Girls to boys = 12:18", "Divide both by 6: 2:3"] }),
+        P("Sharing in a ratio",
+          ["To share an amount in a ratio: add the parts, divide the amount by the total parts to find one part, then multiply."],
+          "Add the parts, find one part, then multiply.",
+          { label: "Share 20 sweets in the ratio 1:3", lines: ["Total parts: 1 + 3 = 4", "One part: 20 ÷ 4 = 5", "Shares: 1 × 5 = 5 and 3 × 5 = 15"] }),
+        P("Percentages",
+          ["Percent means \"out of 100\". To find a percentage of an amount, divide the amount by 100, then multiply by the percentage."],
+          "25% means 25 out of every 100.",
+          { label: "Worked examples", lines: ["25% of 80 = 80 ÷ 100 × 25 = 20", "10% of 250 = 250 ÷ 100 × 10 = 25"] })
+      ],
+      exercises: [
+        Q("Simplify the ratio 10:25.", "2:5", ["1:2", "5:2", "10:5"], "Divide both numbers by 5: 10 ÷ 5 = 2 and 25 ÷ 5 = 5."),
+        Q("Share 30 in the ratio 2:3. What is the larger share?", "18", ["12", "15", "20"], "Total parts = 5, one part = 30 ÷ 5 = 6. The larger share is 3 × 6 = 18."),
+        Q("What is 50% of 90?", "45", ["40", "50", "55"], "50% is half. Half of 90 is 45.")
+      ],
+      test: [
+        Q("What is 20% of 60?", "12", ["10", "15", "20"], "60 ÷ 100 × 20 = 12."),
+        Q("A shirt costs 400 birr and has a 10% discount. What is the new price?", "360 birr", ["40 birr", "390 birr", "440 birr"], "10% of 400 = 40. The new price is 400 − 40 = 360 birr."),
+        Q("Simplify the ratio of 6 pens to 9 pencils.", "2:3", ["3:2", "6:9", "1:3"], "Divide both numbers by 3 to get 2:3."),
+        Q("Hodan scored 18 out of 20 in a test. What percentage is that?", "90%", ["80%", "85%", "98%"], "18 ÷ 20 = 0.9, which is 90%.")
+      ]
+    },
+
+    "math-8": {
+      pages: [
+        P("Keep the equation balanced",
+          ["An equation is like a balance scale. Both sides must stay equal. Whatever you do to one side, you must do to the other side."],
+          "Do the same thing to both sides.",
+          { label: "Solve x + 5 = 12", lines: ["Subtract 5 from both sides.", "x + 5 − 5 = 12 − 5", "x = 7"] }),
+        P("Two-step equations",
+          ["Some equations need two steps. First undo the adding or subtracting. Then undo the multiplying or dividing."],
+          "Undo + and − first, then × and ÷.",
+          { label: "Solve 2x + 3 = 11", lines: ["Subtract 3 from both sides: 2x = 8", "Divide both sides by 2: x = 4"] }),
+        P("Check your answer",
+          ["Always put your answer back into the original equation. If both sides are equal, your answer is correct. If x appears on both sides, collect the x terms on one side first."],
+          "Substitute your answer to check it.",
+          { label: "Examples", lines: ["Check x = 4 in 2x + 3: 2 × 4 + 3 = 11. Correct.", "Solve 3x = x + 8: subtract x from both sides, 2x = 8, so x = 4."] })
+      ],
+      exercises: [
+        Q("Solve x + 9 = 15.", "x = 6", ["x = 5", "x = 7", "x = 24"], "Subtract 9 from both sides: 15 − 9 = 6."),
+        Q("Solve 3x = 18.", "x = 6", ["x = 3", "x = 15", "x = 21"], "Divide both sides by 3: 18 ÷ 3 = 6."),
+        Q("Solve 2x + 1 = 9.", "x = 4", ["x = 3", "x = 5", "x = 8"], "Subtract 1: 2x = 8. Divide by 2: x = 4.")
+      ],
+      test: [
+        Q("Solve x − 4 = 10.", "x = 14", ["x = 6", "x = 10", "x = 40"], "Add 4 to both sides: 10 + 4 = 14."),
+        Q("Solve 4x + 2 = 18.", "x = 4", ["x = 3", "x = 5", "x = 20"], "Subtract 2: 4x = 16. Divide by 4: x = 4."),
+        Q("Solve x ÷ 2 = 7.", "x = 14", ["x = 3.5", "x = 5", "x = 9"], "Multiply both sides by 2: 7 × 2 = 14."),
+        Q("Solve 5x = 2x + 12.", "x = 4", ["x = 2", "x = 3", "x = 6"], "Subtract 2x from both sides: 3x = 12. Divide by 3: x = 4.")
+      ]
+    },
+
+    /* ---------------- English ---------------- */
+    "eng-6": {
+      pages: [
+        P("Nouns",
+          ["A noun is a naming word. It names a person, a place, an animal or a thing."],
+          "Noun = name of a person, place, animal or thing.",
+          { label: "Example", lines: ["The girl carried water to the market.", "Nouns: girl, water, market"] }),
+        P("Verbs",
+          ["A verb is a doing word. It shows an action (run, write, eat) or a state (is, are, seem). Every sentence needs a verb."],
+          "Verb = an action or a state.",
+          { label: "Examples", lines: ["The boys run to school.  (verb: run)", "She is happy.  (verb: is)"] }),
+        P("Adjectives",
+          ["An adjective describes a noun. It tells us what kind, how many or which one."],
+          "Adjective = a word that describes a noun.",
+          { label: "Examples", lines: ["a tall tree  (tall describes tree)", "three red books  (three and red describe books)"] })
+      ],
+      exercises: [
+        Q("Which word is a noun in: \"The farmer sells fresh milk.\"?", "farmer", ["sells", "fresh", "the"], "A farmer is a person, so it is a noun."),
+        Q("Which word is a verb in: \"Hodan writes a letter.\"?", "writes", ["Hodan", "a", "letter"], "Writes shows an action, so it is the verb."),
+        Q("In \"We saw a big, brown camel,\" which word describes the camel?", "big", ["saw", "we", "a"], "Big is an adjective. It tells us what kind of camel it was.")
+      ],
+      test: [
+        Q("What type of word is \"mountain\"?", "noun", ["verb", "adjective", "adverb"], "A mountain is a place or thing, so the word is a noun."),
+        Q("Which word is the verb in: \"They play football every day.\"?", "play", ["They", "football", "day"], "Play is the action in the sentence."),
+        Q("Which word is an adjective in: \"The cold water is clean.\"?", "cold", ["the", "water", "is"], "Cold describes the noun water."),
+        Q("Which sentence has a noun, a verb and an adjective?", "The happy children sing.", ["Run quickly.", "Blue and green.", "Under the table."], "Children is a noun, sing is a verb and happy is an adjective.")
+      ]
+    },
+
+    "eng-7": {
+      pages: [
+        P("The topic sentence",
+          ["A paragraph is a group of sentences about one main idea. The first sentence, called the topic sentence, tells the reader what the paragraph is about."],
+          "One paragraph, one main idea.",
+          { label: "Topic sentence", lines: ["Reading every day makes you a better student."] }),
+        P("Supporting details",
+          ["After the topic sentence, add reasons, facts and examples. Each sentence must help explain the main idea. Leave out anything that does not fit."],
+          "Every detail must support the topic sentence.",
+          { label: "Supporting details", lines: ["It builds your vocabulary.", "It helps you spell new words.", "It shows you how good writers organise ideas."] }),
+        P("Linking words and the closing sentence",
+          ["Linking words help your sentences flow: first, next, also, for example, finally. End with a concluding sentence that repeats the main idea in new words."],
+          "Start strong, stay on topic, finish with a conclusion.",
+          { label: "Concluding sentence", lines: ["In short, a few pages each day can improve your whole education."] })
+      ],
+      exercises: [
+        Q("What does a topic sentence do?", "It tells the reader the main idea", ["It ends the paragraph", "It lists spelling mistakes", "It asks the teacher a question"], "The topic sentence introduces the main idea of the paragraph."),
+        Q("Which sentence supports the topic \"Exercise keeps you healthy\"?", "It strengthens your heart and muscles.", ["I like bananas.", "The bus was late.", "Chairs have four legs."], "Only this sentence gives a reason that explains the topic."),
+        Q("Which word is a linking word?", "finally", ["table", "green", "quickly"], "Finally connects ideas and shows order.")
+      ],
+      test: [
+        Q("Where does the topic sentence usually go?", "At the start of the paragraph", ["Only in the middle", "After every sentence", "Nowhere"], "It opens the paragraph so the reader knows what to expect."),
+        Q("Which sentence best closes a paragraph about saving water?", "In short, saving water protects our future.", ["Water is blue.", "I went home.", "Next, wash the cups."], "A concluding sentence repeats the main idea in new words."),
+        Q("The topic is \"Our school library is helpful.\" Which sentence does NOT belong?", "My uncle owns a red car.", ["It has books for every grade.", "Students can study quietly there.", "The librarian helps us find books."], "The uncle's car has nothing to do with the library."),
+        Q("What is \"for example\" used for?", "To introduce an example", ["To end the paragraph", "To ask a question", "To change the topic"], "It tells the reader an example is coming.")
+      ]
+    },
+     "eng-8": {
+      pages: [
+        P("Choose a clear position",
+          ["A persuasive essay tries to convince the reader. Start by deciding what you believe. Then state it in one sentence called a thesis statement."],
+          "Your thesis is your position in one sentence.",
+          { label: "Thesis statement", lines: ["Schools should start the day with 20 minutes of reading."] }),
+        P("Reasons and evidence",
+          ["Give at least two strong reasons. Support each reason with evidence: a fact, a number or a real example. An opinion alone does not persuade anyone."],
+          "Reason + evidence = a convincing point.",
+          { label: "Example", lines: ["Reason: Reading improves writing.", "Evidence: A student who reads for 20 minutes a day meets many new words every week."] }),
+        P("Answer the other side and conclude",
+          ["Mention one opposing view and respond to it. This shows you have thought carefully. Finish with a conclusion that restates your position and asks the reader to act."],
+          "Respond to the other side, then call for action.",
+          { label: "Example", lines: ["Some people say there is no time.", "But 20 minutes is shorter than one school break."] })
+      ],
+      exercises: [
+        Q("What is a thesis statement?", "One sentence that states your position", ["A list of sources", "The last paragraph", "A title with no meaning"], "The thesis tells the reader exactly what you are arguing."),
+        Q("Which sentence is evidence rather than opinion?", "In a class of 30, 24 students finished the book.", ["Reading is the best.", "I feel reading is nice.", "Everyone should agree."], "Numbers and facts are evidence. The others are opinions."),
+        Q("Why include an opposing view?", "To show you can answer other ideas", ["To make the essay longer", "To confuse the reader", "To change your position"], "Answering the other side makes your argument stronger.")
+      ],
+      test: [
+        Q("What belongs in a conclusion?", "Your position restated and a call to act", ["A brand new argument", "A list of spelling errors", "Only a question"], "The conclusion reminds the reader of your position and what to do."),
+        Q("Which is the best thesis statement?", "Schools should plant trees in the yard.", ["Trees are tall.", "I went to the school.", "What is a tree?"], "It states a clear position that someone could agree or disagree with."),
+        Q("Which phrase introduces an opposing view?", "Some people argue that...", ["In addition,", "Finally,", "For example,"], "It brings in the other side so you can answer it."),
+        Q("A reason with no evidence is...", "weak because it is not supported", ["convincing enough", "the conclusion", "required in every essay"], "Evidence is what makes a reason believable.")
+      ]
+    },
+
+    /* ---------------- Science ---------------- */
+    "sci-6": {
+      pages: [
+        P("Evaporation",
+          ["The Sun heats water in rivers, lakes and seas. The water changes into an invisible gas called water vapour. The vapour rises into the air."],
+          "Evaporation: liquid water becomes water vapour.",
+          { label: "Think about it", lines: ["Wet clothes dry on a washing line because the water in them evaporates."] }),
+        P("Condensation",
+          ["High in the sky the air is cold. Water vapour cools down and changes back into tiny drops of liquid water. Millions of these drops gather together to make clouds."],
+          "Condensation: water vapour becomes liquid drops.",
+          { label: "Think about it", lines: ["Drops form on the outside of a cold glass of water for the same reason."] }),
+        P("Precipitation and collection",
+          ["When the drops in a cloud join together they become heavy and fall as rain, hail or snow. This is precipitation. The water runs into rivers, lakes and seas. This is collection, and then the cycle starts again."],
+          "Four stages: evaporation, condensation, precipitation, collection.")
+      ],
+      exercises: [
+        Q("What heats the water so that it evaporates?", "The Sun", ["The Moon", "The wind", "The clouds"], "The Sun's heat gives water the energy to turn into vapour."),
+        Q("What is it called when water vapour cools into drops?", "Condensation", ["Evaporation", "Precipitation", "Collection"], "Vapour changing into liquid is condensation."),
+        Q("Which of these is NOT a form of precipitation?", "Sunshine", ["Rain", "Hail", "Snow"], "Sunshine is light from the Sun. Rain, hail and snow all fall from clouds.")
+      ],
+      test: [
+        Q("Which stage comes right after condensation?", "Precipitation", ["Evaporation", "Collection", "Sunrise"], "Clouds form by condensation, then water falls as precipitation."),
+        Q("Clouds are made of...", "tiny drops of water", ["smoke", "only dust", "cotton"], "Condensation turns vapour into tiny drops that form clouds."),
+        Q("Water vapour is...", "an invisible gas", ["a liquid you can see", "a solid", "ice"], "Water vapour is water in the form of a gas, and you cannot see it."),
+        Q("What happens in the collection stage?", "Water gathers in rivers, lakes and seas", ["Water turns into vapour", "Clouds form", "The Sun sets"], "Collection is where fallen water gathers before the cycle begins again.")
+      ]
+    },
+
+    "sci-7": {
+      pages: [
+        P("What is a cell?",
+          ["A cell is the smallest unit of life. All living things are made of cells. Some living things, like bacteria, have only one cell. The human body has trillions of them."],
+          "Cells are the building blocks of life.",
+          { label: "Think about it", lines: ["Cells are so small that you need a microscope to see them."] }),
+        P("Parts of a cell",
+          ["Every cell has parts that each do a job:"],
+          "Each part of a cell has its own job.",
+          { label: "Main parts", lines: ["Cell membrane: controls what goes in and out", "Nucleus: the control centre that holds the instructions (DNA)", "Cytoplasm: jelly-like fluid where the cell's work happens", "Mitochondria: release energy from food"] }),
+        P("Plant cells and animal cells",
+          ["Plant cells have some extra parts that animal cells usually do not have: a cell wall for strength, chloroplasts that use sunlight to make food, and a large vacuole that stores water."],
+          "Plants add: cell wall, chloroplasts and a large vacuole.")
+      ],
+      exercises: [
+        Q("Which part is the control centre of the cell?", "Nucleus", ["Cell membrane", "Cell wall", "Vacuole"], "The nucleus holds the instructions that control the cell."),
+        Q("Which part releases energy from food?", "Mitochondria", ["Chloroplast", "Nucleus", "Cell wall"], "Mitochondria release the energy a cell needs."),
+        Q("Which part is found in plant cells but not animal cells?", "Chloroplast", ["Nucleus", "Cell membrane", "Cytoplasm"], "Chloroplasts let plants make food from sunlight.")
+      ],
+      test: [
+        Q("The cell is called...", "the smallest unit of life", ["a type of animal", "a kind of food", "a part of the sky"], "All living things are made of cells."),
+        Q("What does the cell membrane do?", "Controls what enters and leaves the cell", ["Makes sunlight", "Stores DNA only", "Gives the cell colour"], "The membrane acts like a gate around the cell."),
+        Q("Which part gives a plant cell its strong, fixed shape?", "Cell wall", ["Cytoplasm", "Mitochondria", "Nucleus"], "The cell wall is a strong outer layer found in plant cells."),
+        Q("Which part uses sunlight to make food?", "Chloroplast", ["Nucleus", "Cell membrane", "Cytoplasm"], "Chloroplasts capture sunlight to make food for the plant.")
+      ]
+    },
+   "sci-8": {
+      pages: [
+        P("What is a force?",
+          ["A force is a push or a pull. Forces are measured in newtons (N). A force can make an object start moving, stop, change direction or change shape."],
+          "Force = a push or a pull, measured in newtons.",
+          { label: "Examples", lines: ["Kicking a ball is a push.", "Opening a door by its handle is a pull."] }),
+        P("Balanced and unbalanced forces",
+          ["When the forces on an object are balanced, nothing changes. The object stays still or keeps moving at the same speed. When the forces are unbalanced, the object speeds up, slows down or changes direction.", "Friction is a force that slows moving objects when surfaces rub together. Rough surfaces cause more friction than smooth ones."],
+          "Unbalanced forces change the motion of an object."),
+        P("Calculating speed",
+          ["Speed tells us how fast something moves. To find speed, divide the distance travelled by the time taken."],
+          "Speed = distance ÷ time.",
+          { label: "Example", lines: ["A bus travels 120 km in 2 hours.", "Speed = 120 ÷ 2 = 60 km/h"] })
+      ],
+      exercises: [
+        Q("What is the unit used to measure force?", "Newton", ["Metre", "Second", "Litre"], "Force is measured in newtons (N)."),
+        Q("Which surface causes the most friction?", "Sandpaper", ["Ice", "Glass", "A polished floor"], "Rough surfaces cause more friction than smooth ones."),
+        Q("A runner covers 100 m in 20 s. What is the speed?", "5 m/s", ["0.2 m/s", "20 m/s", "80 m/s"], "100 ÷ 20 = 5 metres every second.")
+      ],
+      test: [
+        Q("The forces on a book lying on a table are balanced. What does the book do?", "Stays still", ["Speeds up", "Flies away", "Changes shape"], "Balanced forces mean no change in motion."),
+        Q("A car travels 150 km in 3 hours. What is its speed?", "50 km/h", ["30 km/h", "45 km/h", "450 km/h"], "150 ÷ 3 = 50."),
+        Q("What does friction do to a moving object?", "Slows it down", ["Speeds it up", "Makes it lighter", "Makes it invisible"], "Friction acts against movement."),
+        Q("A force is...", "a push or a pull", ["a kind of light", "a type of food", "a unit of time"], "Pushes and pulls are forces.")
+      ]
+    },
+
+    /* ---------------- Somali ---------------- */
+    "som-6": {
+      pages: [
+        P("Magac (noun)",
+          ["Magac waa erayga lagu magacaabo qof, meel, xayawaan ama shay. A magac is a naming word. It names a person, a place, an animal or a thing."],
+          "Magac = noun.",
+          { label: "Examples", lines: ["ardey = student", "buug = book", "geel = camel", "magaalo = town"] }),
+        P("Fal (verb)",
+          ["Fal waa erayga muujiya shaqo ama dhaqdhaqaaq. A fal is a doing word. It shows an action."],
+          "Fal = verb.",
+          { label: "Examples", lines: ["akhri = read", "qor = write", "cun = eat", "ordo = run"] }),
+        P("Magac and fal in a sentence",
+          ["Every sentence has a fal. Find the magacyo (nouns) and the fal (verb) in these sentences:"],
+          "Find the fal first, then look for the magacyo.",
+          { label: "Sentences", lines: ["Ardayga buug buu akhriyaa.  (The student reads a book.)", "Magacyo: ardayga, buug. Fal: akhriyaa.", "Geeliga cawska buu cunaa.  (The camel eats the grass.)", "Magacyo: geeliga, cawska. Fal: cunaa."] })
+      ],
+      exercises: [
+        Q("Which word is a magac (noun)?", "buug", ["akhri", "ordo", "cun"], "Buug means book, which is a thing."),
+        Q("Which word is a fal (verb)?", "qor", ["geel", "magaalo", "ardey"], "Qor means write, which is an action."),
+        Q("In \"Geeliga cawska buu cunaa\", which word is the fal?", "cunaa", ["Geeliga", "cawska", "buu"], "Cunaa means eats. It is the action.")
+      ],
+      test: [
+        Q("What does \"magac\" mean in English?", "noun", ["verb", "adjective", "sentence"], "Magac is the Somali word for a noun."),
+        Q("Which word is a magac?", "geel", ["akhri", "ordo", "cun"], "Geel means camel, which is an animal."),
+        Q("Which word is a fal?", "ordo", ["magaalo", "buug", "ardey"], "Ordo means run, which is an action."),
+        Q("In \"Ardayga buug buu akhriyaa\", which word is the fal?", "akhriyaa", ["Ardayga", "buug", "buu"], "Akhriyaa means reads. It is the action.")
+      ]
+    },
+
+    "som-7": {
+      pages: [
+        P("What is a maahmaah?",
+          ["A maahmaah is a short saying that carries advice from many generations. Somali elders use maahmaahyo to teach, warn and encourage. A good maahmaah says a lot in very few words."],
+          "Maahmaah = a short saying with wise advice."),
+        P("Aqoon la'aani waa iftiin la'aan",
+          ["This well-known maahmaah means: without knowledge there is no light. Aqoon means knowledge and iftiin means light. Just as light helps you see the road at night, knowledge helps you find your way in life. The saying reminds us how important education is."],
+          "Knowledge is like light.",
+          { label: "Words", lines: ["aqoon = knowledge", "iftiin = light"] }),
+        P("Using a proverb in your writing",
+          ["When you use a maahmaah in your own writing, first write the saying. Then explain what it means in your own words. Finally, connect it to your topic. Another everyday saying is \"Nabad iyo caano\", which literally means \"peace and milk\". People use it to wish each other peace and plenty."],
+          "Write it, explain it, connect it.",
+          { label: "Pattern", lines: ["1. Write the maahmaah.", "2. Say what it means.", "3. Link it to your topic."] })
+      ],
+      exercises: [
+        Q("What is a maahmaah?", "A short saying that carries advice", ["A kind of camel", "A long story", "A type of town"], "Maahmaahyo are short sayings full of wisdom."),
+        Q("\"Aqoon la'aani waa iftiin la'aan\" teaches that...", "knowledge is like light", ["money is everything", "sleeping early is best", "animals are important"], "Without knowledge life is like walking without light."),
+        Q("What does \"iftiin\" mean?", "light", ["water", "milk", "road"], "Iftiin means light.")
+      ],
+      test: [
+        Q("What does \"aqoon\" mean?", "knowledge", ["camel", "peace", "town"], "Aqoon is the Somali word for knowledge."),
+        Q("\"Nabad iyo caano\" literally means...", "peace and milk", ["water and rain", "work and rest", "night and day"], "Nabad is peace and caano is milk."),
+        Q("What is the best way to use a proverb in writing?", "Write it, then explain its meaning in your own words", ["Write it without explaining", "Change all the words", "Hide it at the end"], "Explaining the meaning shows you understand it."),
+        Q("Which Somali saying talks about knowledge?", "Aqoon la'aani waa iftiin la'aan", ["Nabad iyo caano", "Neither of them"], "Aqoon means knowledge. The saying compares it to light.")
+      ]
+    },
+
+    "som-8": {
+      pages: [
+        P("A nation of poets",
+          ["Somalia is often called a nation of poets. For centuries, poems were not written down. They were spoken, memorised and passed from person to person. An abwaan (poet) could share news, give advice, praise good deeds and help settle disagreements. That is why a good abwaan was respected by everyone."],
+          "Abwaan = poet. Maanso = poetry.",
+          { label: "Words", lines: ["abwaan = poet", "maanso = poem or poetry", "gabay = a classic form of Somali poem"] }),
+        P("How a gabay is built",
+          ["A gabay follows strict rules. It has a fixed rhythm pattern called miisaan (metre). It also uses higaad, which is alliteration: in every line there is a word that begins with the same chosen sound. This pattern helps the poet and the listener remember the poem."],
+          "Gabay = miisaan (metre) + higaad (alliteration).",
+          { label: "Alliteration in English", lines: ["Silver snakes slide slowly.", "The repeated S sound is the alliteration."] }),
+        P("Write your own verse",
+          ["You can practise the same idea. Choose a theme, such as knowledge, family or the rain. Choose one sound to repeat. Write four short lines that each use that sound. Then read your verse aloud to feel the rhythm."],
+          "Theme, sound, four lines, read it aloud.",
+          { label: "Try this", lines: ["Theme: rain", "Sound: R", "Line: Rain races over rooftops."] })
+      ],
+      exercises: [
+        Q("What is an abwaan?", "A poet", ["A market", "A song book", "A type of rain"], "An abwaan is a Somali poet."),
+        Q("What does \"higaad\" mean?", "Alliteration", ["A camel", "A market", "A short story"], "Higaad is the repeated starting sound in a poem."),
+        Q("Why were poets so respected?", "They shared news and wisdom and helped settle disagreements", ["They sold food", "They built houses", "They only told jokes"], "Poets carried knowledge and helped keep peace.")
+      ],
+      test: [
+        Q("What is a gabay?", "A classic form of Somali poem", ["A kind of market", "A farming tool", "A school subject"], "The gabay is one of the best-known forms of Somali poetry."),
+        Q("What does \"miisaan\" describe in a poem?", "The rhythm pattern (metre)", ["The title", "The poet's age", "The colour of the page"], "Miisaan is the fixed rhythm pattern of a gabay."),
+        Q("Which line shows alliteration?", "Silver snakes slide slowly.", ["The cat is on a mat.", "Open the door.", "We went home."], "The repeated S sound at the start of words is alliteration."),
+        Q("How were poems mostly shared in the past?", "Spoken aloud and learned by heart", ["Printed in newspapers", "Sent by email", "Painted on walls"], "Somali poetry is an oral tradition.")
+      ]
+    }
+  };
+})();
+
+</script>
+<script>
+   /* ---- player.js ---- */
+/* Macalin Academy: lesson player
+   Walks a student through a lesson: reading pages, then exercises (instant feedback),
+   then a scored test, then a results page. Back and Next move between steps.
+   Progress (best test score per lesson) is kept in this browser only. */
+(function () {
+  "use strict";
+
+  var DATA = window.MACALIN;
+  var CONTENT = window.MACALIN_CONTENT;
+  var dlg = null;
+  var st = null;
+  var progress = {};
+
+  try { progress = JSON.parse(localStorage.getItem("macalin-progress") || "{}") || {}; } catch (e) { progress = {}; }
+  function saveProgress() {
+    try { localStorage.setItem("macalin-progress", JSON.stringify(progress)); } catch (e) { /* storage can be blocked */ }
+  }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function letter(i) { return "ABCD".charAt(i); }
+  function subjectOf(id) { return DATA.subjects.filter(function (s) { return s.id === id; })[0]; }
+
+  var ICON = {
+    back: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
+    next: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+    close: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+    ok: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg>',
+    no: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>'
+  };
+
+  var PHASE = { learn: "Lesson", practice: "Exercise", test: "Test" };
+
+  function buildSteps(c) {
+    var steps = [];
+    c.pages.forEach(function (p, i) { steps.push({ type: "learn", n: i + 1, of: c.pages.length, page: p, key: "learn" + i }); });
+    c.exercises.forEach(function (q, i) { steps.push({ type: "practice", n: i + 1, of: c.exercises.length, q: q, key: "practice" + i }); });
+    c.test.forEach(function (q, i) { steps.push({ type: "test", n: i + 1, of: c.test.length, q: q, key: "test" + i }); });
+    steps.push({ type: "result", key: "result" });
+    return steps;
+  }
+
+  function counts(id) {
+    var c = CONTENT[id];
+    return c ? { pages: c.pages.length, exercises: c.exercises.length, test: c.test.length } : null;
+  }
+
+  /* ---------- step bodies ---------- */
+  function learnBody(step) {
+    var p = step.page, html = '<h2 id="pl-title">' + esc(p.title) + "</h2>";
+    p.text.forEach(function (t) { html += "<p>" + esc(t) + "</p>"; });
+    if (p.example) {
+      html += '<div class="pl-example"><p class="pl-label">' + esc(p.example.label) + "</p><ul>" +
+        p.example.lines.map(function (l) { return "<li>" + esc(l) + "</li>"; }).join("") + "</ul></div>";
+    }
+    if (p.key) html += '<p class="pl-key"><b>Remember:</b> ' + esc(p.key) + "</p>";
+    return html;
+  }
+
+  function optionsHtml(step, reveal) {
+    var chosen = st.ans[step.key];
+    return '<div class="pl-options" role="radiogroup" aria-label="Answer choices">' + step.q.options.map(function (o, k) {
+      var cls = "pl-opt";
+      if (reveal && chosen !== undefined) {
+        if (k === step.q.answer) cls += " right";
+        else if (k === chosen) cls += " wrong";
+      } else if (chosen === k) cls += " picked";
+      var locked = reveal && chosen !== undefined;
+      return '<button class="' + cls + '" type="button" role="radio" aria-checked="' + (chosen === k) + '" data-opt="' + k + '"' + (locked ? " disabled" : "") + ">" +
+        '<span class="pl-letter">' + letter(k) + "</span><span>" + esc(o) + "</span></button>";
+    }).join("") + "</div>";
+  }
+
+  function questionBody(step) {
+    var reveal = step.type === "practice";
+    var html = '<h2 id="pl-title">' + esc(step.q.q) + "</h2>" + optionsHtml(step, reveal);
+    var chosen = st.ans[step.key];
+    if (reveal && chosen !== undefined) {
+      var good = chosen === step.q.answer;
+      html += '<div class="pl-feedback ' + (good ? "ok" : "no") + '" role="status">' + (good ? ICON.ok : ICON.no) +
+        "<div><b>" + (good ? "Correct!" : "Not quite.") + "</b><p>" +
+        (good ? "" : "The right answer is " + letter(step.q.answer) + ": " + esc(step.q.options[step.q.answer]) + ". ") +
+        esc(step.q.why) + "</p></div></div>";
+    }
+    if (!reveal) html += '<p class="pl-hint">You will see your score and the right answers at the end.</p>';
+    return html;
+  }
+
+  function score() {
+    var right = 0;
+    st.c.test.forEach(function (q, i) { if (st.ans["test" + i] === q.answer) right++; });
+    return right;
+  }
+  function practiceScore() {
+    var right = 0;
+    st.c.exercises.forEach(function (q, i) { if (st.ans["practice" + i] === q.answer) right++; });
+    return right;
+  }
+
+  function resultBody() {
+    var total = st.c.test.length, right = score();
+    var pct = Math.round(right / total * 100);
+    var msg = pct >= 75 ? "Great work! You understand this lesson well."
+      : pct >= 50 ? "Good effort. Read the lesson again and try the test once more."
+      : "Keep going. Read the lesson again, then retry the test.";
+    var html = '<div class="pl-score"><div class="pl-ring" style="--p:' + pct + '"><b>' + right + "/" + total + "</b><span>" + pct + "%</span></div>" +
+      '<div><h2 id="pl-title">Test complete</h2><p>' + msg + "</p>" +
+      '<p class="pl-small">Exercises: ' + practiceScore() + " of " + st.c.exercises.length + " correct</p></div></div>";
+    html += '<h3 class="pl-review-h">Review your answers</h3><ol class="pl-review">';
+    st.c.test.forEach(function (q, i) {
+      var a = st.ans["test" + i], good = a === q.answer;
+      html += '<li class="' + (good ? "ok" : "no") + '">' + (good ? ICON.ok : ICON.no) + "<div><b>" + esc(q.q) + "</b>" +
+        "<p>Your answer: " + (a === undefined ? "none" : esc(q.options[a])) + "</p>" +
+        (good ? "" : "<p>Right answer: " + esc(q.options[q.answer]) + "</p>") +
+        '<p class="pl-small">' + esc(q.why) + "</p></div></li>";
+    });
+    html += "</ol>";
+    return html;
+  }
+
+  /* ---------- render ---------- */
+  function render(keepScroll) {
+    var step = st.steps[st.i], l = st.lesson, last = st.steps.length - 1;
+    var oldBody = dlg.querySelector(".pl-body");
+    var scrollTop = keepScroll && oldBody ? oldBody.scrollTop : 0;
+
+    dlg.setAttribute("data-s", l.subject);
+
+    var segs = st.steps.slice(0, last).map(function (x, k) {
+      return '<i class="seg seg-' + x.type + (k < st.i ? " done" : "") + (k === st.i ? " now" : "") + '"></i>';
+    }).join("");
+
+    var badge = step.type === "result" ? "Results" : PHASE[step.type] + " " + step.n + " of " + step.of;
+    var body = step.type === "learn" ? learnBody(step) : step.type === "result" ? resultBody() : questionBody(step);
+
+    var needsAnswer = (step.type === "practice" || step.type === "test") && st.ans[step.key] === undefined;
+    var nextLabel = "Next";
+    if (step.type === "learn" && st.i === 0) nextLabel = "Start";
+    if (step.type === "learn" && st.steps[st.i + 1].type === "practice") nextLabel = "Go to exercises";
+    if (step.type === "practice" && st.steps[st.i + 1].type === "test") nextLabel = "Go to the test";
+    if (step.type === "test" && st.steps[st.i + 1].type === "result") nextLabel = "Finish test";
+
+    var footer = step.type === "result"
+      ? '<button class="btn btn-ghost" type="button" data-pl-back>' + ICON.back + 'Back</button>' +
+        '<span class="pl-step">Done</span>' +
+        '<span class="pl-end"><button class="btn btn-ghost" type="button" data-pl-retry>Retry test</button>' +
+        '<button class="btn btn-primary" type="button" data-pl-exit>Finish</button></span>'
+      : '<button class="btn btn-ghost" type="button" data-pl-back' + (st.i === 0 ? " disabled" : "") + ">" + ICON.back + "Back</button>" +
+        '<span class="pl-step">Step ' + (st.i + 1) + " of " + last + "</span>" +
+        '<button class="btn btn-primary" type="button" data-pl-next' + (needsAnswer ? " disabled" : "") + ">" + nextLabel + ICON.next + "</button>";
+
+    dlg.innerHTML =
+      '<div class="pl-top"><div class="pl-bar"><div class="pl-title-row"><span class="pl-lesson">' + esc(l.title) + '</span>' +
+      '<button class="icon-btn" type="button" data-pl-exit aria-label="Exit lesson">' + ICON.close + "</button></div>" +
+      '<div class="pl-progress" aria-hidden="true">' + segs + "</div></div></div>" +
+      '<div class="pl-body" tabindex="-1"><p class="pl-badge pl-badge-' + step.type + '">' + esc(badge) + "</p>" + body + "</div>" +
+      '<div class="pl-foot">' + footer + "</div>";
+
+    var nb = dlg.querySelector(".pl-body");
+    nb.scrollTop = scrollTop;
+
+    if (step.type === "result") {
+      var right = score(), total = st.c.test.length, prev = progress[l.id];
+      progress[l.id] = { best: Math.max(prev ? prev.best : 0, right), total: total };
+      saveProgress();
+      // Send each finished attempt to Supabase once; a failure never interrupts the student.
+      var signature = JSON.stringify(st.c.test.map(function (q, i) { return st.ans["test" + i]; }));
+      if (st.sent !== signature && window.MacalinApi && window.MacalinApi.enabled) {
+        st.sent = signature;
+        window.MacalinApi.saveResult({ lessonId: l.id, score: right, total: total }).catch(function () { /* offline or table missing */ });
+      }
+    }
+  }
+
+  function go(delta) {
+    var next = st.i + delta;
+    if (next < 0 || next >= st.steps.length) return;
+    st.i = next;
+    render(false);
+    var nb = dlg.querySelector(".pl-body");
+    if (nb) nb.focus({ preventScroll: true });
+  }
+
+  /* ---------- open / close ---------- */
+  function open(id) {
+    var lesson = DATA.lessons.filter(function (l) { return l.id === id; })[0];
+    var c = CONTENT[id];
+    if (!lesson || !c) return false;
+    dlg = document.getElementById("player");
+    st = { lesson: lesson, c: c, steps: buildSteps(c), i: 0, ans: {} };
+    render(false);
+    if (dlg.showModal) { if (!dlg.open) dlg.showModal(); } else { dlg.setAttribute("open", ""); }
+    return true;
+  }
+
+  function exit() {
+    if (!dlg) return;
+    if (dlg.close) dlg.close(); else dlg.removeAttribute("open");
+  }
+
+  function init() {
+    dlg = document.getElementById("player");
+    if (!dlg) return;
+
+    dlg.addEventListener("click", function (e) {
+      if (!st) return;
+      var t = e.target, el;
+      if (t.closest("[data-pl-exit]")) { exit(); return; }
+      if (t.closest("[data-pl-back]")) { go(-1); return; }
+      if (t.closest("[data-pl-next]")) { if (!t.closest("[data-pl-next]").disabled) go(1); return; }
+      if (t.closest("[data-pl-retry]")) {
+        for (var k in st.ans) { if (k.indexOf("test") === 0) delete st.ans[k]; }
+        st.i = st.steps.findIndex(function (s) { return s.type === "test"; });
+        render(false);
+        return;
+      }
+      if ((el = t.closest("[data-opt]"))) {
+        var step = st.steps[st.i];
+        if (step.type === "practice" && st.ans[step.key] !== undefined) return;
+        st.ans[step.key] = Number(el.getAttribute("data-opt"));
+        render(true);
+        var picked = dlg.querySelector(".pl-opt.picked, .pl-opt.right, .pl-opt.wrong");
+        if (picked && step.type === "test") picked.focus({ preventScroll: true });
+      }
+    });
+
+    dlg.addEventListener("keydown", function (e) {
+      if (!st) return;
+      if (e.key === "ArrowRight") {
+        var nx = dlg.querySelector("[data-pl-next]");
+        if (nx && !nx.disabled) { e.preventDefault(); go(1); }
+      } else if (e.key === "ArrowLeft") {
+        if (st.i > 0) { e.preventDefault(); go(-1); }
+      }
+    });
+
+    dlg.addEventListener("close", function () {
+      window.dispatchEvent(new Event("macalin:progress"));
+    });
+  }
+
+  window.MacalinPlayer = {
+    open: open,
+    counts: counts,
+    best: function (id) { return progress[id] || null; }
+  };
+
+  init();
+})();
+
+</script>
+<script>
+   /* ---- app.js ---- */
+/* Macalin Academy: behaviour
+   Reads window.MACALIN (data.js), draws every section, and wires up the buttons.
+   Lessons can come from Supabase (see loadRemote); the sample data is the fallback. */
+(function () {
+  "use strict";
+
+  var DATA = window.MACALIN;
+  var Art = window.MacalinArt;
+  var state = { grade: "all", subject: "all", query: "" };
+
+  /* ---------- helpers ---------- */
+  function $(sel, root) { return (root || document).querySelector(sel); }
+  function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function subjectOf(id) { return DATA.subjects.filter(function (s) { return s.id === id; })[0]; }
+  function lessonOf(id) { return DATA.lessons.filter(function (l) { return l.id === id; })[0]; }
+  function initials(name) {
+    return name.replace(/^(Ms|Mr)\.?\s+/, "").split(" ").map(function (w) { return w[0]; }).slice(0, 2).join("");
+  }
+  function unique(list) { return list.filter(function (v, i) { return list.indexOf(v) === i; }); }
+  var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var ICONS = {
+    math: '<svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12.5h2M14 12.5h2M8 17h2M14 17h2"/></svg>',
+    english: '<svg viewBox="0 0 24 24"><path d="M5 19.5V5.5A2.5 2.5 0 0 1 7.5 3H19v15H7.5A2.5 2.5 0 0 0 5 20.5z"/><path d="M5 19.5A2.5 2.5 0 0 0 7.5 22H19v-4M9 8h6M9 12h4"/></svg>',
+    science: '<svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v6L4.6 18.2A2 2 0 0 0 6.3 21h11.4a2 2 0 0 0 1.7-2.8L14 9V3"/><path d="M7.4 15h9.2"/></svg>',
+    somali: '<svg viewBox="0 0 24 24"><polygon points="12,2.8 14.6,9.2 21.4,9.6 16.2,14 17.9,20.6 12,17 6.1,20.6 7.8,14 2.6,9.6 9.4,9.2"/></svg>',
+    arrow: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+    clock: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    check: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg>',
+    close: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+    moon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5z"/></svg>',
+    sun: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>',
+    book: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19.5V5.5A2.5 2.5 0 0 1 7.5 3H19v15H7.5A2.5 2.5 0 0 0 5 20.5z"/><path d="M5 19.5A2.5 2.5 0 0 0 7.5 22H19v-4"/></svg>',
+    grid: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>',
+    people: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17.5" cy="9" r="2.8"/><path d="M17 14.2c2.6.2 4.5 2 4.5 5"/></svg>',
+    pencil: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 20 1-4.5L16.5 4a2.1 2.1 0 0 1 3 3L8 18.5z"/><path d="m14.5 6 3 3"/></svg>',
+    award: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5.5"/><path d="m8.5 13.5-1.5 7 5-2.8 5 2.8-1.5-7"/></svg>',
+    globe: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>'
+  };
+
+  function scrollToId(id) {
+    var el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+  }
+
+  var toastTimer;
+  function toast(message) {
+    var el = $("#toast");
+    el.textContent = message;
+    el.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.hidden = true; }, 3200);
+  }
+
+  /* ---------- theme ---------- */
+  var root = document.documentElement;
+  function currentTheme() {
+    if (root.getAttribute("data-theme")) return root.getAttribute("data-theme");
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+  function paintThemeButton() {
+    var dark = currentTheme() === "dark";
+    $("#theme-btn").innerHTML = (dark ? ICONS.sun : ICONS.moon) + (dark ? "Light mode" : "Dark mode");
+    $("#theme-btn").setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
+  }
+  function initTheme() {
+    try {
+      var saved = localStorage.getItem("macalin-theme");
+      if (saved === "light" || saved === "dark") root.setAttribute("data-theme", saved);
+    } catch (e) { /* storage can be blocked; the page still works */ }
+    paintThemeButton();
+    $("#theme-btn").addEventListener("click", function () {
+      var next = currentTheme() === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      try { localStorage.setItem("macalin-theme", next); } catch (e) { /* ignore */ }
+      paintThemeButton();
+    });
+  }
+
+  /* ---------- numbers drawn from the data ---------- */
+  function facts() {
+    var content = window.MACALIN_CONTENT || {};
+    var exercises = 0, tests = 0, mins = [];
+    DATA.lessons.forEach(function (l) {
+      var c = content[l.id];
+      if (c) { exercises += c.exercises.length; tests += c.test.length; }
+      mins.push(l.minutes);
+    });
+    return {
+      lessons: DATA.lessons.length,
+      subjects: DATA.subjects.length,
+      grades: DATA.grades.length,
+      teachers: unique(DATA.lessons.map(function (l) { return l.teacher; })).length,
+      exercises: exercises,
+      tests: tests,
+      minMin: mins.length ? Math.min.apply(null, mins) : 0,
+      maxMin: mins.length ? Math.max.apply(null, mins) : 0
+    };
+  }
+
+  /* ---------- hero ---------- */
+  function renderHero() {
+    var f = facts();
+    $("#hero-scene").innerHTML = Art.scene("hero");
+    $("#hero-chips").innerHTML =
+      '<div class="chip-float" style="top:8%;right:0"><span class="ico">' + ICONS.book + "</span><div><b>" + f.lessons + '</b><span class="t">Free lessons</span></div></div>' +
+      '<div class="chip-float" style="bottom:2%;left:0;animation-delay:-3s"><span class="ico">' + ICONS.grid + "</span><div><b>" + f.subjects + ' subjects</b><span class="t">Grades 6, 7 and 8</span></div></div>';
+  }
+
+  function renderPictures() {
+    var about = $("#about-scene"), cta = $("#cta-scene");
+    if (about) about.src = Art.sceneUri("about");
+    if (cta) cta.src = Art.sceneUri("cta");
+  }
+
+  /* ---------- about, stats, teachers ---------- */
+  function renderAbout() {
+    var f = facts();
+    $("#about-stats").innerHTML = [[f.lessons, "Lessons"], [f.subjects, "Subjects"], [f.grades, "Grades"]].map(function (s) {
+      return "<li><b>" + s[0] + "</b><span>" + s[1] + "</span></li>";
+    }).join("");
+    var cards = [
+      [ICONS.clock, f.minMin + " to " + f.maxMin + " min", "Length of each lesson"],
+      [ICONS.check, "3 steps", "Read, practise and take a test"],
+      [ICONS.globe, "2 languages", "English and Somali lessons"]
+    ];
+    $("#about-cards").innerHTML = cards.map(function (c) {
+      return '<div class="stat-card">' + c[0] + "<div><b>" + c[1] + '</b><span class="t">' + c[2] + "</span></div></div>";
+    }).join("");
+  }
+
+  function renderStatsBand() {
+    var f = facts();
+    var items = [
+      [ICONS.book, f.lessons, "Lessons"],
+      [ICONS.people, f.teachers, "Teachers"],
+      [ICONS.pencil, f.exercises, "Practice questions"],
+      [ICONS.award, f.tests, "Test questions"],
+      [ICONS.grid, f.subjects, "Subjects"]
+    ];
+    $("#stats-band").innerHTML = items.map(function (s) {
+      return "<li>" + s[0] + "<div><b>" + s[1] + '</b><span class="t">' + s[2] + "</span></div></li>";
+    }).join("");
+  }
+
+  function renderTeachers() {
+    var names = unique(DATA.lessons.map(function (l) { return l.teacher; })).filter(Boolean).sort();
+    $("#teacher-grid").innerHTML = names.map(function (name, i) {
+      var theirs = DATA.lessons.filter(function (l) { return l.teacher === name; });
+      var subjects = unique(theirs.map(function (l) { var s = subjectOf(l.subject); return s ? s.name : ""; })).filter(Boolean).join(", ");
+      return '<button class="teacher-card" type="button" data-teacher="' + esc(name) + '">' +
+        '<img src="' + Art.avatarUri(name, i) + '" alt="" width="84" height="84" loading="lazy">' +
+        "<b>" + esc(name) + "</b><span>" + esc(subjects) + '</span><span class="tc-count">' + theirs.length + (theirs.length === 1 ? " lesson" : " lessons") + "</span></button>";
+    }).join("");
+  }
+
+  /* ---------- grades ---------- */
+  function renderGrades() {
+    $("#grade-grid").innerHTML = DATA.grades.map(function (g) {
+      var list = DATA.lessons.filter(function (l) { return l.grade === g.id; });
+      var items = list.map(function (l) {
+        return '<li data-s="' + l.subject + '"><i></i><span>' + esc(l.title) + "</span></li>";
+      }).join("");
+      return '<button class="prog-card" type="button" data-pick-grade="' + g.id + '">' +
+        '<span class="prog-img"><img src="' + Art.gradeUri(g.id) + '" alt="" loading="lazy"></span>' +
+        '<span class="prog-body"><span class="prog-meta">' + esc(g.tagline) + "</span><h3>" + esc(g.name) + "</h3><p>" + esc(g.blurb) + "</p>" +
+        '<ul class="prog-list">' + items + "</ul>" +
+        '<span class="prog-meta">' + list.length + " lessons &middot; View lessons</span></span></button>";
+    }).join("");
+  }
+
+  /* ---------- subjects ---------- */
+  function renderSubjects() {
+    $("#subject-grid").innerHTML = DATA.subjects.map(function (s) {
+      var n = DATA.lessons.filter(function (l) { return l.subject === s.id; }).length;
+      return '<button class="cat" type="button" data-s="' + s.id + '" data-pick-subject="' + s.id + '">' +
+        '<span class="cat-icon">' + ICONS[s.icon] + "</span><h3>" + esc(s.name) + '</h3><span class="native">' + esc(s.native) + "</span>" +
+        "<p>" + esc(s.blurb) + '</p><span class="count">' + n + " lessons</span></button>";
+    }).join("");
+  }
+
+  /* ---------- lesson filters ---------- */
+  function renderChips() {
+    var g = [{ id: "all", name: "All grades" }].concat(DATA.grades);
+    $("#grade-chips").innerHTML = g.map(function (x) {
+      return '<button class="chip" type="button" data-chip-grade="' + x.id + '" aria-pressed="' + (String(state.grade) === String(x.id)) + '">' + esc(x.name) + "</button>";
+    }).join("");
+    var s = [{ id: "all", name: "All subjects" }].concat(DATA.subjects);
+    $("#subject-chips").innerHTML = s.map(function (x) {
+      return '<button class="chip" type="button" data-chip-subject="' + x.id + '" aria-pressed="' + (state.subject === x.id) + '">' + esc(x.name) + "</button>";
+    }).join("");
+  }
+
+  function matches(l, q) {
+    if (!q) return true;
+    var s = subjectOf(l.subject);
+    var hay = (l.title + " " + l.description + " " + (s ? s.name + " " + s.native : "") + " " + l.teacher + " grade " + l.grade + " " + l.objectives.join(" ")).toLowerCase();
+    return q.toLowerCase().split(/\s+/).every(function (w) { return hay.indexOf(w) !== -1; });
+  }
+
+  function filtered() {
+    return DATA.lessons.filter(function (l) {
+      return (state.grade === "all" || String(l.grade) === String(state.grade)) &&
+        (state.subject === "all" || l.subject === state.subject) && matches(l, state.query.trim());
+    });
+  }
+
+  function doneBadge(id) {
+    var b = window.MacalinPlayer && window.MacalinPlayer.best(id);
+    return b ? '<span class="badge badge-done">Done &middot; ' + b.best + "/" + b.total + "</span>" : "";
+  }
+
+  function lessonCard(l) {
+    var s = subjectOf(l.subject);
+    return '<article class="lesson" data-s="' + l.subject + '">' +
+      '<button class="lesson-media" type="button" data-open="' + l.id + '" aria-label="Open lesson: ' + esc(l.title) + '">' +
+      '<img src="' + Art.uri(l) + '" alt="" loading="lazy"><span class="badge">Grade ' + l.grade + "</span>" + doneBadge(l.id) + "</button>" +
+      '<div class="lesson-body"><p class="lesson-kicker"><span class="tag">' + esc(s.name) + "</span><span>" + l.minutes + " min</span></p>" +
+      '<h3><button class="lesson-title" type="button" data-open="' + l.id + '">' + esc(l.title) + "</button></h3>" +
+      "<p>" + esc(l.description) + "</p>" +
+      '<div class="lesson-foot"><span class="teacher"><span class="avatar">' + esc(initials(l.teacher)) + "</span><span>" + esc(l.teacher) + "</span></span>" +
+      '<button class="btn btn-small" type="button" data-open="' + l.id + '">Open</button></div></div></article>';
+   }
+   function renderLessons() {
+    var list = filtered();
+    var grid = $("#lesson-grid");
+    if (list.length) {
+      grid.innerHTML = list.map(lessonCard).join("");
+    } else {
+      grid.innerHTML = '<div class="empty"><h3>No lessons found</h3><p>Nothing matches your search. Try a different word, or clear the filters.</p>' +
+        '<button class="btn btn-primary" type="button" data-reset>Show all lessons</button></div>';
+    }
+    var q = state.query.trim();
+    $("#result-count").textContent = "Showing " + list.length + " of " + DATA.lessons.length + " lessons" + (q ? ' for "' + q + '"' : "");
+  }
+
+  function apply(next, scroll) {
+    for (var k in next) { if (Object.prototype.hasOwnProperty.call(next, k)) state[k] = next[k]; }
+    $("#search-input").value = state.query;
+    renderChips();
+    renderLessons();
+    if (scroll) scrollToId("lessons");
+  }
+
+  /* ---------- search with suggestions ---------- */
+  function renderSuggest() {
+    var box = $("#suggest"), q = $("#search-input").value.trim();
+    if (!q) { box.hidden = true; box.innerHTML = ""; return; }
+    var list = DATA.lessons.filter(function (l) { return matches(l, q); }).slice(0, 5);
+    box.innerHTML = list.length ? list.map(function (l) {
+      var s = subjectOf(l.subject);
+      return '<button type="button" role="option" data-s="' + l.subject + '" data-open="' + l.id + '"><span class="dot" style="background:var(--sc)"></span>' +
+        "<span><b>" + esc(l.title) + "</b><small>" + esc(s.name) + " &middot; Grade " + l.grade + "</small></span></button>";
+    }).join("") : '<p class="none">No lessons match "' + esc(q) + '".</p>';
+    box.hidden = false;
+  }
+
+  function initSearch() {
+    var input = $("#search-input");
+    input.addEventListener("input", function () {
+      state.query = input.value;
+      renderLessons();
+      renderSuggest();
+    });
+    $("#search-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      $("#suggest").hidden = true;
+      input.blur();
+      scrollToId("lessons");
+    });
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") { $("#suggest").hidden = true; }
+    });
+    document.addEventListener("click", function (e) {
+      if (!e.target.closest(".search")) $("#suggest").hidden = true;
+    });
+  }
+
+  /* ---------- lesson dialog ---------- */
+  function contentLine(id) {
+    var c = window.MacalinPlayer && window.MacalinPlayer.counts(id);
+    return c ? c.pages + " pages, " + c.exercises + " exercises, " + c.test + "-question test" : "Lesson";
+  }
+
+  function openLesson(id) {
+    var l = lessonOf(id);
+    if (!l) return;
+    var s = subjectOf(l.subject);
+    var dlg = $("#lesson-dialog");
+    dlg.setAttribute("data-s", l.subject);
+    dlg.innerHTML = '<div class="dlg-art"><img src="' + Art.uri(l) + '" alt="">' +
+      '<button class="icon-btn dlg-close" type="button" data-close aria-label="Close lesson">' + ICONS.close + "</button></div>" +
+      '<div class="dlg-body"><div class="dlg-meta"><span class="tag">' + esc(s.name) + "</span><span>Grade " + l.grade + "</span><span>" + ICONS.clock + l.minutes + " minutes</span><span>" + contentLine(l.id) + "</span></div>" +
+      '<h2 id="dlg-title">' + esc(l.title) + "</h2><p>" + esc(l.description) + "</p>" +
+      "<h3>What you will learn</h3><ul class=\"dlg-list\">" +
+      l.objectives.map(function (o) { return "<li>" + ICONS.check + "<span>" + esc(o) + "</span></li>"; }).join("") + "</ul>" +
+      '<div class="teacher"><span class="avatar">' + esc(initials(l.teacher)) + "</span><span>Taught by " + esc(l.teacher) + "</span></div>" +
+      '<div class="dlg-actions"><button class="btn btn-primary" type="button" data-start="' + l.id + '">Start lesson ' + ICONS.arrow + "</button>" +
+      '<button class="btn btn-ghost" type="button" data-close>Close</button></div></div>';
+    $("#suggest").hidden = true;
+    if (dlg.showModal) { if (!dlg.open) dlg.showModal(); } else { dlg.setAttribute("open", ""); }
+    dlg.scrollTop = 0;
+  }
+
+  function closeLesson() {
+    var dlg = $("#lesson-dialog");
+    if (dlg.close) dlg.close(); else dlg.removeAttribute("open");
+  }
+
+  /* ---------- navigation ---------- */
+  function initNav() {
+    var nav = $("#nav"), btn = $("#menu-btn");
+    function setMenu(open) {
+      nav.classList.toggle("open", open);
+      btn.setAttribute("aria-expanded", String(open));
+      btn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    }
+    btn.addEventListener("click", function () { setMenu(!nav.classList.contains("open")); });
+    nav.addEventListener("click", function (e) { if (e.target.closest("a")) setMenu(false); });
+
+    var links = {};
+    $$("[data-nav]").forEach(function (a) { links[a.getAttribute("data-nav")] = a; });
+    function mark(id) {
+      for (var k in links) { if (links[k]) links[k].setAttribute("aria-current", String(k === id)); }
+    }
+    mark("top");
+    if ("IntersectionObserver" in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) { if (en.isIntersecting && links[en.target.id]) mark(en.target.id); });
+      }, { rootMargin: "-35% 0px -60% 0px" });
+      ["about", "grades", "subjects", "lessons", "contact"].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) io.observe(el);
+      });
+      window.addEventListener("scroll", function () { if (window.scrollY < 120) mark("top"); }, { passive: true });
+    }
+  }
+
+  /* ---------- one click handler for every button ---------- */
+  function initClicks() {
+    document.addEventListener("click", function (e) {
+      var t = e.target;
+      var el;
+
+      if ((el = t.closest("[data-open]"))) { openLesson(el.getAttribute("data-open")); return; }
+      if (t.closest("[data-close]")) { closeLesson(); return; }
+      if ((el = t.closest("[data-start]"))) {
+        closeLesson();
+        if (!window.MacalinPlayer || !window.MacalinPlayer.open(el.getAttribute("data-start"))) toast("This lesson is not ready yet.");
+        return;
+      }
+      if (t.closest("[data-login]")) { toast("Student login arrives in the next version. For now every lesson is open."); return; }
+      if (t.closest("[data-reset]")) {
+        e.preventDefault();
+        apply({ grade: "all", subject: "all", query: "" }, true);
+        return;
+      }
+      if ((el = t.closest("[data-teacher]"))) {
+        apply({ query: el.getAttribute("data-teacher"), grade: "all", subject: "all" }, true);
+        return;
+      }
+      if ((el = t.closest("[data-pick-grade]"))) {
+        e.preventDefault();
+        apply({ grade: el.getAttribute("data-pick-grade"), subject: "all", query: "" }, true);
+        return;
+      }
+      if ((el = t.closest("[data-pick-subject]"))) {
+        e.preventDefault();
+        apply({ subject: el.getAttribute("data-pick-subject"), grade: "all", query: "" }, true);
+        return;
+      }
+      if ((el = t.closest("[data-chip-grade]"))) { apply({ grade: el.getAttribute("data-chip-grade") }, false); return; }
+      if ((el = t.closest("[data-chip-subject]"))) { apply({ subject: el.getAttribute("data-chip-subject") }, false); return; }
+    });
+
+    $("#lesson-dialog").addEventListener("click", function (e) {
+      if (e.target === this) closeLesson();
+    });
+
+    $("#news-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      this.reset();
+      toast("Thank you! This sign-up form is a preview and does not send email yet.");
+    });
+  }
+
+  /* ---------- Supabase ---------- */
+  function setSource(kind) {
+    var el = $("#data-source");
+    if (!el) return;
+    el.textContent = {
+      live: "Live lessons from Supabase.",
+      sample: "Showing sample lessons.",
+      empty: "Showing sample lessons (the database has no lessons yet).",
+      offline: "Showing sample lessons (the database could not be reached)."
+    }[kind];
+    el.setAttribute("data-source", kind);
+  }
+
+  function drawAll() {
+    renderHero();
+    renderPictures();
+    renderAbout();
+    renderGrades();
+    renderSubjects();
+    renderChips();
+    renderLessons();
+    renderStatsBand();
+    renderTeachers();
+  }
+
+  function loadRemote() {
+    var api = window.MacalinApi;
+    if (!api || !api.enabled) { setSource("sample"); return; }
+    api.fetchLessons().then(function (rows) {
+      rows = (rows || []).filter(function (r) { return r && r.id && subjectOf(r.subject); });
+      if (!rows.length) { setSource("empty"); return; }
+      var content = window.MACALIN_CONTENT;
+      DATA.lessons.length = 0;
+      rows.forEach(function (r) {
+        DATA.lessons.push({
+          id: r.id, subject: r.subject, grade: Number(r.grade), minutes: Number(r.minutes) || 20,
+          title: r.title, teacher: r.teacher || "", description: r.description || "",
+          objectives: r.objectives || []
+        });
+        if (r.pages && r.pages.length && r.exercises && r.test) {
+          content[r.id] = { pages: r.pages, exercises: r.exercises, test: r.test };
+        }
+      });
+      drawAll();
+      setSource("live");
+    }).catch(function () { setSource("offline"); });
+  }
+
+  /* ---------- start ---------- */
+  function init() {
+    initTheme();
+    drawAll();
+    initSearch();
+    initNav();
+    initClicks();
+    window.addEventListener("macalin:progress", renderLessons);
+    loadRemote();
+  }
+  init();
+})();
+
+</script>
+</body>
+</html>
+
