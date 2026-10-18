@@ -751,3 +751,187 @@ dialog.player[open] { display: flex; flex-direction: column; }
     </div>
   </section>
    
+  <!-- Lessons -->
+  <section class="band band-cream" id="lessons">
+    <div class="wrap">
+      <header class="band-head center">
+        <p class="eyebrow">Lessons</p>
+        <h2>Featured Lessons</h2>
+        <p class="band-sub">Filter by grade and subject, or use the search box at the top of the page.</p>
+      </header>
+
+      <div class="toolbar">
+        <div class="chip-row" role="group" aria-label="Filter by grade" id="grade-chips"></div>
+        <div class="chip-row" role="group" aria-label="Filter by subject" id="subject-chips"></div>
+        <p class="result-count" id="result-count" aria-live="polite"></p>
+      </div>
+
+      <div class="lesson-grid" id="lesson-grid"></div>
+    </div>
+  </section>
+
+  <!-- Numbers -->
+  <section class="stats-band">
+    <div class="wrap">
+      <ul class="stats-box" id="stats-band" aria-label="Macalin Academy in numbers"></ul>
+    </div>
+  </section>
+
+  <!-- Teachers and FAQ -->
+  <section class="band" id="teachers">
+    <div class="wrap split">
+      <div>
+        <header class="band-head">
+          <p class="eyebrow">Our teachers</p>
+          <h2>Meet the Macalimiin</h2>
+          <p class="band-sub">Choose a teacher to see their lessons.</p>
+        </header>
+        <div class="teacher-grid" id="teacher-grid"></div>
+      </div>
+      <div id="faq">
+        <header class="band-head">
+          <p class="eyebrow">FAQ</p>
+          <h2>Common Questions</h2>
+        </header>
+        <div class="faq">
+          <details open>
+            <summary>Is Macalin Academy free?</summary>
+            <p>Yes. Every lesson in this preview is free to open.</p>
+          </details>
+          <details>
+            <summary>Which grades and subjects are included?</summary>
+            <p>Grades 6, 7 and 8, with Mathematics, English, Science and Somali in each grade.</p>
+          </details>
+          <details>
+            <summary>Do I need an account?</summary>
+            <p>No. You can open any lesson straight away. Your best scores are saved on this device.</p>
+          </details>
+          <details>
+            <summary>How are tests scored?</summary>
+            <p>Each test has four questions. At the end you see your score, the right answers and a short explanation, and you can try again.</p>
+          </details>
+          <details>
+            <summary>Can I use it on my phone?</summary>
+            <p>Yes. The pages are made for Android phones, tablets and computers.</p>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Call to action -->
+  <section class="wrap cta-wrap">
+    <div class="cta-split">
+      <img class="cta-img" id="cta-scene" alt="Three students walking to school with books">
+      <div class="cta-copy">
+        <p class="eyebrow">Start today</p>
+        <h2>Begin Your Journey<br><span>Toward Better Grades</span></h2>
+        <p>Open your first lesson in less than a minute. No account needed.</p>
+        <div class="hero-cta">
+          <a class="btn btn-sun" href="#lessons" data-reset>Start now</a>
+          <a class="btn btn-outline" href="#subjects">Browse subjects</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter -->
+  <section class="wrap news-wrap">
+    <form class="news-bar" id="news-form">
+      <span class="news-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/></svg></span>
+      <div class="news-text"><h3>Stay Updated With Macalin</h3><p>Get new lessons and study tips by email.</p></div>
+      <label class="sr-only" for="news-email">Email address</label>
+      <input id="news-email" type="email" placeholder="Enter your email address" required autocomplete="email">
+      <button class="btn btn-sun" type="submit">Subscribe</button>
+    </form>
+  </section>
+</main>
+
+<!-- Footer -->
+<footer class="site-footer" id="contact">
+  <div class="wrap footer-grid">
+    <div class="foot-brand">
+      <a class="brand" href="#top" aria-label="Macalin Academy, back to top">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon points="12,2.6 14.7,9 21.6,9.5 16.3,14 18,20.8 12,17.1 6,20.8 7.7,14 2.4,9.5 9.3,9"/></svg></span>
+        <span class="brand-text"><b>MACALIN</b><small>ACADEMY</small></span>
+      </a>
+      <p>Learn smart. Grow strong. Friendly lessons for students in grades 6, 7 and 8.</p>
+    </div>
+
+    <nav class="foot-col" aria-label="Quick links">
+      <h3>Quick Links</h3>
+      <a href="#about">About</a>
+      <a href="#grades">Grades</a>
+      <a href="#subjects">Subjects</a>
+      <a href="#lessons">Lessons</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+
+    <nav class="foot-col" aria-label="Subjects">
+      <h3>Subjects</h3>
+      <a href="#lessons" data-pick-subject="math">Mathematics</a>
+      <a href="#lessons" data-pick-subject="eng">English</a>
+      <a href="#lessons" data-pick-subject="sci">Science</a>
+      <a href="#lessons" data-pick-subject="som">Somali</a>
+    </nav>
+
+    <div class="foot-col">
+      <h3>Contact</h3>
+      <span class="foot-line"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/></svg><span class="foot-mail">hello@macalinacademy.example</span></span>
+      <button class="foot-link" type="button" data-login>Student login</button>
+    </div>
+  </div>
+  <div class="wrap foot-bottom">
+    <p>&copy; 2026 Macalin Academy. All rights reserved.</p>
+    <p id="data-source">Showing sample lessons.</p>
+  </div>
+</footer>
+   
+<!-- Lesson dialog -->
+<dialog id="lesson-dialog" aria-labelledby="dlg-title"></dialog>
+
+<!-- Lesson player: pages, exercises and test with Back and Next -->
+<dialog id="player" class="player" aria-labelledby="pl-title"></dialog>
+
+<!-- Small message bar -->
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<script>
+/* ---- config.js ---- */
+/* Macalin Academy: Supabase connection
+   The publishable key is designed to live in front-end code. Real protection comes from
+   the row-level security policies in supabase-setup.sql (read lessons, insert results only).
+   Never put a secret or service_role key in this file. */
+window.MACALIN_CONFIG = {
+  supabaseUrl: "https://fkyqbuwsbayjypyujgqj.supabase.co",
+  supabaseKey: "sb_publishable_uokTWBlF8-3PAlXNh0lkrw_ixHfr92T"
+};
+
+</script>
+<script>
+/* ---- data.js ---- */
+/* Macalin Academy: sample data
+   Everything the site shows comes from this one object.
+   Later, replace it with a fetch() to your API and keep the same shape. */
+window.MACALIN = {
+  grades: [
+    { id: 6, name: "Grade 6", tagline: "Strong foundations", blurb: "Get comfortable with the core ideas in every subject, one short lesson at a time." },
+    { id: 7, name: "Grade 7", tagline: "Growing skills", blurb: "Connect ideas, solve harder problems and write with more confidence." },
+    { id: 8, name: "Grade 8", tagline: "Ready for the next step", blurb: "Sharpen your reasoning and review the big topics before secondary school." }
+  ],
+
+  subjects: [
+    { id: "math", name: "Mathematics", native: "Xisaab", icon: "math",
+      blurb: "From fractions to equations, with worked examples you can follow step by step.",
+      topics: ["Fractions and decimals", "Ratios and percentages", "Geometry", "Linear equations"] },
+    { id: "eng", name: "English", native: "Ingiriis", icon: "english",
+      blurb: "Grammar, reading and writing practice that builds clear, confident English.",
+      topics: ["Grammar", "Paragraph writing", "Reading comprehension", "Persuasive writing"] },
+    { id: "sci", name: "Science", native: "Sayniska", icon: "science",
+      blurb: "Explore how the world works with diagrams, experiments and simple explanations.",
+      topics: ["Water and weather", "Cells and life", "Forces and motion", "Earth and space"] },
+    { id: "som", name: "Somali", native: "Af-Soomaali", icon: "somali",
+      blurb: "Read, write and speak Somali with confidence, from grammar to classic poetry.",
+      topics: ["Naxwaha (grammar)", "Maahmaahyo (proverbs)", "Gabayo (poetry)", "Akhriska (reading)"] }
+  ],
+   
+   
