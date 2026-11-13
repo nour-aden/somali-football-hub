@@ -1,406 +1,1052 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Istanbul Furniture Management System</title>
-<meta name="theme-color" content="#4a2f20">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>School Management System</title>
+
 <style>
-:root{--brand:#4a2f20;--brand2:#6b4430;--accent:#c8832a;--gold:#e8b05a;--bg:#f5f1ea;--card:#fff;--ink:#241810;--mut:#7a6a5d;--line:#e6ddd0;--ok:#2f7d4f;--warn:#c8832a;--bad:#b3392f;--info:#2c6aa0}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-button,input,select,textarea{font:inherit;color:inherit}
-h1,h2,h3{margin:0 0 .6rem;line-height:1.2}h1{font-size:1.35rem}h2{font-size:1.15rem}h3{font-size:1rem;margin-top:1rem}
-a{color:var(--brand2)}
-.top{position:sticky;top:0;z-index:20;background:var(--brand);color:#fff;display:flex;align-items:center;gap:.6rem;padding:.55rem .8rem;padding-top:calc(.55rem + env(safe-area-inset-top))}
-.top .burger{background:none;border:0;color:#fff;font-size:1.6rem;line-height:1;padding:.2rem .4rem;cursor:pointer}
-.brand{display:flex;align-items:center;gap:.5rem;font-weight:700}.brand svg{width:30px;height:30px}
-#title{margin-left:auto;font-size:.85rem;opacity:.8}
-#nav{position:fixed;z-index:30;top:0;bottom:0;left:0;width:250px;background:var(--brand);color:#fff;transform:translateX(-100%);transition:transform .2s;overflow-y:auto;padding:1rem .6rem}
-#nav .nb{display:flex;align-items:center;gap:.6rem;margin:.2rem .4rem 1rem}#nav .nb svg{width:38px;height:38px}#nav .nb b{font-size:1rem;line-height:1.1}#nav .nb small{display:block;opacity:.7;font-weight:400}
-#nav a{display:flex;gap:.7rem;align-items:center;padding:.7rem .8rem;border-radius:10px;color:#f1e6da;text-decoration:none;cursor:pointer}
-#nav a.on{background:var(--accent);color:#fff;font-weight:600}
-#scrim{display:none;position:fixed;inset:0;background:#0007;z-index:25}
-body.nav-open #nav{transform:none}body.nav-open #scrim{display:block}
-main{padding:.9rem;max-width:1100px;margin:0 auto;padding-bottom:5rem}
-@media(min-width:900px){#nav{transform:none}.top .burger{display:none}.top{padding-left:270px}main{margin-left:250px;max-width:none;padding:1.2rem 1.5rem}#scrim{display:none!important}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:.9rem;margin-bottom:.9rem}
-.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem;margin-bottom:.9rem}
-@media(min-width:700px){.kpis{grid-template-columns:repeat(4,1fr)}}
-.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:.8rem;border-left:5px solid var(--accent)}
-.kpi small{color:var(--mut);display:block}.kpi b{font-size:1.15rem;display:block;word-break:break-word}
-.kpi.g{border-left-color:var(--ok)}.kpi.r{border-left-color:var(--bad)}.kpi.b{border-left-color:var(--info)}
-.two{display:grid;gap:.9rem}@media(min-width:900px){.two{grid-template-columns:1fr 1fr}}
-.bar{display:flex;gap:.5rem;margin-bottom:.7rem;align-items:center}
-.bar input{flex:1;min-width:0}
-input,select,textarea{width:100%;padding:.6rem .7rem;border:1px solid var(--line);border-radius:10px;background:#fff;min-height:42px}
-input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);border-color:var(--accent)}
-.btn{background:var(--brand);color:#fff;border:0;border-radius:10px;padding:.6rem 1rem;font-weight:600;cursor:pointer;white-space:nowrap;min-height:42px}
-.btn:active{opacity:.8}.btn.acc{background:var(--accent)}.btn.ghost{background:#efe7db;color:var(--brand)}.btn.red{background:var(--bad)}.btn.sm{padding:.35rem .7rem;min-height:34px;font-size:.85rem}
-.row{display:flex;justify-content:space-between;gap:.6rem;align-items:center;padding:.7rem .8rem;background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:.5rem;cursor:pointer}
-.row small{display:block;color:var(--mut)}.row .r{text-align:right;flex-shrink:0}
-.row:hover{border-color:var(--accent)}
-.badge{display:inline-block;padding:.1rem .55rem;border-radius:99px;font-size:.75rem;font-weight:600;background:#eee;color:#444}
-.s-New{background:#dbeafe;color:#1d4ed8}.s-In\ Production{background:#fef3c7;color:#92400e}.s-Ready{background:#dcfce7;color:#166534}.s-Delivered{background:#e5e7eb;color:#374151}.s-Cancelled{background:#fee2e2;color:#991b1b}
-.low{background:#fee2e2;color:#991b1b}.ok{color:var(--ok)}.bad{color:var(--bad)}.mut{color:var(--mut)}
-.empty{text-align:center;color:var(--mut);padding:1.5rem .5rem}
-#modal{display:none;position:fixed;inset:0;z-index:50;background:#000a;overflow-y:auto}
-#modal.show{display:block}
-.mc{min-height:100%;display:flex;align-items:flex-start;justify-content:center;padding:.6rem}
-.mcard{background:#fff;border-radius:14px;width:100%;max-width:640px;padding:1rem;margin:.5rem 0 2rem}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}.grid .w2{grid-column:1/-1}
-.f{display:block}.f span{display:block;font-size:.8rem;color:var(--mut);margin-bottom:.15rem}
-.acts{display:flex;gap:.5rem;justify-content:flex-end;margin-top:1rem;flex-wrap:wrap}
-.item{border:1px solid var(--line);border-radius:12px;padding:.6rem;margin-bottom:.5rem;background:#faf7f2;display:grid;gap:.4rem}
-.item .r3{display:grid;grid-template-columns:1fr 1.4fr 1.4fr;gap:.4rem}
-.tot{text-align:right;font-size:1.1rem;margin-top:.6rem}
-table{width:100%;border-collapse:collapse}th,td{padding:.45rem .4rem;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{font-size:.78rem;color:var(--mut);text-transform:uppercase}
-td.n,th.n{text-align:right}.tw{overflow-x:auto}
-.chips{display:flex;flex-wrap:wrap;gap:.4rem}
-.chip{padding:.3rem .7rem;border-radius:99px;background:#efe7db;font-size:.85rem}
-#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#222;color:#fff;padding:.6rem 1rem;border-radius:10px;z-index:99;display:none;max-width:90%}
-.doc{color:#111;font-size:14px}
-.doc .hd{display:flex;justify-content:space-between;gap:1rem;border-bottom:3px solid var(--brand);padding-bottom:.6rem;margin-bottom:.8rem;flex-wrap:wrap}
-.doc .hd .l{display:flex;gap:.6rem;align-items:center}.doc .hd svg{width:52px;height:52px}
-.doc .ttl{font-size:1.5rem;font-weight:800;color:var(--brand);text-align:right}
-.doc .tt td{border:0;padding:.15rem .4rem}
-.doc .big{font-size:1.2rem;font-weight:800}
-.bars{width:100%;height:auto}
-.legend{display:flex;gap:1rem;font-size:.8rem;color:var(--mut)}.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px}
-.pre{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.6rem}
-@media print{
- body{background:#fff}#app,#toast{display:none!important}
- #modal{position:static;background:none;display:block;overflow:visible}.mc{padding:0;display:block}.mcard{box-shadow:none;max-width:none;padding:0;margin:0}.no-print{display:none!important}
+:root {
+  --green:#176b57;
+  --dark:#123b35;
+  --bg:#f4f7f6;
+  --white:#fff;
+  --line:#e5ece9;
+  --muted:#71817c;
+  --gold:#e9b44c;
+  --red:#c94d4d;
 }
-   </style>
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:var(--bg);
+  color:#172b27;
+}
+button,input,select { font:inherit; }
+button { cursor:pointer; }
+.app { display:flex; min-height:100vh; }
+.sidebar {
+  width:245px;
+  background:var(--dark);
+  color:white;
+  padding:20px;
+  position:fixed;
+  top:0;bottom:0;left:0;
+}
+.brand {
+  font-size:19px;
+  font-weight:bold;
+  padding:12px 5px 25px;
+}
+.logo {
+  background:var(--gold);
+  color:var(--dark);
+  padding:10px;
+  border-radius:10px;
+  display:inline-block;
+  margin-right:8px;
+}
+.nav button {
+  display:block;
+  width:100%;
+  text-align:left;
+  border:0;
+  padding:12px;
+  margin:4px 0;
+  color:white;
+  background:transparent;
+  border-radius:8px;
+}
+.nav button:hover,.nav button.active {
+  background:#24564c;
+}
+.main {
+  margin-left:245px;
+  width:calc(100% - 245px);
+}
+.topbar {
+  height:65px;
+  background:white;
+  padding:15px 25px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:1px solid var(--line);
+}
+.content { padding:25px; }
+h1 { font-size:20px; margin:0; }
+h2 { font-size:22px; }
+h3 { font-size:16px; }
+.muted { color:var(--muted); }
+.cards {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:15px;
+  margin:20px 0;
+}
+.card,.panel {
+  background:white;
+  padding:18px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  margin-bottom:17px;
+}
+.card strong {
+  display:block;
+  font-size:27px;
+  margin-top:10px;
+}
+.toolbar {
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:15px;
+}
+.btn {
+  border:1px solid var(--line);
+  background:white;
+  padding:9px 13px;
+  border-radius:8px;
+}
+.btn.primary {
+  background:var(--green);
+  color:white;
+  border-color:var(--green);
+}
+input,select {
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  width:100%;
+  background:white;
+}
+.search { max-width:300px; }
+table {
+  width:100%;
+  border-collapse:collapse;
+  min-width:550px;
+}
+th,td {
+  padding:12px 10px;
+  text-align:left;
+  border-bottom:1px solid var(--line);
+  font-size:13px;
+}
+th { color:var(--muted); }
+.tablewrap { overflow-x:auto; }
+.formgrid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.field label {
+  display:block;
+  margin-bottom:5px;
+  font-size:13px;
+  font-weight:bold;
+}
+.field { margin-bottom:10px; }
+.modalback {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#0008;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
+  z-index:10;
+}
+.modalback.show { display:flex; }
+.modal {
+  background:white;
+  padding:22px;
+  border-radius:13px;
+  width:100%;
+  max-width:550px;
+  max-height:90vh;
+  overflow:auto;
+}
+.modalhead,.modalfoot {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:15px;
+}
+.modalfoot { justify-content:flex-end; }
+.tag {
+  background:#e3f4eb;
+  color:#18704d;
+  padding:4px 8px;
+  border-radius:15px;
+}
+.empty {
+  text-align:center;
+  padding:30px;
+  color:var(--muted);
+}
+.toast {
+  display:none;
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:var(--dark);
+  color:white;
+  padding:12px 18px;
+  border-radius:8px;
+}
+.toast.show { display:block; }
+.login {
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,#123b35,#246c59);
+  padding:20px;
+}
+.loginbox {
+  background:white;
+  padding:28px;
+  border-radius:15px;
+  width:100%;
+  max-width:400px;
+}
+.loginbox .field { margin-top:14px; }
+.loginbox button { width:100%; margin-top:15px; }
+.hidden { display:none!important; }
+@media(max-width:900px) {
+  .cards { grid-template-columns:repeat(2,1fr); }
+}
+@media(max-width:700px) {
+  .sidebar { display:none; }
+  .main { margin-left:0; width:100%; }
+  .content { padding:15px; }
+  .topbar { padding:12px; }
+  .formgrid { grid-template-columns:1fr; }
+}
+@media print {
+  .sidebar,.topbar,.toolbar,.btn { display:none!important; }
+  .main { margin:0;width:100%; }
+}
+</style>
 </head>
+
 <body>
-<div id="app">
-  <header class="top"><button class="burger" aria-label="Menu" onclick="A.menu()">☰</button><div class="brand" id="topbrand"></div><span id="title"></span></header>
-  <nav id="nav"></nav><div id="scrim" onclick="A.menu(false)"></div>
-  <main id="view"><div class="empty">Loading…</div></main>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="login">
+  <div class="loginbox">
+    <div class="brand">🏫 My School</div>
+    <h2>Welcome Back</h2>
+    <p class="muted">School Management System</p>
+
+    <div class="field">
+      <label>Username</label>
+      <input id="username" value="admin">
+    </div>
+
+    <div class="field">
+      <label>Password</label>
+      <input id="password" type="password" value="admin123">
+    </div>
+
+    <button class="btn primary" onclick="login()">Sign In</button>
+    <p class="muted">Demo: admin / admin123</p>
+  </div>
 </div>
-<div id="modal"></div><div id="toast"></div>
+
+<!-- APPLICATION -->
+<div id="app" class="app hidden">
+
+  <aside class="sidebar">
+    <div class="brand">🏫 My School</div>
+    <nav class="nav">
+      <button class="active" onclick="showPage('dashboard',this)">▦ Dashboard</button>
+      <button onclick="showPage('students',this)">♙ Students</button>
+      <button onclick="showPage('teachers',this)">♟ Teachers</button>
+      <button onclick="showPage('classes',this)">▤ Classes</button>
+      <button onclick="showPage('attendance',this)">✓ Attendance</button>
+      <button onclick="showPage('exams',this)">✎ Exams & Marks</button>
+      <button onclick="showPage('fees',this)">◈ Fees & Payments</button>
+      <button onclick="showPage('reports',this)">▥ Reports</button>
+      <button onclick="showPage('settings',this)">⚙ Settings</button>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <h1 id="pageTitle">Dashboard</h1>
+      <button class="btn" onclick="logout()">Log Out</button>
+    </header>
+    <div class="content" id="content"></div>
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modalback" id="modalBack">
+  <div class="modal">
+    <div class="modalhead">
+      <h3 id="modalTitle">Add Record</h3>
+      <button class="btn" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modalBody"></div>
+    <div class="modalfoot">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn primary" id="modalSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
-/* ============ Istanbul Furniture Management System ============ */
-const LOGO='<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><rect width="48" height="48" rx="10" fill="#4a2f20"/><rect x="12" y="7" width="24" height="32" rx="2" fill="none" stroke="#e8b05a" stroke-width="3"/><rect x="17" y="12" width="14" height="10" fill="#e8b05a" opacity=".35"/><circle cx="31" cy="27" r="2" fill="#e8b05a"/><path d="M8 43h32" stroke="#e8b05a" stroke-width="3" stroke-linecap="round"/></svg>';
-const $=s=>document.querySelector(s);
-const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const num=v=>parseFloat(v)||0;
-const sum=(a,f)=>a.reduce((s,x)=>s+f(x),0);
-const fmt=n=>'ETB '+num(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:2});
-const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-const today=()=>iso(new Date());
-const dAgo=n=>{const d=new Date();d.setDate(d.getDate()+n);return iso(d)};
-const fd=s=>{if(!s)return '—';const d=new Date(s+'T00:00:00');return isNaN(d)?s:d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})};
-const pad=n=>String(n).padStart(4,'0');
-const CATS=['Wooden Door','Metal Door','Aluminium Door','Aluminium Window','Bed','Wardrobe','Cupboard','Custom Furniture','Other'];
-const ECATS=['Raw Materials','Wages / Salaries','Rent','Electricity & Water','Transport','Tools & Equipment','Marketing','Maintenance','Other'];
-const METHODS=['Cash','Telebirr','CBE Birr','Bank Transfer','Other'];
-const STATUSES=['New','In Production','Ready','Delivered','Cancelled'];
-const DEF_CFG={id:1,name:'Istanbul Furniture',tagline:'Doors • Windows • Beds • Wardrobes • Custom Furniture',phone:'',address:'Jijiga, Somali Region, Ethiopia',tin:'',footer:'Thank you for your business! Goods once delivered are non-returnable.'};
+const $ = s => document.querySelector(s);
 
-/* ---------- database (IndexedDB) ---------- */
-const STORES=['products','customers','orders','payments','expenses','materials','suppliers','stockmoves','settings'];
-let db;
-function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open('istanbul_fms',1);
-  r.onupgradeneeded=()=>{STORES.forEach(s=>{if(!r.result.objectStoreNames.contains(s))r.result.createObjectStore(s,{keyPath:'id',autoIncrement:true})})};
-  r.onsuccess=()=>{db=r.result;res()};r.onerror=()=>rej(r.error)})}
-const rq=r=>new Promise((res,rej)=>{r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
-const st=(s,m)=>db.transaction(s,m||'readonly').objectStore(s);
-const DB={all:s=>rq(st(s).getAll()),get:(s,id)=>rq(st(s).get(id)),put:(s,o)=>rq(st(s,'readwrite').put(o)),del:(s,id)=>rq(st(s,'readwrite').delete(id)),clear:s=>rq(st(s,'readwrite').clear())};
-async function load(){const D={};for(const s of STORES)D[s]=await DB.all(s);D.cfg=Object.assign({},DEF_CFG,D.settings[0]||{});
-  D.cust=Object.fromEntries(D.customers.map(c=>[c.id,c]));D.paidBy={};D.payments.forEach(p=>D.paidBy[p.orderId]=(D.paidBy[p.orderId]||0)+num(p.amount));
-  D.orders.forEach(o=>{o.total=oTotal(o);o.paid=D.paidBy[o.id]||0;o.balance=o.total-o.paid});return D}
-const oTotal=o=>Math.max(0,sum(o.items||[],i=>num(i.qty)*num(i.price))-num(o.discount));
-const oCost=o=>sum(o.items||[],i=>num(i.qty)*num(i.cost));
-const cname=(D,id)=>D.cust[id]?D.cust[id].name:'(deleted customer)';
-
-/* ---------- ui helpers ---------- */
-function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display='none',2600)}
-function modal(h){$('#modal').innerHTML='<div class="mc"><div class="mcard">'+h+'</div></div>';$('#modal').classList.add('show');$('#modal').scrollTop=0}
-function closeModal(){$('#modal').classList.remove('show');$('#modal').innerHTML=''}
-const badge=s=>`<span class="badge s-${esc(s)}">${esc(s)}</span>`;
-const row=(click,t,sub,r,rsub,s)=>`<div class="row" role="button" onclick="${click}" data-s="${esc((s||t+' '+sub).toLowerCase())}"><div><b>${t}</b><small>${sub||''}</small></div><div class="r"><b>${r||''}</b><small>${rsub||''}</small></div></div>`;
-const bar=(ph,btn,fn)=>`<div class="bar"><input type="search" placeholder="${ph}" oninput="A.filter(this.value)">${btn?`<button class="btn acc" onclick="${fn}">${btn}</button>`:''}</div>`;
-const none=t=>`<div class="empty">${t}</div>`;
-function form(title,fields,vals,onSave,extra){
-  vals=vals||{};
-  const h=fields.map(f=>{const v=vals[f.k]!=null?vals[f.k]:(f.def!=null?f.def:'');let i;
-    if(f.t==='select')i=`<select name="${f.k}">${f.o.map(o=>{const a=Array.isArray(o)?o:[o,o];return `<option value="${esc(a[0])}" ${String(a[0])===String(v)?'selected':''}>${esc(a[1])}</option>`}).join('')}</select>`;
-    else if(f.t==='textarea')i=`<textarea name="${f.k}" rows="2">${esc(v)}</textarea>`;
-    else i=`<input name="${f.k}" type="${f.t||'text'}" value="${esc(v)}" ${f.t==='number'?'step="any" inputmode="decimal"':''} ${f.req?'required':''} ${f.ph?`placeholder="${esc(f.ph)}"`:''}>`;
-    return `<label class="f ${f.w||''}"><span>${f.l}${f.req?' *':''}</span>${i}</label>`}).join('');
-  modal(`<form id="frm"><h2>${title}</h2><div class="grid">${h}</div>${extra||''}<div class="acts"><button type="button" class="btn ghost" onclick="A.close()">Cancel</button><button class="btn">Save</button></div></form>`);
-  $('#frm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);const o={};
-    fields.forEach(x=>{let v=f.get(x.k);if(x.t==='number')v=(v===''||v==null)?'':num(v);o[x.k]=v});
-    await onSave(o)};
-}
-
-/* ---------- pages ---------- */
-function pDash(D){
-  const m=today().slice(0,7),live=D.orders.filter(o=>o.status!=='Cancelled');
-  const mo=live.filter(o=>(o.date||'').startsWith(m));
-  const sales=sum(mo,o=>o.total),exp=sum(D.expenses.filter(e=>(e.date||'').startsWith(m)),e=>num(e.amount));
-  const coll=sum(D.payments.filter(p=>(p.date||'').startsWith(m)),p=>num(p.amount));
-  const out=sum(live,o=>o.balance>0?o.balance:0),profit=sales-exp;
-  const active=D.orders.filter(o=>['New','In Production','Ready'].includes(o.status));
-  const cnt=Object.fromEntries(STATUSES.map(s=>[s,D.orders.filter(o=>o.status===s).length]));
-  const up=active.slice().sort((a,b)=>(a.deliveryDate||'9')<(b.deliveryDate||'9')?-1:1).slice(0,5);
-  const low=D.materials.filter(x=>num(x.qty)<=num(x.minQty));
-  const recent=D.orders.slice().sort((a,b)=>b.id-a.id).slice(0,5);
-  // 6-month chart
-  const ms=[];const n=new Date();for(let i=5;i>=0;i--){const x=new Date(n.getFullYear(),n.getMonth()-i,1);ms.push(x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0'))}
-  const sv=ms.map(k=>sum(live.filter(o=>(o.date||'').startsWith(k)),o=>o.total)),ev=ms.map(k=>sum(D.expenses.filter(e=>(e.date||'').startsWith(k)),e=>num(e.amount)));
-  const mx=Math.max(1,...sv,...ev);let svg='<svg class="bars" viewBox="0 0 600 220">';
-  ms.forEach((k,i)=>{const x=20+i*95,h1=sv[i]/mx*150,h2=ev[i]/mx*150;
-    svg+=`<rect x="${x}" y="${180-h1}" width="34" height="${h1}" rx="3" fill="#c8832a"/><rect x="${x+38}" y="${180-h2}" width="34" height="${h2}" rx="3" fill="#4a2f20"/><text x="${x+36}" y="200" font-size="13" text-anchor="middle" fill="#7a6a5d">${new Date(k+'-01T00:00:00').toLocaleDateString('en-GB',{month:'short'})}</text>`});
-  svg+='<line x1="10" x2="590" y1="180" y2="180" stroke="#e6ddd0"/></svg>';
-  const empty=!D.orders.length&&!D.products.length?`<div class="card"><b>Welcome!</b><p class="mut">Start by adding products, or load sample data to explore the system.</p><button class="btn acc" onclick="A.seed()">Load sample data</button></div>`:'';
-  return `${empty}<div class="kpis">
-   <div class="kpi"><small>Sales this month</small><b>${fmt(sales)}</b></div>
-   <div class="kpi r"><small>Expenses this month</small><b>${fmt(exp)}</b></div>
-   <div class="kpi ${profit>=0?'g':'r'}"><small>Est. profit (month)</small><b>${fmt(profit)}</b></div>
-   <div class="kpi b"><small>Collected this month</small><b>${fmt(coll)}</b></div>
-   <div class="kpi r"><small>Outstanding balances</small><b>${fmt(out)}</b></div>
-   <div class="kpi"><small>Active orders</small><b>${active.length}</b></div>
-   <div class="kpi g"><small>Delivered</small><b>${cnt.Delivered}</b></div>
-   <div class="kpi ${low.length?'r':'g'}"><small>Low-stock items</small><b>${low.length}</b></div></div>
-  <div class="card"><h2>Sales vs expenses — last 6 months</h2>${svg}<div class="legend"><span><i style="background:#c8832a"></i>Sales</span><span><i style="background:#4a2f20"></i>Expenses</span></div></div>
-  <div class="card"><h2>Orders by status</h2><div class="chips">${STATUSES.map(s=>`<span class="chip">${badge(s)} <b>${cnt[s]}</b></span>`).join('')}</div></div>
-  <div class="two"><div><h2>Upcoming deliveries</h2>${up.length?up.map(o=>row(`A.go('orders/${o.id}')`,`#${pad(o.id)} · ${esc(cname(D,o.customerId))}`,`Due ${fd(o.deliveryDate)}${o.deliveryDate&&o.deliveryDate<today()?' <span class="bad">· overdue</span>':''}`,badge(o.status),o.balance>0?`<span class="bad">Due ${fmt(o.balance)}</span>`:'<span class="ok">Paid</span>')).join(''):none('No active orders')}</div>
-  <div><h2>Low stock alerts</h2>${low.length?low.map(x=>row(`A.go('inventory')`,esc(x.name),`Min ${num(x.minQty)} ${esc(x.unit)}`,`<span class="badge low">${num(x.qty)} ${esc(x.unit)}</span>`,'')).join(''):none('All materials sufficiently stocked')}</div></div>
-  <h2 style="margin-top:.9rem">Recent orders</h2>${recent.length?recent.map(o=>orderRow(D,o)).join(''):none('No orders yet')}`;
-                    }
-   const orderRow=(D,o)=>row(`A.go('orders/${o.id}')`,`#${pad(o.id)} · ${esc(cname(D,o.customerId))}`,`${fd(o.date)} · ${esc((o.items||[]).map(i=>i.name).join(', ')).slice(0,60)}`,fmt(o.total),`${badge(o.status)} ${o.status==='Cancelled'?'':o.balance>0?`<span class="bad">Bal ${fmt(o.balance)}</span>`:'<span class="ok">Paid</span>'}`,`${o.id} ${cname(D,o.customerId)} ${o.status} ${(o.items||[]).map(i=>i.name).join(' ')}`);
-
-function pProducts(D){
-  const l=D.products.slice().sort((a,b)=>a.name.localeCompare(b.name));
-  return `<h1>Products</h1>${bar('Search products…','+ Product','A.product()')}${l.length?l.map(p=>{const mg=num(p.price)-num(p.cost);return row(`A.product(${p.id})`,esc(p.name),`${esc(p.category)} · cost ${fmt(p.cost)}`,fmt(p.price)+(p.unit&&p.unit!=='pcs'?' / '+esc(p.unit):''),`<span class="${mg>=0?'ok':'bad'}">Margin ${fmt(mg)}${num(p.price)?` (${Math.round(mg/num(p.price)*100)}%)`:''}</span>`,p.name+' '+p.category)}).join(''):none('No products yet. Tap “+ Product”.')}`;
-}
-function pCustomers(D){
-  const l=D.customers.slice().sort((a,b)=>a.name.localeCompare(b.name));
-  return `<h1>Customers</h1>${bar('Search name or phone…','+ Customer','A.customer()')}${l.length?l.map(c=>{const os=D.orders.filter(o=>o.customerId===c.id&&o.status!=='Cancelled');return row(`A.go('customers/${c.id}')`,esc(c.name),esc(c.phone||'No phone')+(c.address?' · '+esc(c.address):''),os.length+' order'+(os.length===1?'':'s'),sum(os,o=>o.balance)>0?`<span class="bad">Owes ${fmt(sum(os,o=>o.balance))}</span>`:'',c.name+' '+c.phone)}).join(''):none('No customers yet.')}`;
-}
-function pCustomer(D,id){
-  const c=D.cust[id];if(!c)return none('Customer not found');
-  const os=D.orders.filter(o=>o.customerId===id).sort((a,b)=>b.id-a.id),live=os.filter(o=>o.status!=='Cancelled');
-  return `<p><a href="#/customers">← Customers</a></p><div class="card"><h2>${esc(c.name)}</h2><p>📞 ${esc(c.phone||'—')}<br>📍 ${esc(c.address||'—')}<br>${esc(c.notes||'')}</p>
-   <div class="chips"><span class="chip">Orders <b>${live.length}</b></span><span class="chip">Total <b>${fmt(sum(live,o=>o.total))}</b></span><span class="chip">Paid <b>${fmt(sum(live,o=>o.paid))}</b></span><span class="chip">Balance <b class="bad">${fmt(sum(live,o=>o.balance))}</b></span></div>
-   <div class="acts" style="justify-content:flex-start"><button class="btn acc" onclick="A.order(null,${c.id})">+ New order</button><button class="btn ghost" onclick="A.customer(${c.id})">Edit</button><button class="btn red" onclick="A.delCustomer(${c.id})">Delete</button></div></div>
-   <h2>Order history</h2>${os.length?os.map(o=>orderRow(D,o)).join(''):none('No orders yet')}`;
-}
-function pOrders(D){
-  const f=A.ofilter||'All';
-  const l=D.orders.filter(o=>f==='All'||o.status===f).sort((a,b)=>b.id-a.id);
-  return `<h1>Orders</h1><div class="pre">${['All',...STATUSES].map(s=>`<button class="btn sm ${s===f?'':'ghost'}" onclick="A.ofilter='${s}';A.render()">${s}</button>`).join('')}</div>${bar('Search orders, customers…','+ New order','A.order()')}${l.length?l.map(o=>orderRow(D,o)).join(''):none('No orders found.')}`;
-}
-function pOrder(D,id){
-  const o=D.orders.find(x=>x.id===id);if(!o)return none('Order not found');
-  const pays=D.payments.filter(p=>p.orderId===id).sort((a,b)=>a.id-b.id);
-  return `<p><a href="#/orders">← Orders</a></p><div class="card"><div style="display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap"><h2>Order #${pad(o.id)}</h2>${badge(o.status)}</div>
-   <p>👤 <a href="#/customers/${o.customerId}">${esc(cname(D,o.customerId))}</a> ${D.cust[o.customerId]?esc(D.cust[o.customerId].phone||''):''}<br>📅 Ordered ${fd(o.date)} · 🚚 Delivery ${fd(o.deliveryDate)}</p>
-   <label class="f"><span>Production status</span><select onchange="A.setStatus(${o.id},this.value)">${STATUSES.map(s=>`<option ${s===o.status?'selected':''}>${s}</option>`).join('')}</select></label>
-   <h3>Items</h3>${(o.items||[]).map(i=>`<div class="row" style="cursor:default"><div><b>${esc(i.name)}</b><small>${i.size?'📐 '+esc(i.size)+' ':''}${esc(i.notes||'')}</small></div><div class="r"><b>${fmt(num(i.qty)*num(i.price))}</b><small>${num(i.qty)} × ${fmt(i.price)}</small></div></div>`).join('')}
-   <table class="tt" style="margin-top:.5rem"><tr><td>Discount</td><td class="n">${fmt(o.discount)}</td></tr><tr><td><b>Total</b></td><td class="n"><b>${fmt(o.total)}</b></td></tr><tr><td>Paid</td><td class="n ok">${fmt(o.paid)}</td></tr><tr><td><b>Balance</b></td><td class="n ${o.balance>0?'bad':'ok'}"><b>${fmt(o.balance)}</b></td></tr></table>
-   ${o.notes?`<p class="mut">📝 ${esc(o.notes)}</p>`:''}
-   <div class="acts" style="justify-content:flex-start"><button class="btn acc" onclick="A.invoice(${o.id})">🧾 Invoice</button>${o.balance>0&&o.status!=='Cancelled'?`<button class="btn" onclick="A.payment(${o.id})">+ Payment</button>`:''}<button class="btn ghost" onclick="A.order(${o.id})">Edit</button><button class="btn red" onclick="A.delOrder(${o.id})">Delete</button></div></div>
-   <h2>Payments</h2>${pays.length?pays.map(p=>row(`A.receipt(${p.id})`,fmt(p.amount),`${fd(p.date)} · ${esc(p.method)}${p.note?' · '+esc(p.note):''}`,esc(p.type||'Payment'),'Tap for receipt')).join(''):none('No payments recorded')}`;
-}
-function pPayments(D){
-  const l=D.payments.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')||b.id-a.id);
-  const out=D.orders.filter(o=>o.status!=='Cancelled'&&o.balance>0).sort((a,b)=>b.balance-a.balance);
-  const mo=today().slice(0,7);
-  return `<h1>Payments</h1><div class="kpis"><div class="kpi b"><small>Collected this month</small><b>${fmt(sum(l.filter(p=>(p.date||'').startsWith(mo)),p=>num(p.amount)))}</b></div><div class="kpi r"><small>Total outstanding</small><b>${fmt(sum(out,o=>o.balance))}</b></div></div>
-  <div class="bar"><button class="btn acc" onclick="A.payment()">+ Record payment</button></div>
-  <h2>Outstanding balances (${out.length})</h2>${out.length?out.map(o=>row(`A.go('orders/${o.id}')`,`#${pad(o.id)} · ${esc(cname(D,o.customerId))}`,`Total ${fmt(o.total)} · Paid ${fmt(o.paid)}`,`<span class="bad">${fmt(o.balance)}</span>`,o.deliveryDate?'Due '+fd(o.deliveryDate):'')).join(''):none('No outstanding balances 🎉')}
-  <h2 style="margin-top:1rem">Payment history</h2>${bar('Search payments…')}${l.length?l.map(p=>{const o=D.orders.find(x=>x.id===p.orderId);return row(`A.receipt(${p.id})`,fmt(p.amount),`${fd(p.date)} · ${esc(p.method)} · ${o?esc(cname(D,o.customerId)):'?'}`,esc(p.type||'Payment'),'Order #'+pad(p.orderId),(o?cname(D,o.customerId):'')+' '+p.method+' '+p.amount)}).join(''):none('No payments yet')}`;
-}
-function pExpenses(D){
-  const l=D.expenses.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')||b.id-a.id),mo=today().slice(0,7);
-  const sup=Object.fromEntries(D.suppliers.map(s=>[s.id,s.name]));
-  return `<h1>Expenses</h1><div class="kpis"><div class="kpi r"><small>This month</small><b>${fmt(sum(l.filter(e=>(e.date||'').startsWith(mo)),e=>num(e.amount)))}</b></div><div class="kpi"><small>All time</small><b>${fmt(sum(l,e=>num(e.amount)))}</b></div></div>
-  ${bar('Search expenses…','+ Expense','A.expense()')}${l.length?l.map(e=>row(`A.expense(${e.id})`,esc(e.description||e.category),`${fd(e.date)} · ${esc(e.category)}${e.supplierId&&sup[e.supplierId]?' · '+esc(sup[e.supplierId]):''}`,`<span class="bad">${fmt(e.amount)}</span>`,esc(e.method||''),(e.description||'')+' '+e.category)).join(''):none('No expenses recorded yet.')}`;
-}
-function pInventory(D){
-  const l=D.materials.slice().sort((a,b)=>a.name.localeCompare(b.name));
-  const mv=D.stockmoves.slice().sort((a,b)=>b.id-a.id).slice(0,12),mat=Object.fromEntries(D.materials.map(m=>[m.id,m]));
-  return `<h1>Inventory</h1><div class="kpis"><div class="kpi"><small>Materials</small><b>${l.length}</b></div><div class="kpi"><small>Stock value</small><b>${fmt(sum(l,m=>num(m.qty)*num(m.unitCost)))}</b></div></div>
-  ${bar('Search materials…','+ Material','A.material()')}${l.length?l.map(m=>{const lw=num(m.qty)<=num(m.minQty);return row(`A.material(${m.id})`,esc(m.name),`${fmt(m.unitCost)} / ${esc(m.unit)} · min ${num(m.minQty)}`,`<span class="badge ${lw?'low':''}">${num(m.qty)} ${esc(m.unit)}</span>`,`<button class="btn sm ghost" onclick="event.stopPropagation();A.stock(${m.id})">± Adjust</button>`,m.name)}).join(''):none('No materials yet.')}
-  <h2 style="margin-top:1rem">Recent stock movements</h2>${mv.length?mv.map(x=>row('',`${x.type==='In'?'➕':'➖'} ${num(x.qty)} ${mat[x.materialId]?esc(mat[x.materialId].unit):''} ${mat[x.materialId]?esc(mat[x.materialId].name):'(deleted)'}`,`${fd(x.date)}${x.note?' · '+esc(x.note):''}`,'','')).join(''):none('No movements yet')}`;
-}
-function pSuppliers(D){
-  const l=D.suppliers.slice().sort((a,b)=>a.name.localeCompare(b.name));
-  return `<h1>Suppliers</h1>${bar('Search suppliers…','+ Supplier','A.supplier()')}${l.length?l.map(s=>{const t=sum(D.expenses.filter(e=>e.supplierId===s.id),e=>num(e.amount));return row(`A.supplier(${s.id})`,esc(s.name),`📞 ${esc(s.phone||'—')} · ${esc(s.supplies||'')}`,t?fmt(t):'',t?'spent':'',s.name+' '+s.supplies)}).join(''):none('No suppliers yet.')}`;
-}
-function range(){if(!A.range){const n=new Date();A.range={from:iso(new Date(n.getFullYear(),n.getMonth(),1)),to:today()}}return A.range}
-function pReports(D){
-  const {from,to}=range(),inR=d=>(!from||(d||'')>=from)&&(!to||(d||'')<=to);
-  const os=D.orders.filter(o=>o.status!=='Cancelled'&&inR(o.date)),sales=sum(os,o=>o.total),cogs=sum(os,oCost);
-  const coll=sum(D.payments.filter(p=>inR(p.date)),p=>num(p.amount));
-  const ex=D.expenses.filter(e=>inR(e.date)),et=sum(ex,e=>num(e.amount));
-  const byE={};ex.forEach(e=>byE[e.category]=(byE[e.category]||0)+num(e.amount));
-  const byC={},byP={};os.forEach(o=>(o.items||[]).forEach(i=>{const v=num(i.qty)*num(i.price),c=i.cat||'Custom / Other';byC[c]=(byC[c]||0)+v;const p=byP[i.name]||(byP[i.name]={q:0,v:0});p.q+=num(i.qty);p.v+=v}));
-  const tb=(o,f)=>Object.entries(o).sort((a,b)=>(f?b[1].v-a[1].v:b[1]-a[1])).map(([k,v])=>f?`<tr><td>${esc(k)}</td><td class="n">${v.q}</td><td class="n">${fmt(v.v)}</td></tr>`:`<tr><td>${esc(k)}</td><td class="n">${fmt(v)}</td></tr>`).join('')||'<tr><td colspan="3" class="mut">No data</td></tr>';
-  const profit=sales-et;
-  return `<h1>Reports</h1><div class="card no-print"><div class="pre"><button class="btn sm ghost" onclick="A.preset('month')">This month</button><button class="btn sm ghost" onclick="A.preset('last')">Last month</button><button class="btn sm ghost" onclick="A.preset('year')">This year</button><button class="btn sm ghost" onclick="A.preset('all')">All time</button></div>
-  <div class="grid"><label class="f"><span>From</span><input type="date" value="${from||''}" onchange="A.range.from=this.value;A.render()"></label><label class="f"><span>To</span><input type="date" value="${to||''}" onchange="A.range.to=this.value;A.render()"></label></div></div>
-  <p class="mut">Period: <b>${from?fd(from):'beginning'}</b> to <b>${to?fd(to):'today'}</b></p>
-  <div class="kpis"><div class="kpi"><small>Sales (${os.length} orders)</small><b>${fmt(sales)}</b></div><div class="kpi b"><small>Payments collected</small><b>${fmt(coll)}</b></div><div class="kpi r"><small>Expenses</small><b>${fmt(et)}</b></div><div class="kpi ${profit>=0?'g':'r'}"><small>Estimated profit</small><b>${fmt(profit)}</b></div></div>
-  <div class="card"><table><tr><td>Total sales (orders placed)</td><td class="n">${fmt(sales)}</td></tr><tr><td>Estimated production cost of those orders</td><td class="n">${fmt(cogs)}</td></tr><tr><td>Product gross margin</td><td class="n">${fmt(sales-cogs)}</td></tr><tr><td>Total business expenses</td><td class="n">${fmt(et)}</td></tr><tr><td><b>Estimated profit (Sales − Expenses)</b></td><td class="n ${profit>=0?'ok':'bad'}"><b>${fmt(profit)}</b></td></tr></table>
-  <p class="mut" style="font-size:.8rem;margin:.5rem 0 0">Estimated profit = sales minus recorded expenses. Production cost is shown for reference (product costs may overlap with expenses such as raw materials).</p></div>
-  <div class="two"><div class="card"><h2>Sales by category</h2><div class="tw"><table>${tb(byC)}</table></div></div><div class="card"><h2>Expenses by category</h2><div class="tw"><table>${tb(byE)}</table></div></div></div>
-  <div class="card"><h2>Top products</h2><div class="tw"><table><tr><th>Product</th><th class="n">Qty</th><th class="n">Sales</th></tr>${tb(byP,1)}</table></div></div>
-  <div class="acts no-print" style="justify-content:flex-start"><button class="btn" onclick="window.print()">🖨 Print report</button><button class="btn ghost" onclick="A.csv('orders')">Export orders CSV</button><button class="btn ghost" onclick="A.csv('expenses')">Export expenses CSV</button></div>`;
-}
-function pSettings(D){
-  const c=D.cfg;
-  return `<h1>Settings</h1><div class="card"><h2>Business details (shown on invoices)</h2><form id="cfg"><div class="grid">
-   <label class="f w2"><span>Business name</span><input name="name" value="${esc(c.name)}"></label>
-   <label class="f w2"><span>Tagline</span><input name="tagline" value="${esc(c.tagline)}"></label>
-   <label class="f"><span>Phone</span><input name="phone" value="${esc(c.phone)}"></label><label class="f"><span>TIN</span><input name="tin" value="${esc(c.tin)}"></label>
-   <label class="f w2"><span>Address</span><input name="address" value="${esc(c.address)}"></label>
-   <label class="f w2"><span>Invoice footer</span><textarea name="footer" rows="2">${esc(c.footer)}</textarea></label></div><div class="acts"><button class="btn">Save</button></div></form></div>
-  <div class="card"><h2>Data & backup</h2><p class="mut">Data is stored in this browser's database on this device. Download a backup regularly and keep it safe (WhatsApp/Telegram/Drive).</p>
-   <div class="acts" style="justify-content:flex-start"><button class="btn" onclick="A.backup()">⬇ Download backup</button><label class="btn ghost" style="display:inline-flex;align-items:center">⬆ Restore backup<input type="file" accept=".json" hidden onchange="A.restore(this.files[0])"></label></div>
-   <div class="acts" style="justify-content:flex-start"><button class="btn ghost" onclick="A.seed()">Load sample data</button><button class="btn red" onclick="A.wipe()">Erase all data</button></div></div>`;
-     }
-   const ROUTES={dashboard:pDash,products:pProducts,customers:(D,id)=>id?pCustomer(D,id):pCustomers(D),orders:(D,id)=>id?pOrder(D,id):pOrders(D),payments:pPayments,expenses:pExpenses,inventory:pInventory,suppliers:pSuppliers,reports:pReports,settings:pSettings};
-const NAV=[['dashboard','📊','Dashboard'],['orders','🧾','Orders'],['customers','👥','Customers'],['payments','💰','Payments'],['products','📦','Products'],['inventory','🪵','Inventory'],['suppliers','🚚','Suppliers'],['expenses','💸','Expenses'],['reports','📈','Reports'],['settings','⚙️','Settings']];
-
-/* ---------- actions ---------- */
-const A={ofilter:'All',range:null,last:'',
-  menu(o){document.body.classList.toggle('nav-open',o===undefined?!document.body.classList.contains('nav-open'):o)},
-  go(p){location.hash='#/'+p},close:closeModal,
-  filter(q){q=q.toLowerCase();document.querySelectorAll('#view .row[data-s]').forEach(r=>r.style.display=r.dataset.s.includes(q)?'':'none')},
-  async render(){const h=location.hash.replace(/^#\/?/,''),[r,id]=h.split('/'),key=ROUTES[r]?r:'dashboard';
-    let D;try{D=await load()}catch(e){$('#view').innerHTML=none('Database error: '+esc(e.message));return}
-    $('#view').innerHTML=ROUTES[key](D,id?+id:null);
-    $('#nav').innerHTML=`<div class="nb">${LOGO}<b>${esc(D.cfg.name)}<small>Management System</small></b></div>`+NAV.map(n=>`<a class="${n[0]===key?'on':''}" onclick="A.go('${n[0]}');A.menu(false)">${n[1]} ${n[2]}</a>`).join('');
-    $('#topbrand').innerHTML=LOGO+'<span>'+esc(D.cfg.name)+'</span>';$('#title').textContent=(NAV.find(n=>n[0]===key)||[])[2];document.title=D.cfg.name+' — Management System';
-    if(A.last!==h){window.scrollTo(0,0);A.last=h}},
-  async del(s,id,msg){if(confirm(msg||'Delete this record?')){await DB.del(s,id);closeModal();toast('Deleted');A.render()}},
-  /* products */
-  async product(id){const p=id?await DB.get('products',id):{};
-    form(id?'Edit product':'New product',[{k:'name',l:'Product name',req:1,w:'w2',ph:'e.g. Solid wood door 210x90'},{k:'category',l:'Category',t:'select',o:CATS},{k:'unit',l:'Unit',t:'select',o:['pcs','m²','set']},{k:'price',l:'Selling price (ETB)',t:'number',req:1},{k:'cost',l:'Production cost (ETB)',t:'number',def:0},{k:'notes',l:'Notes',t:'textarea',w:'w2'}],p,async o=>{if(id)o.id=id;await DB.put('products',o);closeModal();toast('Product saved');A.render()},id?`<button type="button" class="btn red sm" onclick="A.del('products',${id})">Delete product</button>`:'')},
-  /* customers */
-  async customer(id){const c=id?await DB.get('customers',id):{};
-    form(id?'Edit customer':'New customer',[{k:'name',l:'Full name',req:1,w:'w2'},{k:'phone',l:'Phone',t:'tel'},{k:'address',l:'Address / area'},{k:'notes',l:'Notes',t:'textarea',w:'w2'}],c,async o=>{if(id)o.id=id;else o.createdAt=today();await DB.put('customers',o);closeModal();toast('Customer saved');A.render()})},
-  async delCustomer(id){const os=(await DB.all('orders')).filter(o=>o.customerId===id);if(os.length)return alert('This customer has orders. Delete or reassign the orders first.');if(confirm('Delete this customer?')){await DB.del('customers',id);A.go('customers');toast('Deleted')}},
-  /* orders */
-  async order(id,custId){const D=await load();const o=id?D.orders.find(x=>x.id===id):{date:today(),status:'New',items:[{qty:1}],discount:0,customerId:custId||''};const isNew=!id;A._prods=D.products;
-    const co='<option value="">— Select customer —</option>'+D.customers.map(c=>`<option value="${c.id}" ${c.id==o.customerId?'selected':''}>${esc(c.name)} ${esc(c.phone||'')}</option>`).join('')+'<option value="new">+ New customer…</option>';
-    modal(`<form id="frm"><h2>${isNew?'New order':'Edit order #'+pad(id)}</h2><div class="grid">
-     <label class="f w2"><span>Customer *</span><select id="o-cust" onchange="document.getElementById('newc').hidden=this.value!=='new'">${co}</select></label>
-     <div id="newc" class="grid w2" hidden><label class="f"><span>New customer name</span><input id="nc-name"></label><label class="f"><span>Phone</span><input id="nc-phone" type="tel"></label></div>
-     <label class="f"><span>Order date</span><input type="date" id="o-date" value="${o.date||today()}"></label><label class="f"><span>Delivery date</span><input type="date" id="o-del" value="${o.deliveryDate||''}"></label>
-     <label class="f w2"><span>Production status</span><select id="o-status">${STATUSES.map(s=>`<option ${s===o.status?'selected':''}>${s}</option>`).join('')}</select></label></div>
-     <h3>Items & measurements</h3><div id="items"></div><button type="button" class="btn ghost sm" onclick="A.addItem()">+ Add item</button>
-     <div class="grid" style="margin-top:.7rem"><label class="f"><span>Discount (ETB)</span><input type="number" step="any" inputmode="decimal" id="o-disc" value="${num(o.discount)||''}" oninput="A.tot()"></label>
-     ${isNew?`<label class="f"><span>Deposit paid now (ETB)</span><input type="number" step="any" inputmode="decimal" id="o-dep" placeholder="0"></label><label class="f w2"><span>Deposit method</span><select id="o-meth">${METHODS.map(m=>`<option>${m}</option>`).join('')}</select></label>`:''}
-     <label class="f w2"><span>Order notes</span><textarea id="o-notes" rows="2">${esc(o.notes||'')}</textarea></label></div>
-     <div class="tot">Total: <b id="o-tot">${fmt(0)}</b></div><div class="acts"><button type="button" class="btn ghost" onclick="A.close()">Cancel</button><button class="btn">Save order</button></div></form>`);
-    (o.items&&o.items.length?o.items:[{qty:1}]).forEach(i=>A.addItem(i));A.tot();
-    $('#frm').onsubmit=async e=>{e.preventDefault();
-      let cid=$('#o-cust').value;if(!cid)return alert('Please select a customer');
-      if(cid==='new'){const n=$('#nc-name').value.trim();if(!n)return alert('Enter the new customer name');cid=await DB.put('customers',{name:n,phone:$('#nc-phone').value.trim(),createdAt:today()})}else cid=+cid;
-      const items=[...document.querySelectorAll('#items .item')].map(r=>({productId:+r.querySelector('.i-prod').value||null,name:r.querySelector('.i-name').value.trim(),cat:r.dataset.cat||'',qty:num(r.querySelector('.i-qty').value)||1,price:num(r.querySelector('.i-price').value),cost:num(r.querySelector('.i-cost').value),size:r.querySelector('.i-size').value.trim(),notes:r.querySelector('.i-notes').value.trim()})).filter(i=>i.name||i.price);
-      if(!items.length)return alert('Add at least one item');items.forEach(i=>{if(!i.name)i.name='Item'});
-      const rec={customerId:cid,date:$('#o-date').value||today(),deliveryDate:$('#o-del').value,status:$('#o-status').value,items,discount:num($('#o-disc').value),notes:$('#o-notes').value.trim()};
-      if(id){rec.id=id;rec.createdAt=o.createdAt}else rec.createdAt=today();
-      const nid=await DB.put('orders',rec);
-      if(isNew){const dep=num($('#o-dep').value);if(dep>0)await DB.put('payments',{orderId:nid,amount:dep,date:rec.date,method:$('#o-meth').value,type:'Deposit',note:'Deposit on order'})}
-      closeModal();toast('Order saved');A.go('orders/'+nid);A.render()}},
-  addItem(i){i=i||{qty:1};const d=document.createElement('div');d.className='item';d.dataset.cat=i.cat||'';
-    d.innerHTML=`<select class="i-prod" onchange="A.pick(this)"><option value="">Custom item (type below)</option>${(A._prods||[]).map(p=>`<option value="${p.id}" ${p.id==i.productId?'selected':''}>${esc(p.name)}</option>`).join('')}</select>
-    <input class="i-name" placeholder="Item description" value="${esc(i.name||'')}">
-    <div class="r3"><input class="i-qty" type="number" step="any" inputmode="decimal" min="0" placeholder="Qty" value="${i.qty||1}" oninput="A.tot()"><input class="i-price" type="number" step="any" inputmode="decimal" placeholder="Unit price" value="${i.price!=null?i.price:''}" oninput="A.tot()"><input class="i-cost" type="number" step="any" inputmode="decimal" placeholder="Unit cost" value="${i.cost!=null?i.cost:''}"></div>
-    <input class="i-size" placeholder="Measurements e.g. 210 × 90 cm" value="${esc(i.size||'')}"><input class="i-notes" placeholder="Notes (colour, material, glass…)" value="${esc(i.notes||'')}">
-    <button type="button" class="btn red sm" onclick="this.parentNode.remove();A.tot()">Remove item</button>`;
-    $('#items').appendChild(d);A.tot()},
-  pick(sel){const r=sel.closest('.item'),p=(A._prods||[]).find(x=>x.id==sel.value);if(!p)return;r.querySelector('.i-name').value=p.name;r.querySelector('.i-price').value=p.price;r.querySelector('.i-cost').value=p.cost||0;r.dataset.cat=p.category;A.tot()},
-  tot(){const t=sum([...document.querySelectorAll('#items .item')],r=>num(r.querySelector('.i-qty').value)*num(r.querySelector('.i-price').value))-num(($('#o-disc')||{}).value);const e=$('#o-tot');if(e)e.textContent=fmt(Math.max(0,t))},
-  async setStatus(id,s){const o=await DB.get('orders',id);o.status=s;if(s==='Delivered')o.deliveredDate=today();await DB.put('orders',o);toast('Status: '+s);A.render()},
-  async delOrder(id){if(!confirm('Delete this order and all its payments?'))return;for(const p of (await DB.all('payments')).filter(p=>p.orderId===id))await DB.del('payments',p.id);await DB.del('orders',id);A.go('orders');toast('Order deleted')},
-  /* payments */
-  async payment(orderId){const D=await load();const open=D.orders.filter(o=>o.status!=='Cancelled'&&o.balance>0);
-    if(!open.length)return alert('There are no orders with an outstanding balance.');
-    const sel=orderId?open.find(o=>o.id===orderId):open[0];if(!sel)return alert('This order has no balance due.');
-    form('Record payment',[{k:'orderId',l:'Order',t:'select',w:'w2',o:open.map(o=>[o.id,`#${pad(o.id)} · ${cname(D,o.customerId)} · bal ${fmt(o.balance)}`]),def:sel.id},{k:'amount',l:'Amount (ETB)',t:'number',req:1,def:sel.balance},{k:'date',l:'Date',t:'date',def:today()},{k:'method',l:'Method',t:'select',o:METHODS},{k:'note',l:'Note'}],{orderId:sel.id},async o=>{
-      o.orderId=+o.orderId;const ord=D.orders.find(x=>x.id===o.orderId);if(o.amount<=0)return alert('Enter an amount');
-      if(o.amount>ord.balance+0.001&&!confirm('Amount is more than the balance due ('+fmt(ord.balance)+'). Continue?'))return;
-      o.type=D.payments.some(p=>p.orderId===o.orderId)?(o.amount>=ord.balance?'Final payment':'Payment'):'Deposit';
-      const id=await DB.put('payments',o);closeModal();toast('Payment recorded');await A.render();A.receipt(id)})},
-  /* expenses */
-  async expense(id){const D=await load();const e=id?await DB.get('expenses',id):{date:today()};
-    form(id?'Edit expense':'New expense',[{k:'description',l:'Description',req:1,w:'w2',ph:'e.g. 20 sheets plywood'},{k:'amount',l:'Amount (ETB)',t:'number',req:1},{k:'date',l:'Date',t:'date',def:today()},{k:'category',l:'Category',t:'select',o:ECATS},{k:'method',l:'Paid by',t:'select',o:METHODS},{k:'supplierId',l:'Supplier (optional)',t:'select',w:'w2',o:[['','— None —'],...D.suppliers.map(s=>[s.id,s.name])]}],e,async o=>{o.supplierId=o.supplierId?+o.supplierId:'';if(id)o.id=id;await DB.put('expenses',o);closeModal();toast('Expense saved');A.render()},id?`<button type="button" class="btn red sm" onclick="A.del('expenses',${id})">Delete expense</button>`:'')},
-  /* inventory */
-  async material(id){const D=await load();const m=id?await DB.get('materials',id):{};
-    form(id?'Edit material':'New material',[{k:'name',l:'Material',req:1,w:'w2',ph:'e.g. Plywood 18mm'},{k:'unit',l:'Unit',ph:'sheet, kg, m, pcs…',req:1},{k:'qty',l:'Quantity in stock',t:'number',def:0},{k:'minQty',l:'Minimum (alert level)',t:'number',def:0},{k:'unitCost',l:'Cost per unit (ETB)',t:'number',def:0},{k:'supplierId',l:'Supplier',t:'select',o:[['','— None —'],...D.suppliers.map(s=>[s.id,s.name])]}],m,async o=>{o.supplierId=o.supplierId?+o.supplierId:'';if(o.qty==='')o.qty=0;if(id)o.id=id;await DB.put('materials',o);closeModal();toast('Material saved');A.render()},id?`<button type="button" class="btn red sm" onclick="A.del('materials',${id},'Delete this material?')">Delete material</button>`:'')},
-  async stock(id){const m=await DB.get('materials',id);
-    form('Adjust stock — '+esc(m.name)+' (now '+num(m.qty)+' '+esc(m.unit)+')',[{k:'type',l:'Movement',t:'select',o:[['In','➕ Stock in (purchase)'],['Out','➖ Stock out (used)']]},{k:'qty',l:'Quantity ('+m.unit+')',t:'number',req:1},{k:'date',l:'Date',t:'date',def:today()},{k:'exp',l:'Record purchase as expense?',t:'select',o:[['','No'],['1','Yes (qty × unit cost)']]},{k:'note',l:'Note',w:'w2'}],{},async o=>{
-      if(o.qty<=0)return alert('Enter a quantity');if(o.type==='Out'&&o.qty>num(m.qty)&&!confirm('This is more than the stock on hand. Set stock to 0?'))return;
-      m.qty=o.type==='In'?num(m.qty)+o.qty:Math.max(0,num(m.qty)-o.qty);await DB.put('materials',m);
-      await DB.put('stockmoves',{materialId:id,type:o.type,qty:o.qty,date:o.date,note:o.note});
-      if(o.type==='In'&&o.exp==='1'&&num(m.unitCost)>0)await DB.put('expenses',{description:'Purchase: '+o.qty+' '+m.unit+' '+m.name,amount:o.qty*num(m.unitCost),date:o.date,category:'Raw Materials',method:'Cash',supplierId:m.supplierId||''});
-      closeModal();toast('Stock updated');A.render()})},
-         /* suppliers */
-  async supplier(id){const s=id?await DB.get('suppliers',id):{};
-    form(id?'Edit supplier':'New supplier',[{k:'name',l:'Supplier name',req:1,w:'w2'},{k:'phone',l:'Phone',t:'tel'},{k:'address',l:'Address / city'},{k:'supplies',l:'Supplies (what they sell)',w:'w2',ph:'Timber, hinges, aluminium profiles…'},{k:'notes',l:'Notes',t:'textarea',w:'w2'}],s,async o=>{if(id)o.id=id;await DB.put('suppliers',o);closeModal();toast('Supplier saved');A.render()},id?`<button type="button" class="btn red sm" onclick="A.del('suppliers',${id},'Delete this supplier?')">Delete supplier</button>`:'')},
-  /* reports */
-  preset(p){const n=new Date(),y=n.getFullYear(),m=n.getMonth();
-    A.range=p==='month'?{from:iso(new Date(y,m,1)),to:today()}:p==='last'?{from:iso(new Date(y,m-1,1)),to:iso(new Date(y,m,0))}:p==='year'?{from:y+'-01-01',to:today()}:{from:'',to:''};A.render()},
-  async csv(kind){const D=await load(),{from,to}=range(),inR=d=>(!from||(d||'')>=from)&&(!to||(d||'')<=to);let rows;
-    if(kind==='orders')rows=[['Order','Date','Customer','Status','Total','Paid','Balance']].concat(D.orders.filter(o=>inR(o.date)).map(o=>[pad(o.id),o.date,cname(D,o.customerId),o.status,o.total,o.paid,o.balance]));
-    else rows=[['Date','Category','Description','Amount','Method']].concat(D.expenses.filter(e=>inR(e.date)).map(e=>[e.date,e.category,e.description,e.amount,e.method||'']));
-    A.download(rows.map(r=>r.map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"').join(',')).join('\n'),kind+'-'+today()+'.csv','text/csv')},
-  download(txt,name,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)},
-  /* invoices & receipts */
-  docHead(D,title,no,date){const c=D.cfg;return `<div class="hd"><div class="l">${LOGO}<div><b style="font-size:1.15rem">${esc(c.name)}</b><br><small>${esc(c.tagline)}</small><br><small>${esc(c.address)}${c.phone?' · Tel '+esc(c.phone):''}${c.tin?' · TIN '+esc(c.tin):''}</small></div></div><div><div class="ttl">${title}</div><div style="text-align:right">No. <b>${no}</b><br>Date: ${fd(date)}</div></div></div>`},
-  async invoice(id){const D=await load(),o=D.orders.find(x=>x.id===id),c=D.cust[o.customerId]||{},pays=D.payments.filter(p=>p.orderId===id).sort((a,b)=>a.id-b.id),sub=sum(o.items,i=>num(i.qty)*num(i.price));
-    modal(`<div class="doc">${A.docHead(D,'INVOICE','INV-'+pad(id),o.date)}<p><b>Bill to:</b> ${esc(c.name||'')}<br>${esc(c.phone||'')} ${esc(c.address||'')}<br>Delivery date: ${fd(o.deliveryDate)}</p>
-     <div class="tw"><table><tr><th>#</th><th>Description</th><th class="n">Qty</th><th class="n">Unit price</th><th class="n">Amount</th></tr>${o.items.map((i,k)=>`<tr><td>${k+1}</td><td><b>${esc(i.name)}</b>${i.size?'<br><small>Size: '+esc(i.size)+'</small>':''}${i.notes?'<br><small>'+esc(i.notes)+'</small>':''}</td><td class="n">${num(i.qty)}</td><td class="n">${fmt(i.price)}</td><td class="n">${fmt(num(i.qty)*num(i.price))}</td></tr>`).join('')}</table></div>
-     <table class="tt" style="width:auto;margin-left:auto;margin-top:.6rem"><tr><td>Subtotal</td><td class="n">${fmt(sub)}</td></tr>${num(o.discount)?`<tr><td>Discount</td><td class="n">− ${fmt(o.discount)}</td></tr>`:''}<tr><td><b>Total</b></td><td class="n"><b>${fmt(o.total)}</b></td></tr><tr><td>Paid</td><td class="n">${fmt(o.paid)}</td></tr><tr><td class="big">Balance due</td><td class="n big">${fmt(o.balance)}</td></tr></table>
-     ${pays.length?`<p><b>Payments received</b><br>${pays.map(p=>`${fd(p.date)} — ${fmt(p.amount)} (${esc(p.method)}${p.type?', '+esc(p.type):''})`).join('<br>')}</p>`:''}
-     <p style="border-top:1px solid #ccc;padding-top:.5rem;text-align:center"><small>${esc(D.cfg.footer)}</small></p>
-     <div class="acts no-print"><button class="btn ghost" onclick="A.close()">Close</button><button class="btn" onclick="window.print()">🖨 Print / Save PDF</button></div></div>`)},
-  async receipt(pid){const D=await load(),p=D.payments.find(x=>x.id===pid);if(!p)return;const o=D.orders.find(x=>x.id===p.orderId),c=D.cust[o.customerId]||{};
-    const upto=sum(D.payments.filter(x=>x.orderId===o.id&&x.id<=pid),x=>num(x.amount)),bal=o.total-upto;
-    modal(`<div class="doc">${A.docHead(D,'RECEIPT','RCT-'+pad(pid),p.date)}<p>Received from <b>${esc(c.name||'')}</b> ${esc(c.phone||'')}</p>
-     <table class="tt"><tr><td>Amount received</td><td class="n big">${fmt(p.amount)}</td></tr><tr><td>Payment type</td><td class="n">${esc(p.type||'Payment')}</td></tr><tr><td>Method</td><td class="n">${esc(p.method)}</td></tr><tr><td>For order</td><td class="n">#${pad(o.id)} (${esc(o.items.map(i=>i.name).join(', ').slice(0,80))})</td></tr><tr><td>Order total</td><td class="n">${fmt(o.total)}</td></tr><tr><td>Total paid to date</td><td class="n">${fmt(upto)}</td></tr><tr><td><b>Balance remaining</b></td><td class="n"><b>${fmt(Math.max(0,bal))}</b></td></tr></table>
-     ${p.note?`<p>Note: ${esc(p.note)}</p>`:''}<p style="margin-top:2rem">Received by: ______________________</p><p style="text-align:center"><small>${esc(D.cfg.footer)}</small></p>
-     <div class="acts no-print"><button class="btn ghost" onclick="A.close()">Close</button><button class="btn" onclick="window.print()">🖨 Print / Save PDF</button></div></div>`)},
-  /* data */
-  async backup(){const o={app:'istanbul-fms',version:1,date:new Date().toISOString()};for(const s of STORES)o[s]=await DB.all(s);A.download(JSON.stringify(o),'istanbul-furniture-backup-'+today()+'.json','application/json');toast('Backup downloaded')},
-  async restore(f){if(!f)return;try{const o=JSON.parse(await f.text());if(o.app!=='istanbul-fms')throw new Error('Not a valid backup file');if(!confirm('This replaces ALL current data with the backup. Continue?'))return;
-      for(const s of STORES){await DB.clear(s);for(const r of (o[s]||[]))await DB.put(s,r)}toast('Backup restored');A.render()}catch(e){alert('Restore failed: '+e.message)}},
-  async wipe(){if(confirm('Erase ALL data permanently? Download a backup first!')&&confirm('Are you absolutely sure?')){for(const s of STORES)await DB.clear(s);toast('All data erased');A.render()}},
-  async cfgSave(e){e.preventDefault();const o=Object.fromEntries(new FormData(e.target));o.id=1;await DB.put('settings',o);toast('Settings saved');A.render()},
-  async seed(){
-    if((await DB.all('products')).length&&!confirm('Add sample data to your existing data?'))return;
-    const P=[['Solid wood door 210x90','Wooden Door',18000,11000],['Steel security door','Metal Door',12500,7800],['Aluminium door with glass','Aluminium Door',9500,6000],['Aluminium sliding window','Aluminium Window',6500,4000],['Double bed (wood)','Bed',22000,14000],['3-door wardrobe','Wardrobe',28000,17500],['Kitchen cupboard (per set)','Cupboard',15000,9000],['Custom office desk','Custom Furniture',12000,7000]];
-    const pid=[];for(const p of P)pid.push(await DB.put('products',{name:p[0],category:p[1],unit:'pcs',price:p[2],cost:p[3],notes:''}));
-    const sid=[];for(const s of [['Jijiga Timber Market','+251 91 000 0001','Jijiga','Timber, plywood, MDF'],['Dire Dawa Metal & Aluminium','+251 91 000 0002','Dire Dawa','Steel sheets, aluminium profiles, glass'],['Hardware Plus','+251 91 000 0003','Jijiga','Hinges, locks, screws, paint']])sid.push(await DB.put('suppliers',{name:s[0],phone:s[1],address:s[2],supplies:s[3],notes:''}));
-    for(const m of [['Plywood 18mm','sheet',24,10,2400,0],['Timber (Cedar)','m³',3,1,32000,0],['Steel sheet 1.5mm','sheet',8,10,3800,1],['Aluminium profile','bar',40,20,650,1],['Glass 5mm','m²',15,6,900,1],['Hinges (heavy)','pcs',60,30,85,2],['Door locks','pcs',9,10,450,2],['Varnish / paint','litre',18,8,320,2]])await DB.put('materials',{name:m[0],unit:m[1],qty:m[2],minQty:m[3],unitCost:m[4],supplierId:sid[m[5]]});
-    const cid=[];for(const c of [['Abdi Mohamed','+251 91 111 2233','Jijiga, Kebele 03'],['Hodan Ahmed','+251 91 222 3344','Jijiga, Kebele 05'],['Abdullahi Yusuf','+251 91 333 4455','Degehabur'],['Fatuma Ali','+251 91 444 5566','Jijiga, Downtown']])cid.push(await DB.put('customers',{name:c[0],phone:c[1],address:c[2],notes:'',createdAt:today()}));
-    const mk=async(ci,ago,del,status,items,disc,pays)=>{const its=items.map(([k,q,sz])=>({productId:pid[k],name:P[k][0],cat:P[k][1],qty:q,price:P[k][2],cost:P[k][3],size:sz||'',notes:''}));const id=await DB.put('orders',{customerId:cid[ci],date:dAgo(-ago),deliveryDate:dAgo(del),status,items:its,discount:disc,notes:'',createdAt:dAgo(-ago)});let n=0;for(const a of pays)await DB.put('payments',{orderId:id,amount:a,date:dAgo(-ago+n*7),method:METHODS[n%3],type:n?'Payment':'Deposit',note:''}),n++};
-    await mk(0,70,-50,'Delivered',[[0,2,'210 × 90 cm']],0,[36000]);await mk(1,45,-20,'Delivered',[[5,1,'240 × 220 cm'],[4,1,'180 × 200 cm']],2000,[48000]);
-    await mk(2,30,-5,'Delivered',[[1,2,'200 × 90 cm']],0,[15000,10000]);await mk(3,12,6,'In Production',[[3,4,'120 × 120 cm'],[2,1,'210 × 100 cm']],500,[15000]);
-    await mk(0,6,10,'In Production',[[6,1,'Kitchen 3.5 m'],[7,1,'160 × 70 cm']],0,[10000]);await mk(1,2,14,'New',[[0,1,'220 × 100 cm']],0,[5000]);
-    for(const e of [['Plywood & timber purchase',48000,'Raw Materials',-60],['Workshop rent',15000,'Rent',-35],['Workers salaries',42000,'Wages / Salaries',-33],['Aluminium profiles & glass',36000,'Raw Materials',-25],['Electricity',3200,'Electricity & Water',-20],['Workshop rent',15000,'Rent',-5],['Workers salaries',42000,'Wages / Salaries',-3],['Delivery truck rental',2500,'Transport',-2],['Hinges, locks, paint',9800,'Raw Materials',-8]])await DB.put('expenses',{description:e[0],amount:e[1],category:e[2],date:dAgo(e[3]),method:'Cash',supplierId:''});
-    toast('Sample data loaded');A.go('dashboard');A.render()}
+let db = JSON.parse(localStorage.getItem("schoolData") || "null") || {
+  students:[],
+  teachers:[],
+  classes:[
+    {id:1,name:"Grade 1",level:"Primary"},
+    {id:2,name:"Grade 2",level:"Primary"},
+    {id:3,name:"Grade 7",level:"Secondary"}
+  ],
+  attendance:[],
+  marks:[],
+  payments:[],
+  settings:{
+    schoolName:"My School",
+    academicYear:"2026/2027"
+  }
 };
-window.A=A;
 
-/* ---------- start ---------- */
-document.addEventListener('submit',e=>{if(e.target.id==='cfg')A.cfgSave(e)});
-window.addEventListener('hashchange',()=>{closeModal();A.render()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
-openDB().then(()=>{A.render();if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{})}).catch(e=>{$('#view').innerHTML='<div class="empty">Could not open the database: '+esc(e.message)+'<br>Private/incognito mode may block it.</div>'});
-if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{});
+let currentPage = "dashboard";
+let today = new Date().toISOString().slice(0,10);
+
+function saveData(){
+  localStorage.setItem("schoolData",JSON.stringify(db));
+}
+
+function makeId(){
+  return Date.now()+Math.floor(Math.random()*1000);
+}
+
+function escapeHTML(value){
+  return String(value ?? "").replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",
+    '"':"&quot;","'":"&#39;"
+  }[c]));
+}
+
+function toast(message){
+  let el=$("#toast");
+  el.textContent=message;
+  el.classList.add("show");
+  setTimeout(()=>el.classList.remove("show"),2200);
+}
+
+function login(){
+  if($("#username").value==="admin" &&
+     $("#password").value==="admin123"){
+    $("#loginScreen").classList.add("hidden");
+    $("#app").classList.remove("hidden");
+    render();
+  }else{
+    alert("Incorrect username or password");
+  }
+}
+
+function logout(){
+  $("#app").classList.add("hidden");
+  $("#loginScreen").classList.remove("hidden");
+}
+
+function showPage(page,button){
+  currentPage=page;
+  document.querySelectorAll(".nav button").forEach(b=>{
+    b.classList.remove("active");
+  });
+  if(button)button.classList.add("active");
+  render();
+}
+
+function render(){
+  let pages={
+    dashboard:dashboardPage,
+    students:studentsPage,
+    teachers:teachersPage,
+    classes:classesPage,
+    attendance:attendancePage,
+    exams:examsPage,
+    fees:feesPage,
+    reports:reportsPage,
+    settings:settingsPage
+  };
+  pages[currentPage]();
+}
+
+function setTitle(title){
+  $("#pageTitle").textContent=title;
+}
+
+function className(id){
+  return db.classes.find(c=>String(c.id)===String(id))?.name || "—";
+}
+
+function stat(label,value){
+  return `<div class="card">
+    <span class="muted">${label}</span>
+    <strong>${value}</strong>
+  </div>`;
+}
+
+/* DASHBOARD */
+function dashboardPage(){
+  setTitle("Dashboard");
+
+  let paid=db.payments.reduce((a,p)=>a+Number(p.amount),0);
+
+  $("#content").innerHTML=`
+    <h2>Welcome to ${escapeHTML(db.settings.schoolName)}</h2>
+    <p class="muted">Academic Year: ${escapeHTML(db.settings.academicYear)}</p>
+
+    <div class="cards">
+      ${stat("Total Students",db.students.length)}
+      ${stat("Total Teachers",db.teachers.length)}
+      ${stat("Total Classes",db.classes.length)}
+      ${stat("Fees Collected",paid.toLocaleString()+" ETB")}
+    </div>
+
+    <div class="panel">
+      <h3>Quick Actions</h3>
+      <div class="toolbar">
+        <button class="btn primary" onclick="openStudentForm()">+ Add Student</button>
+        <button class="btn" onclick="showPage('attendance')">Attendance</button>
+        <button class="btn" onclick="openPaymentForm()">Record Payment</button>
+        <button class="btn" onclick="showPage('reports')">Reports</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Recent Students</h3>
+      ${studentTable(db.students.slice(-5).reverse(),false)}
+    </div>
+  `;
+}
+
+/* STUDENTS */
+function studentsPage(){
+  setTitle("Students");
+  $("#content").innerHTML=`
+    <div class="toolbar">
+      <h2>Student List</h2>
+      <button class="btn primary" onclick="openStudentForm()">+ Add Student</button>
+    </div>
+    <div class="panel">
+      <div class="toolbar">
+        <input class="search" id="studentSearch"
+          placeholder="Search students..." oninput="filterStudents()">
+        <button class="btn" onclick="exportCSV('students')">Export CSV</button>
+      </div>
+      <div id="studentTable">${studentTable(db.students)}</div>
+    </div>
+  `;
+}
+
+function studentTable(rows,actions=true){
+  if(!rows.length)return `<div class="empty">No students found.</div>`;
+
+  return `<div class="tablewrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Admission No.</th>
+          <th>Student Name</th>
+          <th>Gender</th>
+          <th>Class</th>
+          <th>Phone</th>
+          <th>Status</th>
+          ${actions?'<th>Actions</th>':''}
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map(s=>`
+          <tr>
+            <td>${escapeHTML(s.admission)}</td>
+            <td>${escapeHTML(s.name)}</td>
+            <td>${escapeHTML(s.gender)}</td>
+            <td>${escapeHTML(className(s.classId))}</td>
+            <td>${escapeHTML(s.phone)}</td>
+            <td><span class="tag">${escapeHTML(s.status)}</span></td>
+            ${actions?`<td>
+              <button class="btn" onclick="removeItem('students',${s.id})">Delete</button>
+            </td>`:''}
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+function filterStudents(){
+  let q=$("#studentSearch").value.toLowerCase();
+  let rows=db.students.filter(s=>
+    [s.name,s.admission,s.phone,className(s.classId)]
+      .join(" ").toLowerCase().includes(q)
+  );
+  $("#studentTable").innerHTML=studentTable(rows);
+}
+
+/* TEACHERS */
+function teachersPage(){
+  setTitle("Teachers");
+  $("#content").innerHTML=`
+    <div class="toolbar">
+      <h2>Teacher List</h2>
+      <button class="btn primary" onclick="openTeacherForm()">+ Add Teacher</button>
+    </div>
+    <div class="panel">
+      <div class="toolbar">
+        <input class="search" id="teacherSearch"
+          placeholder="Search teachers..." oninput="filterTeachers()">
+        <button class="btn" onclick="exportCSV('teachers')">Export CSV</button>
+      </div>
+      <div id="teacherTable">${teacherTable(db.teachers)}</div>
+    </div>
+  `;
+}
+
+function teacherTable(rows){
+  if(!rows.length)return `<div class="empty">No teachers found.</div>`;
+  return `<div class="tablewrap"><table>
+    <thead><tr>
+      <th>Employee No.</th><th>Name</th><th>Phone</th>
+      <th>Qualification</th><th>Actions</th>
+    </tr></thead>
+    <tbody>
+      ${rows.map(x=>`<tr>
+        <td>${escapeHTML(x.no)}</td>
+        <td>${escapeHTML(x.name)}</td>
+        <td>${escapeHTML(x.phone)}</td>
+        <td>${escapeHTML(x.qualification)}</td>
+        <td><button class="btn" onclick="removeItem('teachers',${x.id})">Delete</button></td>
+      </tr>`).join("")}
+    </tbody>
+  </table></div>`;
+}
+
+function filterTeachers(){
+  let q=$("#teacherSearch").value.toLowerCase();
+  $("#teacherTable").innerHTML=teacherTable(
+    db.teachers.filter(x=>
+      [x.name,x.no,x.phone].join(" ").toLowerCase().includes(q)
+    )
+  );
+}
+
+/* CLASSES */
+function classesPage(){
+  setTitle("Classes");
+  $("#content").innerHTML=`
+    <div class="toolbar">
+      <h2>Class List</h2>
+      <button class="btn primary" onclick="openClassForm()">+ Add Class</button>
+    </div>
+    <div class="panel">
+      <div class="tablewrap"><table>
+        <thead><tr><th>Class</th><th>Level</th><th>Students</th><th>Actions</th></tr></thead>
+        <tbody>
+          ${db.classes.map(c=>`<tr>
+            <td>${escapeHTML(c.name)}</td>
+            <td>${escapeHTML(c.level)}</td>
+            <td>${db.students.filter(s=>String(s.classId)===String(c.id)).length}</td>
+            <td><button class="btn" onclick="removeItem('classes',${c.id})">Delete</button></td>
+          </tr>`).join("")}
+        </tbody>
+      </table></div>
+    </div>
+  `;
+}
+
+/* ATTENDANCE */
+function attendancePage(){
+  setTitle("Attendance");
+  $("#content").innerHTML=`
+    <h2>Attendance Register</h2>
+    <div class="panel">
+      <div class="toolbar">
+        <select id="attClass" onchange="showAttendanceRows()">
+          ${classOptions()}
+        </select>
+        <input type="date" id="attDate" value="${today}">
+        <button class="btn primary" onclick="saveAttendance()">Save Attendance</button>
+      </div>
+      <div id="attList"></div>
+    </div>
+    <div class="panel">
+      <h3>Recent Attendance</h3>
+      ${attendanceHistory()}
+    </div>
+  `;
+  showAttendanceRows();
+}
+
+function classOptions(){
+  return db.classes.map(c=>
+    `<option value="${c.id}">${escapeHTML(c.name)}</option>`
+  ).join("");
+}
+
+function showAttendanceRows(){
+  let cid=$("#attClass").value;
+  let students=db.students.filter(s=>String(s.classId)===String(cid));
+
+  if(!students.length){
+    $("#attList").innerHTML='<div class="empty">No students in this class.</div>';
+    return;
+  }
+
+  $("#attList").innerHTML=`<div class="tablewrap"><table>
+    <thead><tr><th>Student</th><th>Status</th></tr></thead>
+    <tbody>
+      ${students.map(s=>{
+        let old=db.attendance.find(a=>
+          a.studentId===s.id && a.date===$("#attDate").value
+        );
+        return `<tr>
+          <td>${escapeHTML(s.name)}</td>
+          <td>
+            <select class="attstatus" data-id="${s.id}">
+              <option ${old?.status==="Present"?"selected":""}>Present</option>
+              <option ${old?.status==="Absent"?"selected":""}>Absent</option>
+              <option ${old?.status==="Late"?"selected":""}>Late</option>
+              <option ${old?.status==="Excused"?"selected":""}>Excused</option>
+            </select>
+          </td>
+        </tr>`;
+      }).join("")}
+    </tbody>
+  </table></div>`;
+}
+
+function saveAttendance(){
+  let date=$("#attDate").value;
+  let cid=Number($("#attClass").value);
+
+  if(!date || !cid){
+    toast("Select date and class.");
+    return;
+  }
+
+  document.querySelectorAll(".attstatus").forEach(sel=>{
+    let studentId=Number(sel.dataset.id);
+    let old=db.attendance.find(a=>
+      a.studentId===studentId && a.date===date
+    );
+
+    if(old){
+      old.status=sel.value;
+    }else{
+      db.attendance.push({
+        id:makeId(),
+        studentId,
+        classId:cid,
+        date,
+        status:sel.value
+      });
+    }
+  });
+
+  saveData();
+  toast("Attendance saved successfully.");
+  attendancePage();
+}
+
+function attendanceHistory(){
+  let rows=db.attendance.slice(-10).reverse();
+  if(!rows.length)return '<div class="empty">No attendance records.</div>';
+
+  return `<div class="tablewrap"><table>
+    <thead><tr><th>Date</th><th>Student</th><th>Class</th><th>Status</th></tr></thead>
+    <tbody>
+      ${rows.map(a=>`<tr>
+        <td>${a.date}</td>
+        <td>${escapeHTML(db.students.find(s=>s.id===a.studentId)?.name||"—")}</td>
+        <td>${escapeHTML(className(a.classId))}</td>
+        <td>${escapeHTML(a.status)}</td>
+      </tr>`).join("")}
+    </tbody>
+  </table></div>`;
+}
+
+/* EXAMS */
+function examsPage(){
+  setTitle("Exams & Marks");
+  $("#content").innerHTML=`
+    <div class="toolbar">
+      <h2>Exams and Marks</h2>
+      <button class="btn primary" onclick="openMarkForm()">+ Add Marks</button>
+    </div>
+    <div class="panel">
+      <div class="toolbar">
+        <input class="search" id="markSearch" placeholder="Search..." oninput="filterMarks()">
+        <button class="btn" onclick="exportCSV('marks')">Export CSV</button>
+      </div>
+      <div id="markTable">${markTable(db.marks)}</div>
+    </div>
+  `;
+}
+
+function markTable(rows){
+  if(!rows.length)return '<div class="empty">No marks recorded.</div>';
+
+  return `<div class="tablewrap"><table>
+    <thead><tr>
+      <th>Student</th><th>Class</th><th>Subject</th>
+      <th>Exam</th><th>Score</th><th>Maximum</th><th>Action</th>
+    </tr></thead>
+    <tbody>
+      ${rows.map(m=>`<tr>
+        <td>${escapeHTML(db.students.find(s=>s.id===m.studentId)?.name||"—")}</td>
+        <td>${escapeHTML(className(m.classId))}</td>
+        <td>${escapeHTML(m.subject)}</td>
+        <td>${escapeHTML(m.title)}</td>
+        <td>${m.score}</td><td>${m.max}</td>
+        <td><button class="btn" onclick="removeItem('marks',${m.id})">Delete</button></td>
+      </tr>`).join("")}
+    </tbody>
+  </table></div>`;
+}
+
+function filterMarks(){
+  let q=$("#markSearch").value.toLowerCase();
+  $("#markTable").innerHTML=markTable(db.marks.filter(m=>
+    [m.subject,m.title,db.students.find(s=>s.id===m.studentId)?.name]
+      .join(" ").toLowerCase().includes(q)
+  ));
+}
+
+/* FEES */
+function feesPage(){
+  setTitle("Fees & Payments");
+  let total=db.payments.reduce((s,p)=>s+Number(p.amount),0);
+
+  $("#content").innerHTML=`
+    <div class="toolbar">
+      <h2>Fees and Payments</h2>
+      <button class="btn primary" onclick="openPaymentForm()">+ Record Payment</button>
+    </div>
+    <div class="cards">
+      ${stat("Fees Collected",total.toLocaleString()+" ETB")}
+      ${stat("Students",db.students.length)}
+    </div>
+    <div class="panel">
+      <div class="toolbar">
+        <input class="search" id="paymentSearch" placeholder="Search..." oninput="filterPayments()">
+        <button class="btn" onclick="exportCSV('payments')">Export CSV</button>
+      </div>
+      <div id="paymentTable">${paymentTable(db.payments)}</div>
+    </div>
+  `;
+}
+
+function paymentTable(rows){
+  if(!rows.length)return '<div class="empty">No payments recorded.</div>';
+
+  return `<div class="tablewrap"><table>
+    <thead><tr>
+      <th>Date</th><th>Student</th><th>Fee Type</th>
+      <th>Amount</th><th>Note</th><th>Action</th>
+    </tr></thead>
+    <tbody>
+      ${rows.slice().reverse().map(p=>`<tr>
+        <td>${p.date}</td>
+        <td>${escapeHTML(db.students.find(s=>s.id===p.studentId)?.name||"—")}</td>
+        <td>${escapeHTML(p.type)}</td>
+        <td>${Number(p.amount).toLocaleString()} ETB</td>
+        <td>${escapeHTML(p.note)}</td>
+        <td><button class="btn" onclick="removeItem('payments',${p.id})">Delete</button></td>
+      </tr>`).join("")}
+    </tbody>
+  </table></div>`;
+}
+function filterPayments(){
+  let q=$("#paymentSearch").value.toLowerCase();
+  $("#paymentTable").innerHTML=paymentTable(db.payments.filter(p=>
+    [p.type,p.note,db.students.find(s=>s.id===p.studentId)?.name]
+      .join(" ").toLowerCase().includes(q)
+  ));
+}
+
+/* REPORTS */
+function reportsPage(){
+  setTitle("Reports");
+  let present=db.attendance.filter(a=>a.status==="Present").length;
+  let absent=db.attendance.filter(a=>a.status==="Absent").length;
+  let total=db.payments.reduce((s,p)=>s+Number(p.amount),0);
+
+  $("#content").innerHTML=`
+    <div class="toolbar">
+      <h2>School Reports</h2>
+      <button class="btn" onclick="window.print()">Print Report</button>
+    </div>
+    <div class="cards">
+      ${stat("Students",db.students.length)}
+      ${stat("Teachers",db.teachers.length)}
+      ${stat("Present",present)}
+      ${stat("Absent",absent)}
+    </div>
+      <div class="panel">
+      <h3>School Summary</h3>
+      <p>Total Students: <b>${db.students.length}</b></p>
+      <p>Total Teachers: <b>${db.teachers.length}</b></p>
+      <p>Total Classes: <b>${db.classes.length}</b></p>
+      <p>Total Attendance Records: <b>${db.attendance.length}</b></p>
+      <p>Total Fees Collected: <b>${total.toLocaleString()} ETB</b></p>
+    </div>
+  `;
+}
+ /* SETTINGS */
+function settingsPage(){
+  setTitle("Settings");
+  $("#content").innerHTML=`
+    <h2>School Settings</h2>
+    <div class="panel">
+      <form id="settingsForm">
+        <div class="formgrid">
+          <div class="field">
+            <label>School Name</label>
+            <input name="schoolName" required value="${escapeHTML(db.settings.schoolName)}">
+          </div>
+          <div class="field">
+            <label>Academic Year</label>
+            <input name="academicYear" value="${escapeHTML(db.settings.academicYear)}">
+          </div>
+        </div>
+        <button class="btn primary">Save Settings</button>
+      </form>
+    </div>
+    <p class="muted">Demo version: information is saved in this browser only.</p>
+  `;
+
+  $("#settingsForm").onsubmit=e=>{
+    e.preventDefault();
+    db.settings=Object.fromEntries(new FormData(e.target));
+    saveData();
+    toast("Settings saved.");
+    render();
+  };
+}
+/* MODALS */
+function openModal(title,html,handler){
+  $("#modalTitle").textContent=title;
+  $("#modalBody").innerHTML=html;
+  $("#modalSave").onclick=()=>{
+    let form=$("#modalBody").querySelector("form");
+    if(form && !form.reportValidity())return;
+    handler(form?Object.fromEntries(new FormData(form)):{});
+  };
+  $("#modalBack").classList.add("show");
+}
+
+function closeModal(){
+  $("#modalBack").classList.remove("show");
+}
+
+function openStudentForm(){
+  if(!db.classes.length){
+    toast("Create a class first.");
+    return;
+  }
+ openModal("Add Student",`
+    <form>
+      <div class="formgrid">
+        <div class="field">
+          <label>Admission Number</label>
+          <input name="admission" required>
+        </div>
+        <div class="field">
+          <label>Student Name</label>
+          <input name="name" required>
+        </div>
+        <div class="field">
+          <label>Gender</label>
+          <select name="gender">
+            <option>Male</option><option>Female</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Class</label>
+          <select name="classId">
+            ${classOptions()}
+          </select>
+        </div>
+        <div class="field">
+          <label>Phone</label>
+          <input name="phone">
+        </div>
+        <div class="field">
+          <label>Date of Birth</label>
+          <input name="dob" type="date">
+        </div>
+        <div class="field">
+          <label>Guardian Name</label>
+          <input name="guardian">
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <select name="status"><option>Active</option><option>Inactive</option></select>
+        </div>
+      </div>
+    </form>
+    `,v=>{
+    db.students.push({
+      id:makeId(),
+      admission:v.admission,
+      name:v.name,
+      gender:v.gender,
+      classId:Number(v.classId),
+      phone:v.phone,
+      dob:v.dob,
+      guardian:v.guardian,
+      status:v.status
+    });
+    saveData();
+    closeModal();
+    render();
+    toast("Student saved.");
+  });
+}
+ function openTeacherForm(){
+  openModal("Add Teacher",`
+    <form>
+      <div class="formgrid">
+        <div class="field"><label>Employee Number</label><input name="no" required></div>
+        <div class="field"><label>Name</label><input name="name" required></div>
+        <div class="field"><label>Phone</label><input name="phone"></div>
+        <div class="field"><label>Qualification</label><input name="qualification"></div>
+      </div>
+    </form>
+  `,v=>{
+    db.teachers.push({id:makeId(),...v});
+    saveData();
+    closeModal();
+    render();
+    toast("Teacher saved.");
+  });
+}
+
+function openClassForm(){
+  openModal("Add Class",`
+    <form>
+      <div class="field">
+        <label>Class Name</label>
+        <input name="name" required placeholder="Example: Grade 5">
+      </div>
+      <div class="field">
+        <label>Education Level</label>
+        <select name="level"><option>Primary</option><option>Secondary</option></select>
+      </div>
+    </form>
+    `,v=>{
+    if(Number(v.score)>Number(v.max)){
+      toast("Score cannot exceed maximum.");
+      return;
+    }
+    let student=db.students.find(s=>s.id===Number(v.studentId));
+    db.marks.push({
+      id:makeId(),
+      studentId:Number(v.studentId),
+      classId:student.classId,
+      subject:v.subject,
+      title:v.title,
+      score:Number(v.score),
+      max:Number(v.max)
+    });
+    saveData();
+    closeModal();
+    render();
+    toast("Marks saved.");
+  });
+}
+
+function openPaymentForm(){
+  if(!db.students.length){
+    toast("Add students first.");
+    return;
+  }
+
+  openModal("Record Payment",`
+    <form>
+      <div class="field">
+        <label>Student</label>
+        <select name="studentId">
+          ${db.students.map(s=>`<option value="${s.id}">${escapeHTML(s.name)}</option>`).join("")}
+        </select>
+      </div>
+      <div class="formgrid">
+        <div class="field"><label>Fee Type</label><input name="type" required placeholder="Tuition Fee"></div>
+        <div class="field"><label>Amount (ETB)</label><input name="amount" type="number" min="0.01" step="0.01" required></div>
+        <div class="field"><label>Payment Date</label><input name="date" type="date" value="${today}" required></div>
+        <div class="field"><label>Note</label><input name="note"></div>
+      </div>
+    </form>
+  `,v=>{
+    db.payments.push({
+      id:makeId(),
+      studentId:Number(v.studentId),
+      type:v.type,
+      amount:Number(v.amount),
+      date:v.date,
+      note:v.note
+    });
+    saveData();
+    closeModal();
+    render();
+    toast("Payment saved.");
+  });
+}
+ /* DELETE */
+function removeItem(table,recordId){
+  if(!confirm("Are you sure you want to delete this record?"))return;
+
+  db[table]=db[table].filter(x=>x.id!==recordId);
+  saveData();
+  render();
+}
+
+/* CSV EXPORT */
+function exportCSV(table){
+  let rows=db[table];
+
+  if(!rows.length){
+    toast("No records to export.");
+    return;
+  }
+
+  let headers=Object.keys(rows[0]);
+  let csv=[
+    headers.join(","),
+    ...rows.map(row=>headers.map(k=>
+      '"'+String(row[k]??"").replace(/"/g,'""')+'"'
+    ).join(","))
+  ].join("\n");
+
+  let blob=new Blob(["\ufeff"+csv],{
+    type:"text/csv;charset=utf-8"
+  });
+
+  let link=document.createElement("a");
+  link.href=URL.createObjectURL(blob);
+  link.download=table+".csv";
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+/* START */
+render();
 </script>
 </body>
 </html>
+
