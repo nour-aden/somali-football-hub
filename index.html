@@ -437,5 +437,1523 @@ function setLang(l) {
   LANG = l; try { localStorage.setItem('sms_lang', l); } catch (e) {}
   document.documentElement.lang = l;
 }
-   
+  /* =====================================================================
+   3. STATE & UTILITIES
+   ===================================================================== */
+const S = { user: null, profile: null, memberships: [], member: null, school: null, role: null,
+  perms: new Set(), years: [], terms: [], classes: [], sections: [], subjects: [], curYear: null,
+  teacher: null, stats: null, log: [], route: '' };
+const can = p => Array.isArray(p) ? p.some(x => S.perms.has(x)) : S.perms.has(p);
+const isTeacher = () => S.role === 'teacher';
+
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const debounce = (fn, ms = 300) => { let h; return (...a) => { clearTimeout(h); h = setTimeout(() => fn(...a), ms); }; };
+const todayStr = () => new Date().toLocaleDateString('en-CA', { timeZone: TZ });
+const addDays = (d, n) => { const x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
+const monthRange = ym => { const [y, m] = ym.split('-').map(Number); const last = new Date(Date.UTC(y, m, 0)).getUTCDate(); return [`${ym}-01`, `${ym}-${String(last).padStart(2, '0')}`]; };
+const fmtDate = d => d ? new Date(String(d).length === 10 ? d + 'T00:00:00' : d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: String(d).length === 10 ? undefined : TZ }) : '—';
+const fmtDateTime = d => d ? new Date(d).toLocaleString('en-GB', { timeZone: TZ, day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
+const nf = new Intl.NumberFormat('en-US');
+const nf2 = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const num = n => nf.format(+n || 0);
+const money = n => nf2.format(+n || 0) + ' ' + (S.school?.currency || 'ETB');
+const pct = (a, b) => b > 0 ? Math.round((a / b) * 1000) / 10 : 0;
+const initials = n => String(n || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+const sanitizeQ = s => String(s || '').replace(/[,()%*\\"]/g, ' ').trim();   // safe for PostgREST .or()/.ilike
+const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
+const uniq = a => [...new Set(a)];
+ /* Friendly error messages (Postgres / PostgREST codes) */
+function errMsg(e) {
+  const m = (e && e.message) || String(e), c = e && e.code;
+  if (c === '23505') return t('err_duplicate');
+  if (c === '23503') return t('err_fk');
+  if (c === '42501' || /row-level security|permission denied/i.test(m)) return t('err_denied');
+  if (c === '23514') return t('err_check') + ' ' + (e.details || '');
+  if (/Failed to fetch|NetworkError|Load failed/i.test(m)) return t('err_network');
+  if (/Invalid login credentials/i.test(m)) return t('err_login');
+  return m;
+}
+const handleErr = e => { console.error(e); toast(errMsg(e), 'error'); };
+
+/* Read every page of a query (PostgREST returns max 1000 rows per request) */
+async function fetchAll(build, size = 1000) {
+  let out = [], from = 0;
+  for (;;) {
+    const { data, error } = await build().range(from, from + size - 1);
+    if (error) throw error;
+    out = out.concat(data || []);
+    if (!data || data.length < size) break;
+    from += size;
+  }
+  return out;
+   }
+   /* Unwrap a supabase response */
+const ok = r => { if (r.error) throw r.error; return r; };
+const chunk = (a, n) => { const o = []; for (let i = 0; i < a.length; i += n) o.push(a.slice(i, i + n)); return o; };
+
+/* =====================================================================
+   4. ICONS (inline SVG)
+   ===================================================================== */
+const ICONS = {
+  dashboard: '<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
+  users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  user: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  cap: '<path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
+  layers: '<path d="m12 2 10 5-10 5L2 7z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/>',
+  calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/>',
+  award: '<circle cx="12" cy="8" r="6"/><path d="M15.5 12.9 17 22l-5-3-5 3 1.5-9.1"/>',
+  wallet: '<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>',
+  chart: '<path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/>',
+  settings: '<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+  bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+  menu: '<path d="M3 12h18M3 6h18M3 18h18"/>',
+  search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  edit: '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
+  trash: '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+  eye: '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+  download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+  printer: '<path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',
+  logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>',
+  x: '<path d="M18 6 6 18M6 6l12 12"/>',
+  globe: '<circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  alert: '<circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>',
+  lock: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  mail: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>',
+  file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>',
+  shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  dollar: '<path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+  clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+  upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/>',
+  chev: '<path d="m6 9 6 6 6-6"/>',
+  inbox: '<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>'
+};
+   const ic = (n, s = 18) => `<svg class="ic" viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n] || ''}</svg>`;
+
+/* =====================================================================
+   5. UI KIT
+   ===================================================================== */
+const ACT = {};   // click actions:  <button data-act="name" data-id="..">
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (el) { const fn = ACT[el.dataset.act]; if (fn) { e.preventDefault(); Promise.resolve(fn(el, e)).catch(handleErr); } }
+  // close dropdown menus on outside click
+  if (!e.target.closest('.menu-wrap') && !e.target.closest('.gsearch')) $$('.menu,.pop').forEach(m => m.hidden = true);
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { const m = $('#modal-root').lastElementChild; if (m) closeModal(m); } });
+
+function toast(msg, type = 'success') {
+  const el = document.createElement('div');
+  el.className = 'toast ' + type; el.setAttribute('role', 'status');
+  el.innerHTML = `${ic(type === 'error' ? 'alert' : 'check')}<div>${esc(msg)}</div>`;
+  $('#toast-root').appendChild(el);
+  if (type !== 'error') { S.log.unshift({ at: Date.now(), msg }); S.log.length = Math.min(S.log.length, 12); }
+  setTimeout(() => el.remove(), type === 'error' ? 6500 : 3500);
+   }
+   function modal({ title, body, size = '', onMount }) {
+  const el = document.createElement('div');
+  el.className = 'modal-backdrop';
+  el.innerHTML = `<div class="modal ${size}" role="dialog" aria-modal="true"><div class="modal-head"><h3>${esc(title)}</h3><button class="icon-btn" data-act="modal-close" aria-label="${esc(t('close'))}">${ic('x')}</button></div><div class="modal-body">${body}</div></div>`;
+  $('#modal-root').appendChild(el); document.body.classList.add('no-scroll');
+  el.addEventListener('mousedown', e => { if (e.target === el) closeModal(el); });
+  if (onMount) onMount(el);
+  return el;
+}
+function closeModal(el) {
+  el = el || $('#modal-root').lastElementChild; if (!el) return;
+  if (el._onClose) el._onClose();
+  el.remove();
+  if (!$('#modal-root').children.length) document.body.classList.remove('no-scroll');
+}
+ACT['modal-close'] = el => closeModal(el.closest('.modal-backdrop'));
+
+function confirmBox({ title, message, okLabel, danger = false }) {
+  return new Promise(res => {
+    const el = modal({ title, size: 'sm', body: `<p class="muted" style="margin:0">${esc(message)}</p>
+      <div class="modal-foot"><button class="btn" data-r="0">${t('cancel')}</button>
+      <button class="btn ${danger ? 'btn-danger' : 'btn-primary'}" data-r="1">${esc(okLabel || t('confirm'))}</button></div>` });
+    el._onClose = () => res(false);
+    el.addEventListener('click', e => { const b = e.target.closest('[data-r]'); if (b) { const v = b.dataset.r === '1'; el._onClose = null; closeModal(el); res(v); } });
+  });
+}
+   async function withBusy(btn, fn) {
+  if (btn) { btn.disabled = true; btn.classList.add('busy'); }
+  try { return await fn(); } finally { if (btn) { btn.disabled = false; btn.classList.remove('busy'); } }
+}
+
+/* ---- form field builder:  f = {k, l(i18n key), type, req, opts:[{v,l}], full, min, max, step, ph, help, def, ro} ---- */
+function field(f, v) {
+  if (f.sep) return `<div class="section-title">${esc(t(f.sep))}</div>`;
+  const val = v ?? f.def ?? '';
+  const id = 'f_' + f.k;
+  const common = `id="${id}" name="${f.k}" ${f.req ? 'required' : ''} ${f.ro ? 'disabled' : ''}`;
+  let input;
+  if (f.type === 'select') {
+    const opts = (f.opts || []).map(o => `<option value="${esc(o.v)}" ${String(val) === String(o.v) ? 'selected' : ''}>${esc(o.l)}</option>`).join('');
+    input = `<select ${common}><option value="">${esc(f.blank || t('select_opt'))}</option>${opts}</select>`;
+  } else if (f.type === 'textarea') {
+    input = `<textarea ${common} placeholder="${esc(f.ph || '')}">${esc(val)}</textarea>`;
+  } else if (f.type === 'checkbox') {
+    return `<div class="fg ${f.full ? 'full' : ''}"><label class="check"><input type="checkbox" ${common} ${val ? 'checked' : ''}> <span>${esc(t(f.l))}</span></label>${f.help ? `<span class="help">${esc(t(f.help))}</span>` : ''}</div>`;
+  } else {
+    input = `<input type="${f.type || 'text'}" ${common} value="${esc(val)}" placeholder="${esc(f.ph || '')}"
+      ${f.min != null ? `min="${f.min}"` : ''} ${f.max != null ? `max="${f.max}"` : ''} ${f.step ? `step="${f.step}"` : ''} ${f.maxlength ? `maxlength="${f.maxlength}"` : ''} ${f.type === 'number' ? 'inputmode="decimal"' : ''}>`;
+  }
+  return `<div class="fg ${f.full ? 'full' : ''}"><label for="${id}">${esc(t(f.l))}${f.req ? ' <span class="req">*</span>' : ''}</label>${input}${f.help ? `<span class="help">${esc(t(f.help))}</span>` : ''}</div>`;
+}
+function readForm(form, fields) {
+  const o = {};
+  fields.forEach(f => {
+    if (f.ro || f.skip || f.sep) return;
+    const el = form.elements[f.k]; if (!el) return;
+    if (f.type === 'checkbox') { o[f.k] = el.checked; return; }
+    let v = (el.value ?? '').trim();
+    if (v === '') { o[f.k] = null; return; }
+    o[f.k] = f.type === 'number' ? Number(v) : v;
+  });
+  return o;
+     }
+   /* Modal with a generated form. onSubmit(values, form, modalEl) may throw; return false to keep it open. */
+function formModal({ title, fields, values = {}, submitLabel, extra = '', extraTop = '', size = '', onSubmit, onMount }) {
+  const body = `<form class="form-grid" autocomplete="off">${extraTop}${fields.map(f => field(f, values[f.k])).join('')}${extra}
+    <div class="modal-foot"><button type="button" class="btn" data-act="modal-close">${t('cancel')}</button>
+    <button type="submit" class="btn btn-primary">${esc(submitLabel || t('save'))}</button></div></form>`;
+  const el = modal({ title, body, size });
+  const form = $('form', el);
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    await withBusy($('[type=submit]', form), async () => {
+      try { const r = await onSubmit(readForm(form, fields), form, el); if (r !== false) closeModal(el); }
+      catch (err) { handleErr(err); }
+    });
+  });
+  if (onMount) onMount(el, form);
+  return el;
+}
+/* helpers for select options */
+const opt = (list, lf = x => x.name) => list.map(x => ({ v: x.id, l: lf(x) }));
+const enumOpts = (keys, prefix) => keys.map(k => ({ v: k, l: t(prefix + k) }));
+function fillSelect(sel, opts, value, blank) {
+  sel.innerHTML = `<option value="">${esc(blank || t('select_opt'))}</option>` + opts.map(o => `<option value="${esc(o.v)}" ${String(o.v) === String(value) ? 'selected' : ''}>${esc(o.l)}</option>`).join('');
+}
+   /* ---- status badges ---- */
+const BADGE = { active: 'green', enrolled: 'green', paid: 'green', present: 'green', inactive: 'gray', void: 'gray', graduated: 'blue', transferred: 'amber', suspended: 'red',
+  on_leave: 'amber', unpaid: 'red', partial: 'amber', overdue: 'red', absent: 'red', late: 'amber', excused: 'gray', trial: 'amber', expired: 'red', school_admin: 'blue', teacher: 'green', accountant: 'amber', staff: 'gray' };
+const badge = (s, label) => `<span class="badge b-${BADGE[s] || 'gray'}">${esc(label ?? t('st_' + s))}</span>`;
+const statusOf = inv => (inv.status === 'unpaid' || inv.status === 'partial') && inv.due_date && inv.due_date < todayStr() ? 'overdue' : inv.status;
+
+const avatar = (name, url, cls = '') => `<span class="avatar ${cls}">${url ? `<img src="${esc(url)}" alt="">` : esc(initials(name))}</span>`;
+const emptyState = (msg, icon = 'inbox') => `<div class="empty">${ic(icon, 38)}<div>${esc(msg)}</div></div>`;
+const skeleton = (n = 5) => Array.from({ length: n }, () => '<div class="skel"></div>').join('');
+const pageHead = (title, sub = '', actions = '') => `<div class="page-head"><div><h1>${esc(title)}</h1>${sub ? `<p>${esc(sub)}</p>` : ''}</div><div class="actions">${actions}</div></div>`;
+const errorState = e => `<div class="card card-pad"><div class="alert err">${esc(errMsg(e))}</div></div>`;
+
+/* ---- pagination ---- */
+function pager(el, { total, page, size = PAGE_SIZE, onPage }) {
+  const pages = Math.max(1, Math.ceil(total / size));
+  const from = total ? (page - 1) * size + 1 : 0, to = Math.min(total, page * size);
+  el.innerHTML = `<div class="pager"><span class="muted small">${t('showing', { from, to, total })}</span>
+    <div class="pager-btns"><button class="btn btn-sm" data-p="${page - 1}" ${page <= 1 ? 'disabled' : ''}>${t('prev')}</button>
+    <span class="small">${page} / ${pages}</span><button class="btn btn-sm" data-p="${page + 1}" ${page >= pages ? 'disabled' : ''}>${t('next')}</button></div></div>`;
+  el.onclick = e => { const b = e.target.closest('[data-p]'); if (b && !b.disabled) onPage(+b.dataset.p); };
+}
+   /* ---- filter bar: defs = [{k,type:'search'|'select'|'date'|'month',ph,blank,opts:()=>[],reset:[keys],rerender}] ---- */
+function filterBar(host, defs, st, onChange) {
+  const draw = () => {
+    host.innerHTML = `<div class="filters">${defs.map(d => {
+      if (d.type === 'select') return `<select data-k="${d.k}" aria-label="${esc(d.blank || '')}"><option value="">${esc(d.blank || t('all'))}</option>${d.opts().map(o => `<option value="${esc(o.v)}" ${String(st[d.k]) === String(o.v) ? 'selected' : ''}>${esc(o.l)}</option>`).join('')}</select>`;
+      if (d.type === 'date' || d.type === 'month') return `<input type="${d.type}" data-k="${d.k}" value="${esc(st[d.k])}" aria-label="${esc(d.ph || '')}" title="${esc(d.ph || '')}" ${d.max ? `max="${d.max}"` : ''}>`;
+      return `<div class="search">${ic('search', 16)}<input type="search" data-k="${d.k}" placeholder="${esc(d.ph || t('search'))}" value="${esc(st[d.k])}"></div>`;
+    }).join('')}</div>`;
+    $$('[data-k]', host).forEach(inp => {
+      const d = defs.find(x => x.k === inp.dataset.k);
+      const h = async () => { st[d.k] = inp.value; if ('page' in st) st.page = 1; (d.reset || []).forEach(k => st[k] = ''); const r = onChange(d.k); if (d.wait) await r; if (d.rerender || d.reset) draw(); };
+      if (inp.type === 'search') inp.addEventListener('input', debounce(h, 300)); else inp.addEventListener('change', h);
+    });
+  };
+  draw();
+}
+
+function tabsBar(list, active) {
+  return `<div class="tabs" role="tablist">${list.map(x => `<button class="tab ${x.id === active ? 'on' : ''}" role="tab" data-act="tab" data-id="${x.id}">${esc(x.label)}</button>`).join('')}</div>`;
+   }
+   /* ---- student picker (typeahead). onPick(student) ---- */
+function studentPicker(host, { onPick, placeholder }) {
+  host.innerHTML = `<div class="search" style="max-width:none">${ic('search', 16)}<input type="search" placeholder="${esc(placeholder || t('search_student'))}" autocomplete="off"></div><div class="pop" hidden></div>`;
+  host.style.position = 'relative';
+  const inp = $('input', host), pop = $('.pop', host);
+  const run = debounce(async () => {
+    const s = sanitizeQ(inp.value);
+    if (s.length < 2) { pop.hidden = true; return; }
+    const { data, error } = await sb.from('students').select('id,full_name,admission_no,status').eq('school_id', S.school.id)
+      .or(`full_name.ilike.%${s}%,admission_no.ilike.%${s}%`).order('full_name').limit(8);
+    if (error) { pop.hidden = false; pop.innerHTML = `<div class="empty small">${esc(errMsg(error))}</div>`; return; }
+    pop.hidden = false;
+    pop.innerHTML = data.length ? data.map(r => `<button type="button" data-id="${r.id}">${avatar(r.full_name)}<span><b>${esc(r.full_name)}</b><br><span class="muted small">${esc(r.admission_no)}</span></span></button>`).join('') : `<div class="empty small">${t('no_results')}</div>`;
+    pop._rows = data;
+  }, 280);
+  inp.addEventListener('input', run);
+  pop.addEventListener('click', e => { const b = e.target.closest('button[data-id]'); if (!b) return; const r = pop._rows.find(x => x.id === b.dataset.id); pop.hidden = true; inp.value = ''; onPick(r); });
+}
+   /* ---- CSV export & printing ---- */
+function toCSV(cols, rows) {
+  const q = v => { v = v ?? ''; v = String(v); return /[",\n\r;]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+  return [cols.map(c => q(c.l)).join(','), ...rows.map(r => cols.map(c => q(r[c.k])).join(','))].join('\r\n');
+}
+function downloadCSV(name, cols, rows) {
+  const blob = new Blob(['﻿' + toCSV(cols, rows)], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `${name}-${todayStr()}.csv`; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+let _title = document.title;
+function printDoc(html, title) {
+  $('#print-root').innerHTML = html; _title = document.title; if (title) document.title = title;
+  document.body.classList.add('printing'); setTimeout(() => window.print(), 60);
+}
+window.addEventListener('afterprint', () => { document.body.classList.remove('printing'); $('#print-root').innerHTML = ''; document.title = _title; });
+const letterhead = (title, sub = '') => `<div class="lh"><div><h1>${esc(S.school?.name || '')}</h1><div>${esc([S.school?.address, S.school?.phone].filter(Boolean).join(' · '))}</div></div>
+  <div style="text-align:right"><h2 style="margin:0">${esc(title)}</h2><div>${esc(sub)}</div><div>${esc(t('generated'))}: ${esc(fmtDate(todayStr()))}</div></div></div>`;
+const gradeOf = p => p >= 90 ? 'A' : p >= 80 ? 'B' : p >= 70 ? 'C' : p >= 60 ? 'D' : p >= 50 ? 'E' : 'F';
+
+/* Generic report table (on-screen & print) */
+function tableHTML(cols, rows, { footer } = {}) {
+  return `<table class="tbl"><thead><tr>${cols.map(c => `<th class="${c.num ? 'num' : ''}">${esc(c.l)}</th>`).join('')}</tr></thead>
+  <tbody>${rows.map(r => `<tr>${cols.map(c => `<td class="${c.num ? 'num' : ''}">${c.html ? r[c.k] : esc(r[c.k] ?? '')}</td>`).join('')}</tr>`).join('')}</tbody>
+  ${footer ? `<tfoot><tr>${footer.map((f, i) => `<td class="${cols[i]?.num ? 'num' : ''}">${esc(f ?? '')}</td>`).join('')}</tr></tfoot>` : ''}</table>`;
+}
+   /* =====================================================================
+   6. DATA HELPERS
+   ===================================================================== */
+const byId = (list, id) => list.find(x => x.id === id);
+const nameOf = (list, id, fb = '—') => byId(list, id)?.name ?? fb;
+const sectionsOf = cid => S.sections.filter(s => s.class_id === cid);
+const classLabel = (cid, sid) => [nameOf(S.classes, cid, ''), sid ? nameOf(S.sections, sid, '') : ''].filter(Boolean).join(' – ') || '—';
+const myAsg = () => S.teacher?.teacher_assignments || [];
+function allowedClasses() { if (!isTeacher()) return S.classes; const ids = new Set(myAsg().map(a => a.class_id)); return S.classes.filter(c => ids.has(c.id)); }
+function allowedSections(cid) {
+  const all = sectionsOf(cid); if (!isTeacher()) return all;
+  const a = myAsg().filter(x => x.class_id === cid);
+  if (a.some(x => !x.section_id)) return all;
+  const ids = new Set(a.map(x => x.section_id)); return all.filter(s => ids.has(s.id));
+}
+function allowedSubjects(cid) { if (!isTeacher()) return S.subjects; const ids = new Set(myAsg().filter(a => a.class_id === cid).map(a => a.subject_id)); return S.subjects.filter(s => ids.has(s.id)); }
+const classOpts = () => opt(allowedClasses());
+const sectionOpts = cid => opt(allowedSections(cid));
+const termLabel = tm => { const y = byId(S.years, tm.academic_year_id); return `${tm.name}${y ? ' · ' + y.name : ''}`; };
+
+async function loadLookups() {
+  const sid = S.school.id;
+  const rs = await Promise.all([
+    sb.from('academic_years').select('*').eq('school_id', sid).order('start_date', { ascending: false }),
+    sb.from('terms').select('*').eq('school_id', sid).order('start_date'),
+    sb.from('classes').select('*').eq('school_id', sid).order('sort_order').order('name'),
+    sb.from('sections').select('*').eq('school_id', sid).order('name'),
+    sb.from('subjects').select('*').eq('school_id', sid).order('name')]);
+  rs.forEach(ok);
+  [S.years, S.terms, S.classes, S.sections, S.subjects] = rs.map(r => r.data || []);
+  S.curYear = S.years.find(y => y.is_current) || S.years[0] || null;
+}
+   async function loadTeacherCtx() {
+  S.teacher = null;
+  if (!isTeacher()) return;
+  const { data } = await sb.from('teachers').select('*, teacher_assignments(*)').eq('school_id', S.school.id).eq('user_id', S.user.id).maybeSingle();
+  S.teacher = data || { teacher_assignments: [] };
+}
+async function refreshStats() {
+  try {
+    const { data, error } = await sb.rpc('dashboard_stats', { p_school: S.school.id });
+    if (error) throw error;
+    S.stats = data; updateBell(); return data;
+  } catch (e) { console.warn('stats', e); return S.stats; }
+}
+
+/* photo helpers (private storage bucket, signed URLs) */
+const PHOTO = {};
+async function photoUrls(paths) {
+  paths = uniq(paths.filter(Boolean)); const need = paths.filter(p => !PHOTO[p]);
+  if (need.length) { try { const { data } = await sb.storage.from('student-photos').createSignedUrls(need, 3600); (data || []).forEach(d => { if (d.signedUrl) PHOTO[d.path] = d.signedUrl; }); } catch (e) { console.warn(e); } }
+  return PHOTO;
+}
+function resizeImage(file, max = 480) {
+  return new Promise((res, rej) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => { const r = Math.min(1, max / Math.max(img.width, img.height)); const c = document.createElement('canvas'); c.width = Math.round(img.width * r); c.height = Math.round(img.height * r);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url); c.toBlob(b => b ? res(b) : rej(new Error('Image error')), 'image/jpeg', .85); };
+    img.onerror = () => rej(new Error(t('err_image'))); img.src = url;
+  });
+   }
+   /* Compute class results for a term (used by results tab, report cards, reports) */
+async function classResults(classId, termId) {
+  const sid = S.school.id, term = byId(S.terms, termId);
+  const ass = ok(await sb.from('assessments').select('id,subject_id,max_marks,name').eq('school_id', sid).eq('class_id', classId).eq('term_id', termId)).data || [];
+  const subjIds = uniq(ass.map(a => a.subject_id));
+  const subjects = subjIds.map(id => byId(S.subjects, id)).filter(Boolean).sort((a, b) => a.name.localeCompare(b.name));
+  const roster = await fetchAll(() => sb.from('enrollments').select('student_id,section_id,students(full_name,admission_no,status)').eq('school_id', sid).eq('class_id', classId).eq('academic_year_id', term.academic_year_id).order('student_id'));
+  let marks = [];
+  if (ass.length) for (const ids of chunk(ass.map(a => a.id), 60)) marks = marks.concat(await fetchAll(() => sb.from('marks').select('student_id,assessment_id,score').in('assessment_id', ids).order('id')));
+  const aMap = Object.fromEntries(ass.map(a => [a.id, a]));
+  const rows = roster.filter(r => r.students).map(r => ({ id: r.student_id, name: r.students.full_name, adm: r.students.admission_no, section_id: r.section_id, subj: {}, total: 0, max: 0 }));
+  const rMap = Object.fromEntries(rows.map(r => [r.id, r]));
+  marks.forEach(m => { const r = rMap[m.student_id], a = aMap[m.assessment_id]; if (!r || !a) return;
+    const s = r.subj[a.subject_id] ||= { score: 0, max: 0 }; s.score += +m.score; s.max += +a.max_marks; r.total += +m.score; r.max += +a.max_marks; });
+  rows.forEach(r => { const ps = Object.values(r.subj).filter(s => s.max > 0).map(s => s.score / s.max * 100);
+    r.pct = pct(r.total, r.max); r.avg = ps.length ? Math.round(ps.reduce((a, b) => a + b, 0) / ps.length * 10) / 10 : 0; r.grade = r.max ? gradeOf(r.pct) : '—'; });
+  const ranked = rows.filter(r => r.max > 0).sort((a, b) => b.pct - a.pct);
+  ranked.forEach((r, i) => r.rank = i && r.pct === ranked[i - 1].pct ? ranked[i - 1].rank : i + 1);
+  rows.sort((a, b) => (a.rank || 9999) - (b.rank || 9999) || a.name.localeCompare(b.name));
+  return { subjects, rows, ranked: ranked.length, term, classId };
+}
+function reportCardHTML(res, r, sectionName) {
+  const body = res.subjects.map(s => { const x = r.subj[s.id]; return x ? `<tr><td>${esc(s.name)}</td><td class="num">${x.score}</td><td class="num">${x.max}</td><td class="num">${pct(x.score, x.max)}%</td><td>${gradeOf(pct(x.score, x.max))}</td></tr>` : `<tr><td>${esc(s.name)}</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td>—</td></tr>`; }).join('');
+  return `<div class="sheet page">${letterhead(t('report_card'), termLabel(res.term))}
+    <table><tr><td><b>${t('full_name')}:</b> ${esc(r.name)}</td><td><b>${t('admission_no')}:</b> ${esc(r.adm)}</td></tr>
+    <tr><td><b>${t('class')}:</b> ${esc(classLabel(res.classId, r.section_id))}</td><td><b>${t('rank')}:</b> ${r.rank ? `${r.rank} / ${res.ranked}` : '—'}</td></tr></table>
+    <table><thead><tr><th>${t('subject')}</th><th class="num">${t('score')}</th><th class="num">${t('max_marks')}</th><th class="num">${t('percentage')}</th><th>${t('grade')}</th></tr></thead><tbody>${body}</tbody>
+    <tfoot><tr><th>${t('total')}</th><th class="num">${r.total}</th><th class="num">${r.max}</th><th class="num">${r.pct}%</th><th>${r.grade}</th></tr></tfoot></table>
+    <div class="sum"><div><b>${t('average')}:</b> ${r.avg}%</div><div><b>${t('percentage')}:</b> ${r.pct}%</div><div><b>${t('grade')}:</b> ${r.grade}</div></div>
+    <div class="sign"><div>${t('class_teacher')}</div><div>${t('parent_sign')}</div><div>${t('principal')}</div></div></div>`;
+}
+   /* =====================================================================
+   7. AUTHENTICATION  (Supabase Auth)
+   ===================================================================== */
+const show = id => { ['boot', 'auth', 'app'].forEach(x => $('#' + x).hidden = x !== id); };
+let recovery = false, starting = false;
+
+function langSwitch(cls = '') {
+  return `<div class="seg ${cls}">${['en', 'so'].map(l => `<button class="${LANG === l ? 'on' : ''}" data-act="lang" data-id="${l}" aria-label="${l === 'en' ? 'English' : 'Soomaali'}">${l === 'en' ? 'EN' : 'SO'}</button>`).join('')}</div>`;
+}
+ACT.lang = el => {
+  setLang(el.dataset.id);
+  if (!$('#auth').hidden) showAuth(authMode); else { renderShell(); route(); }
+};
+   let authMode = 'login';
+function showAuth(mode = 'login', msg = '') {
+  authMode = mode; show('auth');
+  $('#auth-lang').innerHTML = langSwitch();
+  $('#auth-brand').innerHTML = `<div class="logo"><span class="logo-mark">${ic('cap', 22)}</span><span>${t('app_name')}</span></div>
+    <div><h1>${t('auth_headline')}</h1><p style="margin-top:12px">${t('auth_sub')}</p>
+    <div class="auth-feats"><div>${ic('check')} ${t('feat1')}</div><div>${ic('check')} ${t('feat2')}</div><div>${ic('check')} ${t('feat3')}</div></div></div>
+    <div class="small" style="color:#9db4e6">${t('footer_note')}</div>`;
+  const card = $('#auth-card'), flash = msg ? `<div class="alert err" role="alert" style="margin-top:14px">${esc(msg)}</div>` : '';
+  const mobileLogo = `<div class="logo" style="margin-bottom:22px"><span class="logo-mark">${ic('cap', 22)}</span><span>${t('app_name')}</span></div>`;
+  if (mode === 'login') {
+    card.innerHTML = `${mobileLogo}<h2>${t('welcome')}</h2><p class="muted" style="margin:0">${t('login_sub')}</p>${flash}
+      <form id="f-login"><div class="fg"><label for="l_email">${t('email')}</label><input id="l_email" type="email" required autocomplete="username" placeholder="name@school.edu.et"></div>
+      <div class="fg"><label for="l_pass">${t('password')}</label><input id="l_pass" type="password" required autocomplete="current-password"></div>
+      <button class="btn btn-primary" style="height:42px" type="submit">${t('login')}</button>
+      <a href="#" data-act="auth-mode" data-id="forgot" class="center">${t('forgot_password')}</a></form>`;
+    $('#f-login').addEventListener('submit', async e => {
+      e.preventDefault();
+      await withBusy($('[type=submit]', e.target), async () => {
+        const { error } = await sb.auth.signInWithPassword({ email: $('#l_email').value.trim(), password: $('#l_pass').value });
+        if (error) showAuth('login', errMsg(error));
+      });
+    });
+     } else if (mode === 'forgot') {
+    card.innerHTML = `${mobileLogo}<h2>${t('forgot_password')}</h2><p class="muted" style="margin:0">${t('forgot_sub')}</p>${flash}
+      <form id="f-forgot"><div class="fg"><label for="fp_email">${t('email')}</label><input id="fp_email" type="email" required></div>
+      <button class="btn btn-primary" style="height:42px" type="submit">${t('send_reset')}</button>
+      <a href="#" data-act="auth-mode" data-id="login" class="center">${t('back_to_login')}</a></form>`;
+    $('#f-forgot').addEventListener('submit', async e => {
+      e.preventDefault();
+      await withBusy($('[type=submit]', e.target), async () => {
+        const { error } = await sb.auth.resetPasswordForEmail($('#fp_email').value.trim(), { redirectTo: location.origin + location.pathname });
+        if (error) return showAuth('forgot', errMsg(error));
+        $('#f-forgot').insertAdjacentHTML('beforebegin', `<div class="alert ok" style="margin-top:14px">${t('reset_sent')}</div>`);
+      });
+    });
+  } else if (mode === 'reset') {
+    card.innerHTML = `${mobileLogo}<h2>${t('set_new_password')}</h2><p class="muted" style="margin:0">${t('set_new_sub')}</p>${flash}
+      <form id="f-reset"><div class="fg"><label for="r_p1">${t('new_password')}</label><input id="r_p1" type="password" minlength="8" required autocomplete="new-password"></div>
+      <div class="fg"><label for="r_p2">${t('confirm_password')}</label><input id="r_p2" type="password" minlength="8" required autocomplete="new-password"></div>
+      <button class="btn btn-primary" style="height:42px" type="submit">${t('update_password')}</button></form>`;
+    $('#f-reset').addEventListener('submit', async e => {
+      e.preventDefault();
+      if ($('#r_p1').value !== $('#r_p2').value) return showAuth('reset', t('pw_mismatch'));
+      await withBusy($('[type=submit]', e.target), async () => {
+        const { error } = await sb.auth.updateUser({ password: $('#r_p1').value });
+        if (error) return showAuth('reset', errMsg(error));
+        recovery = false; toast(t('password_updated')); history.replaceState(null, '', location.pathname);
+        const { data } = await sb.auth.getSession(); S.user = null; start(data.session);
+      });
+    });
+  } else if (mode === 'noaccess') {
+    card.innerHTML = `${mobileLogo}<h2>${t('no_access')}</h2><p class="muted">${esc(msg || t('no_access_sub'))}</p>
+      <button class="btn" data-act="logout" style="margin-top:10px">${ic('logout')} ${t('logout')}</button>`;
+  }
+   }
+   ACT['auth-mode'] = el => showAuth(el.dataset.id);
+ACT.logout = async () => { await sb.auth.signOut(); S.user = null; S.school = null; showAuth('login'); };
+
+function showSetup() {
+  show('auth');
+  $('#auth-lang').innerHTML = langSwitch();
+  $('#auth-brand').innerHTML = `<div class="logo"><span class="logo-mark">${ic('cap', 22)}</span><span>${t('app_name')}</span></div><div><h1>${t('setup_title')}</h1></div><div></div>`;
+  $('#auth-card').innerHTML = `<h2>${t('setup_title')}</h2><div class="alert warn" style="margin-top:14px">${window.supabase ? t('setup_msg') : t('setup_cdn')}</div>
+    <p class="muted small">${t('setup_hint')}</p><pre style="background:#f1f5f9;padding:12px;border-radius:9px;overflow:auto;font-size:12px">const SUPABASE_URL = 'https://xxxx.supabase.co';\nconst SUPABASE_KEY = 'sb_publishable_xxx';</pre>`;
+}
+
+/* Loads profile, membership, school, permissions and lookups after login */
+async function loadContext() {
+  const uid = S.user.id;
+  const prof = (await sb.from('profiles').select('*').eq('id', uid).maybeSingle()).data;
+  S.profile = prof || { id: uid, full_name: S.user.email, email: S.user.email };
+  const mems = ok(await sb.from('school_members').select('*, schools(*)').eq('user_id', uid)).data || [];
+  S.memberships = mems.filter(m => m.status === 'active' && m.schools);
+  if (!S.memberships.length) throw Object.assign(new Error(t('no_membership')), { noAccess: true });
+  let saved = null; try { saved = localStorage.getItem('sms_school'); } catch (e) {}
+  S.member = S.memberships.find(m => m.school_id === saved) || S.memberships[0];
+  await selectSchool(S.member);
+}
+async function selectSchool(m) {
+  S.member = m; S.school = m.schools; S.role = m.role;
+  try { localStorage.setItem('sms_school', m.school_id); } catch (e) {}
+  const p = ok(await sb.rpc('my_permissions', { p_school: S.school.id })).data || [];
+  S.perms = new Set(p);
+  if (!S.perms.size) throw Object.assign(new Error(S.school.status === 'suspended' ? t('school_suspended') : t('school_inactive')), { noAccess: true });
+  await loadLookups(); await loadTeacherCtx();
+  S.stats = null; 
+}
+   async function start(session) {
+  if (starting) return; starting = true;
+  try {
+    if (!session) { S.user = null; showAuth('login'); return; }
+    S.user = session.user;
+    await loadContext();
+    renderShell(); show('app');
+    if (!location.hash.startsWith('#/')) location.hash = '#/dashboard';
+    await route(); refreshStats();
+  } catch (e) {
+    console.error(e);
+    if (e.noAccess) showAuth('noaccess', e.message); else { showAuth('noaccess', errMsg(e)); }
+  } finally { starting = false; }
+   }
+   /* =====================================================================
+   8. SHELL, MENUS & ROUTER
+   ===================================================================== */
+const ROUTES = [
+  { id: 'dashboard', icon: 'dashboard', perm: null, fn: () => renderDashboard() },
+  { id: 'students', icon: 'users', perm: 'students.read', fn: () => renderStudents() },
+  { id: 'teachers', icon: 'user', perm: 'teachers.read', fn: () => renderTeachers() },
+  { id: 'academics', icon: 'layers', perm: 'academics.read', fn: () => renderAcademics() },
+  { id: 'attendance', icon: 'calendar', perm: 'attendance.read', fn: () => renderAttendance() },
+  { id: 'exams', icon: 'award', perm: 'marks.read', fn: () => renderExams() },
+  { id: 'fees', icon: 'wallet', perm: 'fees.read', fn: () => renderFees() },
+  { id: 'reports', icon: 'chart', perm: 'reports.read', fn: () => renderReports() },
+  { id: 'settings', icon: 'settings', perm: ['school.manage', 'members.manage', 'audit.read'], fn: () => renderSettings() }
+];
+   const routeAllowed = r => !r.perm || can(r.perm);
+
+function renderShell() {
+  document.documentElement.lang = LANG;
+  $('#sidebar').innerHTML = `<div class="brand"><span class="logo-mark" style="width:34px;height:34px">${ic('cap', 20)}</span><span>${esc(S.school.short_name || S.school.name)}</span></div>
+    <nav>${ROUTES.filter(routeAllowed).map(r => `<a class="nav-item" href="#/${r.id}" data-route="${r.id}">${ic(r.icon, 19)}<span>${t('nav_' + r.id)}</span></a>`).join('')}</nav>
+    <div class="side-foot">${t('role_' + S.role)} · ${esc(S.school.currency)}</div>`;
+  const hasSearch = can('students.read');
+  $('#topbar').innerHTML = `<button class="icon-btn hamburger" data-act="nav-open" aria-label="Menu">${ic('menu', 22)}</button>
+    <div class="title" id="page-title"></div><div class="grow"></div>
+    ${hasSearch ? '<div class="gsearch" id="gsearch"></div>' : ''}
+    ${langSwitch()}
+    <div class="menu-wrap"><button class="icon-btn" data-act="menu" data-id="bell-menu" aria-label="${esc(t('notifications'))}">${ic('bell', 20)}<span class="dot" id="bell-dot" hidden></span></button><div class="menu wide" id="bell-menu" hidden></div></div>
+    <div class="menu-wrap"><button class="icon-btn" style="width:auto;gap:8px;padding:0 6px" data-act="menu" data-id="profile-menu" aria-label="${esc(t('profile'))}">${avatar(S.profile.full_name || S.user.email)}</button><div class="menu" id="profile-menu" hidden></div></div>`;
+  if (hasSearch) studentPicker($('#gsearch'), { onPick: r => { viewStudent(r.id); } , placeholder: t('search_student') });
+  profileMenu(); updateBell(); markNav();
+}
+function profileMenu() {
+  const switcher = S.memberships.length > 1 ? S.memberships.map(m => `<button class="menu-item" data-act="switch-school" data-id="${m.school_id}">${ic('cap')} ${esc(m.schools.name)} ${m.school_id === S.school.id ? ic('check', 14) : ''}</button>`).join('') + '<hr style="border:0;border-top:1px solid var(--line);margin:6px 0">' : '';
+  $('#profile-menu').innerHTML = `<div class="menu-head"><b>${esc(S.profile.full_name || '')}</b><div class="muted small">${esc(S.profile.email || S.user.email || '')}</div><div style="margin-top:6px">${badge(S.role, t('role_' + S.role))}</div></div>
+    ${switcher}<button class="menu-item" data-act="profile">${ic('user')} ${t('my_profile')}</button>
+    <button class="menu-item danger" data-act="logout">${ic('logout')} ${t('logout')}</button>`;
+     }
+   ACT.menu = el => { const m = $('#' + el.dataset.id); const open = m.hidden; $$('.menu').forEach(x => x.hidden = true); m.hidden = !open; if (open && el.dataset.id === 'bell-menu') renderBell(); };
+ACT['nav-open'] = () => document.body.classList.add('nav-open');
+ACT['nav-close'] = () => document.body.classList.remove('nav-open');
+ACT['switch-school'] = async el => { const m = S.memberships.find(x => x.school_id === el.dataset.id); await selectSchool(m); renderShell(); await route(); refreshStats(); };
+
+/* Notifications: system alerts derived from live data + recent actions this session */
+function alertItems() {
+  const s = S.stats, a = []; if (!s) return a;
+  if (can('fees.read') && s.overdue_count > 0) a.push({ icon: 'wallet', tone: 'red', text: t('n_overdue', { n: s.overdue_count }), href: '#/fees' });
+  if (can('attendance.write') && !isTeacher() && s.sections_pending > 0) a.push({ icon: 'calendar', tone: 'amber', text: t('n_att_pending', { n: s.sections_pending }), href: '#/attendance' });
+  if (isTeacher() && !myAsg().length) a.push({ icon: 'alert', tone: 'amber', text: t('n_no_assign'), href: '#/dashboard' });
+  return a;
+}
+function updateBell() { const d = $('#bell-dot'); if (!d) return; const n = alertItems().length; d.hidden = !n; d.textContent = n; }
+function renderBell() {
+  const al = alertItems();
+  $('#bell-menu').innerHTML = `<div class="menu-head"><b>${t('notifications')}</b></div>
+   ${al.map(x => `<a class="notif" href="${x.href}"><span class="ni tone-${x.tone}">${ic(x.icon, 16)}</span><span>${esc(x.text)}</span></a>`).join('')}
+   ${S.log.slice(0, 5).map(x => `<div class="notif"><span class="ni tone-green">${ic('check', 16)}</span><span>${esc(x.msg)}<br><span class="muted small">${esc(new Date(x.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }))}</span></span></div>`).join('')}
+   ${!al.length && !S.log.length ? `<div class="empty small">${t('no_notifications')}</div>` : ''}`;
+}
+
+function markNav() { $$('.nav-item').forEach(a => a.classList.toggle('active', a.dataset.route === S.route)); const r = ROUTES.find(x => x.id === S.route); const pt = $('#page-title'); if (pt && r) pt.textContent = t('nav_' + r.id); }
+async function route() {
+  if (!S.user || !S.school) return;
+  const h = location.hash.replace(/^#\/?/, '').split('?')[0];
+  let r = ROUTES.find(x => x.id === h);
+  if (!r || !routeAllowed(r)) { r = ROUTES[0]; if (h && h !== 'dashboard') history.replaceState(null, '', '#/dashboard'); }
+  S.route = r.id; markNav(); ACT['nav-close']();
+  const v = $('#view'); v.innerHTML = `<div class="card">${skeleton(6)}</div>`; window.scrollTo(0, 0);
+  try { await r.fn(); } catch (e) { console.error(e); v.innerHTML = errorState(e); }
+  }
+   window.addEventListener('hashchange', route);
+ACT.tab = el => { const st = TABSTATE[S.route]; if (st) { st.tab = el.dataset.id; route(); } };
+const TABSTATE = {};
+/* =====================================================================
+   9. MODULES
+   9.1 Dashboard
+   ===================================================================== */
+async function renderDashboard() {
+  const v = $('#view'), sid = S.school.id;
+  const [st, acts, pays] = await Promise.all([
+    refreshStats(),
+    can('audit.read') ? sb.from('audit_logs').select('id,action,table_name,details,created_at,profiles(full_name)').eq('school_id', sid).order('created_at', { ascending: false }).limit(8) : null,
+    can('fees.read') ? sb.from('payments').select('id,receipt_no,amount,paid_on,method,students(full_name)').eq('school_id', sid).order('created_at', { ascending: false }).limit(6) : null]);
+  if (!st) throw new Error(t('err_stats'));
+  const a = st.att_today || {}, present = a.present || 0, absent = a.absent || 0, late = a.late || 0, excused = a.excused || 0;
+  const marked = present + absent + late + excused;
+  const card = (icon, tone, val, label, sub = '') => `<div class="stat"><div class="stat-ic tone-${tone}">${ic(icon, 22)}</div><div><div class="stat-v">${val}</div><div class="stat-l">${esc(label)}${sub ? ` · <span class="muted">${esc(sub)}</span>` : ''}</div></div></div>`;
+  const cards = [];
+  if (can('students.read')) cards.push(card('users', 'blue', num(st.students), t('total_students')));
+  if (can('teachers.read')) cards.push(card('user', 'green', num(st.teachers), t('total_teachers')));
+  if (can('academics.read')) cards.push(card('layers', 'slate', num(st.classes), t('total_classes'), t('n_sections', { n: st.sections })));
+  if (can('attendance.read')) {
+    cards.push(card('calendar', 'blue', marked ? pct(present + late, marked) + '%' : '—', t('todays_attendance'), t('n_marked', { n: marked })));
+    cards.push(card('check', 'green', num(present), t('present_students'), late ? t('n_late', { n: late }) : ''));
+    cards.push(card('x', 'red', num(absent), t('absent_students')));
+  }
+  if (can('fees.read')) {
+    cards.push(card('wallet', 'green', money(st.month_collected), t('monthly_collection')));
+    cards.push(card('alert', 'amber', money(st.unpaid_total), t('unpaid_fees'), t('n_invoices', { n: st.unpaid_count })));
+   }
+   // 7-day attendance chart
+  const wk = st.att_week || [], tot = d => d.present + d.absent + d.late + d.excused, mx = Math.max(1, ...wk.map(tot));
+  const chart = can('attendance.read') ? `<div class="card"><div class="card-head"><h3>${t('attendance_chart')}</h3><div class="legend">${['present', 'absent', 'late', 'excused'].map(s => `<span class="c-${s}" style="background:none">${t('st_' + s)}</span>`).join('')}</div></div>
+    <div class="card-pad"><div class="bars">${wk.map(d => { const T = tot(d); return `<div class="bar-col" title="${esc(fmtDate(d.date))}: ${t('st_present')} ${d.present}, ${t('st_absent')} ${d.absent}, ${t('st_late')} ${d.late}, ${t('st_excused')} ${d.excused}">
+      <div class="bar-stack" style="height:${T ? T / mx * 82 : 1}%">${['present', 'late', 'excused', 'absent'].map(s => d[s] ? `<i class="c-${s}" style="height:${d[s] / T * 100}%"></i>` : '').join('')}</div>
+      <div class="bar-lab">${new Date(d.date + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' })}</div></div>`; }).join('')}</div>
+      ${wk.every(d => !tot(d)) ? `<div class="muted small center" style="margin-top:10px">${t('no_attendance_yet')}</div>` : ''}</div></div>` : '';
+
+  // student statistics
+  const g = st.gender || {}, male = g.male || 0, female = g.female || 0, gt = Math.max(1, male + female), bc = st.by_class || [], bm = Math.max(1, ...bc.map(x => x.count));
+  const stats = can('students.read') ? `<div class="card"><div class="card-head"><h3>${t('student_statistics')}</h3></div><div class="card-pad">
+    <div class="small muted">${t('gender_split')}</div><div class="split"><i style="width:${male / gt * 100}%;background:#2563eb"></i><i style="width:${female / gt * 100}%;background:#93c5fd"></i></div>
+    <div class="legend"><span style="--c:#2563eb">${t('g_male')} ${male}</span><span style="--c:#93c5fd">${t('g_female')} ${female}</span></div>
+    <div class="small muted" style="margin-top:16px">${t('students_by_class')}</div>
+    ${bc.length ? bc.map(c => `<div class="hbar"><span>${esc(c.name)}</span><div class="track"><div class="fill" style="width:${c.count / bm * 100}%"></div></div><b class="mono">${c.count}</b></div>`).join('') : `<div class="muted small">${t('no_data')}</div>`}</div></div>` : '';
+
+  const verb = x => t('act_' + x);
+  const actCard = acts ? `<div class="card"><div class="card-head"><h3>${t('recent_activities')}</h3></div>
+    ${(acts.data || []).length ? (acts.data || []).map(x => `<div class="notif"><span class="ni tone-blue">${ic(x.action === 'delete' ? 'trash' : x.action === 'insert' ? 'plus' : 'edit', 15)}</span>
+      <span><b>${esc(x.profiles?.full_name || t('system'))}</b> ${esc(verb(x.action))} ${esc(t('tbl_' + x.table_name))}${x.details?.label ? ': <b>' + esc(x.details.label) + '</b>' : ''}<br><span class="muted small">${fmtDateTime(x.created_at)}</span></span></div>`).join('') : emptyState(t('no_activity'))}</div>` : '';
+  const payCard = pays ? `<div class="card"><div class="card-head"><h3>${t('recent_payments')}</h3><a href="#/fees" class="small">${t('view_all')}</a></div>
+    ${(pays.data || []).length ? `<div class="table-wrap"><table class="tbl" style="min-width:420px"><tbody>${pays.data.map(p => `<tr><td><b>${esc(p.students?.full_name || '—')}</b><br><span class="muted small">${esc(p.receipt_no)} · ${fmtDate(p.paid_on)}</span></td><td class="num"><b>${money(p.amount)}</b><br><span class="muted small">${t('pm_' + p.method)}</span></td></tr>`).join('')}</tbody></table></div>` : emptyState(t('no_payments'))}</div>` : '';
+
+  v.innerHTML = pageHead(t('nav_dashboard'), t('welcome_back', { name: (S.profile.full_name || '').split(' ')[0] || '' }), `<button class="btn" data-act="dash-refresh">${ic('clock', 16)} ${t('refresh')}</button>`) +
+    `<div class="stats">${cards.join('')}</div>` +
+    ((chart || stats) ? `<div class="grid-main">${chart}${stats}</div>` : '') +
+    ((actCard || payCard) ? `<div class="grid2">${actCard}${payCard}</div>` : '');
+}
+ACT['dash-refresh'] = () => route();
+   /* =====================================================================
+   9.2 Students
+   ===================================================================== */
+const STU_STATUS = ['active', 'inactive', 'graduated', 'transferred', 'suspended'];
+const STU = { q: '', cls: '', sec: '', year: '', status: '', gender: '', page: 1 };
+
+async function renderStudents() {
+  $('#view').innerHTML = pageHead(t('nav_students'), t('students_sub'), can('students.write') ? `<button class="btn btn-primary" data-act="stu-new">${ic('plus', 16)} ${t('register_student')}</button>` : '') +
+    `<div class="card"><div id="stu-filters"></div><div id="stu-list"></div><div id="stu-pager"></div></div>`;
+  filterBar($('#stu-filters'), [
+    { k: 'q', type: 'search', ph: t('search_students_ph') },
+    { k: 'cls', type: 'select', blank: t('all_classes'), opts: () => opt(S.classes), reset: ['sec'] },
+    { k: 'sec', type: 'select', blank: t('all_sections'), opts: () => STU.cls ? opt(sectionsOf(STU.cls)) : S.sections.map(s => ({ v: s.id, l: `${nameOf(S.classes, s.class_id)} – ${s.name}` })) },
+    { k: 'year', type: 'select', blank: t('all_years'), opts: () => opt(S.years) },
+    { k: 'status', type: 'select', blank: t('all_statuses'), opts: () => enumOpts(STU_STATUS, 'st_') },
+    { k: 'gender', type: 'select', blank: t('all_genders'), opts: () => enumOpts(['male', 'female'], 'g_') }], STU, loadStudents);
+  await loadStudents();
+}
+async function loadStudents() {
+  const box = $('#stu-list'); if (!box) return;
+  box.innerHTML = skeleton();
+  const filterEnr = STU.cls || STU.sec || STU.year;
+  let q = sb.from('students').select(`*, enrollments${filterEnr ? '!inner' : ''}(id,academic_year_id,class_id,section_id), student_guardians(guardians(full_name,phone))`, { count: 'exact' }).eq('school_id', S.school.id);
+  const s = sanitizeQ(STU.q);
+  if (s) q = q.or(`full_name.ilike.%${s}%,admission_no.ilike.%${s}%,phone.ilike.%${s}%`);
+  if (STU.status) q = q.eq('status', STU.status);
+  if (STU.gender) q = q.eq('gender', STU.gender);
+  if (STU.cls) q = q.eq('enrollments.class_id', STU.cls);
+  if (STU.sec) q = q.eq('enrollments.section_id', STU.sec);
+  if (STU.year) q = q.eq('enrollments.academic_year_id', STU.year);
+  const { data, error, count } = await q.order('full_name').order('id').range((STU.page - 1) * PAGE_SIZE, STU.page * PAGE_SIZE - 1);
+  if (error) { box.innerHTML = `<div class="card-pad"><div class="alert err">${esc(errMsg(error))}</div></div>`; return; }
+  const urls = await photoUrls(data.map(r => r.photo_path));
+  const yr = STU.year || S.curYear?.id;
+  box.innerHTML = data.length ? `<div class="table-wrap"><table class="tbl"><thead><tr><th>${t('student')}</th><th>${t('gender')}</th><th>${t('class_section')}</th><th>${t('guardian')}</th><th>${t('status')}</th><th></th></tr></thead><tbody>
+    ${data.map(r => { const en = (r.enrollments || []).find(e => e.academic_year_id === yr) || (r.enrollments || [])[0]; const gd = r.student_guardians?.[0]?.guardians;
+      return `<tr><td><div class="cell-user">${avatar(r.full_name, urls[r.photo_path])}<div><b>${esc(r.full_name)}</b><span class="muted small">${esc(r.admission_no)}</span></div></div></td>
+      <td>${r.gender ? t('g_' + r.gender) : '—'}</td><td>${en ? esc(classLabel(en.class_id, en.section_id)) : '—'}</td>
+      <td>${gd ? `${esc(gd.full_name)}<br><span class="muted small">${esc(gd.phone || '')}</span>` : '—'}</td><td>${badge(r.status)}</td>
+      <td><div class="row-actions"><button class="icon-btn" data-act="stu-view" data-id="${r.id}" title="${t('view')}">${ic('eye')}</button>
+      ${can('students.write') ? `<button class="icon-btn" data-act="stu-edit" data-id="${r.id}" title="${t('edit')}">${ic('edit')}</button><button class="icon-btn danger" data-act="stu-del" data-id="${r.id}" data-name="${esc(r.full_name)}" title="${t('delete')}">${ic('trash')}</button>` : ''}</div></td></tr>`; }).join('')}
+    </tbody></table></div>` : emptyState(t('no_students'));
+  pager($('#stu-pager'), { total: count || 0, page: STU.page, onPage: p => { STU.page = p; loadStudents(); } });
+}
+ACT['stu-new'] = () => openStudentForm();
+ACT['stu-edit'] = el => openStudentForm(el.dataset.id);
+ACT['stu-view'] = el => viewStudent(el.dataset.id);
+ACT['stu-del'] = async el => {
+  if (!await confirmBox({ title: t('delete_student'), message: t('confirm_delete_student', { name: el.dataset.name }), danger: true, okLabel: t('delete') })) return;
+  const { error } = await sb.from('students').delete().eq('id', el.dataset.id);
+  if (error) return toast(error.code === '23503' ? t('err_student_in_use') : errMsg(error), 'error');
+  toast(t('deleted')); closeModal(); loadStudents();
+};
+   async function openStudentForm(id) {
+  const sid = S.school.id; let ex = null;
+  if (id) ex = ok(await sb.from('students').select('*, enrollments(*), student_guardians(id,guardian_id,relationship,guardians(*))').eq('id', id).single()).data;
+  if (!S.years.length || !S.classes.length) return toast(t('need_setup'), 'error');
+  let suggested = '';
+  if (!ex) { const { count } = await sb.from('students').select('id', { count: 'exact', head: true }).eq('school_id', sid); suggested = `ADM-${(S.curYear?.name || '').slice(0, 4) || new Date().getFullYear()}-${String((count || 0) + 1).padStart(4, '0')}`; }
+  const link = ex?.student_guardians?.[0], gd = link?.guardians;
+  const enr = (ex?.enrollments || []).find(e => e.academic_year_id === S.curYear?.id) || ex?.enrollments?.[0] || {};
+  const vals = { ...(ex || {}), admission_no: ex?.admission_no || suggested, status: ex?.status || 'active', admission_date: ex?.admission_date || todayStr(),
+    academic_year_id: enr.academic_year_id || S.curYear?.id, class_id: enr.class_id, section_id: enr.section_id,
+    g_name: gd?.full_name, g_rel: link?.relationship, g_phone: gd?.phone, g_email: gd?.email };
+  const fields = [
+    { k: 'admission_no', l: 'admission_no', req: true }, { k: 'full_name', l: 'full_name', req: true },
+    { k: 'gender', l: 'gender', type: 'select', req: true, opts: enumOpts(['male', 'female'], 'g_') },
+    { k: 'date_of_birth', l: 'dob', type: 'date', max: todayStr() },
+    { k: 'phone', l: 'phone', type: 'tel' }, { k: 'admission_date', l: 'admission_date', type: 'date' },
+    { k: 'address', l: 'address', full: true },
+    { k: 'status', l: 'status', type: 'select', req: true, opts: enumOpts(STU_STATUS, 'st_') },
+    { sep: 'sec_academic' },
+    { k: 'academic_year_id', l: 'academic_year', type: 'select', req: true, opts: opt(S.years) },
+    { k: 'class_id', l: 'class', type: 'select', req: true, opts: opt(S.classes) },
+    { k: 'section_id', l: 'section', type: 'select', req: true, opts: opt(sectionsOf(vals.class_id)) },
+    { sep: 'sec_guardian' },
+    { k: 'g_name', l: 'guardian_name' }, { k: 'g_rel', l: 'relationship' },
+    { k: 'g_phone', l: 'guardian_phone', type: 'tel' }, { k: 'g_email', l: 'guardian_email', type: 'email' }];
+  let photoFile = null, photoUrl = ex?.photo_path ? (await photoUrls([ex.photo_path]))[ex.photo_path] : null;
+  const photoBlock = `<div class="fg full" style="flex-direction:row;align-items:center;gap:14px"><span id="ph-prev">${avatar(vals.full_name || '?', photoUrl, 'lg')}</span>
+    <div><label class="btn btn-sm" for="ph-file" style="cursor:pointer">${ic('upload', 14)} ${t('upload_photo')}</label><input id="ph-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><div class="help" style="margin-top:6px">${t('photo_help')}</div></div></div>`;
+  formModal({ title: ex ? t('edit_student') : t('register_student'), fields, values: vals, extraTop: photoBlock, size: 'lg',
+    onMount: (el, form) => {
+      $('#ph-file', el).addEventListener('change', e => { photoFile = e.target.files[0] || null; if (photoFile) $('#ph-prev', el).innerHTML = avatar('', URL.createObjectURL(photoFile), 'lg'); });
+      const syncSec = () => fillSelect(form.elements.section_id, opt(sectionsOf(form.elements.class_id.value)), '', t('select_opt'));
+      form.elements.class_id.addEventListener('change', syncSec);
+      form.elements.academic_year_id.addEventListener('change', e => { const m = (ex?.enrollments || []).find(x => x.academic_year_id === e.target.value); form.elements.class_id.value = m?.class_id || ''; syncSec(); form.elements.section_id.value = m?.section_id || ''; });
+    },
+           onSubmit: async v => {
+      const payload = { school_id: sid, admission_no: v.admission_no, full_name: v.full_name, gender: v.gender, date_of_birth: v.date_of_birth, phone: v.phone, address: v.address, status: v.status || 'active', admission_date: v.admission_date };
+      let stuId = ex?.id;
+      if (!ex) stuId = ok(await sb.from('students').insert(payload).select('id').single()).data.id; else ok(await sb.from('students').update(payload).eq('id', stuId));
+      try {
+        ok(await sb.from('enrollments').upsert({ school_id: sid, student_id: stuId, academic_year_id: v.academic_year_id, class_id: v.class_id, section_id: v.section_id }, { onConflict: 'student_id,academic_year_id' }));
+        if (v.g_name) {
+          if (link) {
+            ok(await sb.from('guardians').update({ full_name: v.g_name, phone: v.g_phone, email: v.g_email }).eq('id', link.guardian_id));
+            ok(await sb.from('student_guardians').update({ relationship: v.g_rel }).eq('id', link.id));
+          } else {
+            let gid = null;
+            if (v.g_phone) gid = (await sb.from('guardians').select('id').eq('school_id', sid).eq('phone', v.g_phone).limit(1)).data?.[0]?.id;
+            if (!gid) gid = ok(await sb.from('guardians').insert({ school_id: sid, full_name: v.g_name, phone: v.g_phone, email: v.g_email }).select('id').single()).data.id;
+            ok(await sb.from('student_guardians').insert({ school_id: sid, student_id: stuId, guardian_id: gid, relationship: v.g_rel, is_primary: true }));
+          }
+        }
+      } catch (e) { if (!ex) await sb.from('students').delete().eq('id', stuId); throw e; }
+      if (photoFile) {
+        try {
+          const blob = await resizeImage(photoFile), path = `${sid}/${stuId}-${Date.now()}.jpg`;
+          ok(await sb.storage.from('student-photos').upload(path, blob, { contentType: 'image/jpeg' }));
+          ok(await sb.from('students').update({ photo_path: path }).eq('id', stuId));
+          if (ex?.photo_path) sb.storage.from('student-photos').remove([ex.photo_path]);
+        } catch (e) { console.error(e); toast(t('photo_failed'), 'warn'); }
+      }
+      toast(ex ? t('saved') : t('student_registered')); if (S.route === 'students') loadStudents(); refreshStats();
+    } });
+   }
+   async function viewStudent(id) {
+  const r = ok(await sb.from('students').select('*, enrollments(academic_year_id,class_id,section_id), student_guardians(relationship,guardians(*))').eq('id', id).single()).data;
+  const urls = r.photo_path ? await photoUrls([r.photo_path]) : {};
+  const [att, inv] = await Promise.all([
+    can('attendance.read') ? Promise.all(['present', 'absent', 'late', 'excused'].map(s => sb.from('attendance_records').select('id', { count: 'exact', head: true }).eq('student_id', id).eq('status', s))) : null,
+    can('fees.read') ? sb.from('invoices').select('id,invoice_no,description,amount,amount_paid,status,due_date').eq('student_id', id).order('issue_date', { ascending: false }).limit(20) : null]);
+  const en = (r.enrollments || []).find(e => e.academic_year_id === S.curYear?.id) || (r.enrollments || [])[0], g = r.student_guardians?.[0], gd = g?.guardians;
+  const kv = (l, v) => `<div><small>${t(l)}</small>${v || '—'}</div>`;
+  const outstanding = (inv?.data || []).filter(i => i.status !== 'void').reduce((s, i) => s + (i.amount - i.amount_paid), 0);
+  const html = `<div style="display:flex;gap:16px;align-items:center;margin-bottom:18px;flex-wrap:wrap">${avatar(r.full_name, urls[r.photo_path], 'lg')}
+    <div><h2 style="font-size:20px">${esc(r.full_name)}</h2><div class="muted">${esc(r.admission_no)} · ${esc(en ? classLabel(en.class_id, en.section_id) : t('not_enrolled'))}</div><div style="margin-top:6px">${badge(r.status)}</div></div></div>
+    <div class="kv">${kv('gender', r.gender ? t('g_' + r.gender) : '')}${kv('dob', r.date_of_birth ? fmtDate(r.date_of_birth) : '')}${kv('phone', esc(r.phone))}${kv('admission_date', fmtDate(r.admission_date))}${kv('academic_year', esc(en ? nameOf(S.years, en.academic_year_id) : ''))}${kv('address', esc(r.address))}</div>
+    <div class="section-title" style="margin:18px 0 10px">${t('guardian')}</div>
+    <div class="kv">${kv('guardian_name', esc(gd?.full_name))}${kv('relationship', esc(g?.relationship))}${kv('guardian_phone', esc(gd?.phone))}${kv('guardian_email', esc(gd?.email))}</div>
+    ${att ? `<div class="section-title" style="margin:18px 0 10px">${t('attendance_record')}</div><div class="chips">${['present', 'absent', 'late', 'excused'].map((s, i) => `<span class="pill">${t('st_' + s)}: ${att[i].count || 0}</span>`).join('')}</div>` : ''}
+    ${inv ? `<div class="section-title" style="margin:18px 0 10px">${t('nav_fees')} · ${t('outstanding')}: ${money(outstanding)}</div>
+      ${(inv.data || []).length ? `<div class="table-wrap"><table class="tbl" style="min-width:480px"><tbody>${inv.data.map(i => `<tr><td>${esc(i.invoice_no)}<br><span class="muted small">${esc(i.description)}</span></td><td class="num">${money(i.amount)}</td><td>${badge(statusOf(i))}</td></tr>`).join('')}</tbody></table></div>` : `<div class="muted">${t('no_invoices')}</div>`}` : ''}
+    <div class="modal-foot">${can('attendance.read') ? `<button class="btn" data-act="stu-history" data-id="${r.id}" data-name="${esc(r.full_name)}" data-adm="${esc(r.admission_no)}">${ic('calendar', 16)} ${t('attendance_history')}</button>` : ''}
+      <button class="btn" data-act="stu-print" data-id="${r.id}">${ic('printer', 16)} ${t('print')}</button>
+      ${can('students.write') ? `<button class="btn btn-primary" data-act="stu-edit-from-view" data-id="${r.id}">${ic('edit', 16)} ${t('edit')}</button>` : ''}</div>`;
+  const el = modal({ title: t('student_profile'), body: html, size: 'lg' });
+  el._student = r; el._info = { en, gd, g, url: urls[r.photo_path] };
+}
+ACT['stu-edit-from-view'] = el => { closeModal(); return openStudentForm(el.dataset.id); };
+ACT['stu-history'] = el => { closeModal(); ATT.tab = 'history'; ATT.hist = { id: el.dataset.id, name: el.dataset.name, adm: el.dataset.adm }; location.hash = '#/attendance'; if (S.route === 'attendance') route(); };
+ACT['stu-print'] = el => {
+  const m = el.closest('.modal-backdrop'), r = m._student, i = m._info;
+  printDoc(`<div class="sheet">${letterhead(t('student_profile'), r.admission_no)}<table>
+    <tr><th>${t('full_name')}</th><td>${esc(r.full_name)}</td><th>${t('admission_no')}</th><td>${esc(r.admission_no)}</td></tr>
+    <tr><th>${t('gender')}</th><td>${r.gender ? t('g_' + r.gender) : '—'}</td><th>${t('dob')}</th><td>${fmtDate(r.date_of_birth)}</td></tr>
+    <tr><th>${t('class_section')}</th><td>${esc(i.en ? classLabel(i.en.class_id, i.en.section_id) : '—')}</td><th>${t('status')}</th><td>${t('st_' + r.status)}</td></tr>
+    <tr><th>${t('phone')}</th><td>${esc(r.phone || '—')}</td><th>${t('address')}</th><td>${esc(r.address || '—')}</td></tr>
+    <tr><th>${t('guardian')}</th><td>${esc(i.gd?.full_name || '—')} (${esc(i.g?.relationship || '—')})</td><th>${t('guardian_phone')}</th><td>${esc(i.gd?.phone || '—')}</td></tr></table></div>`, r.full_name);
+};
+ /* =====================================================================
+   9.3 Teachers
+   ===================================================================== */
+const TCH_STATUS = ['active', 'inactive', 'on_leave'];
+const TCH = { q: '', status: '', page: 1 };
+async function renderTeachers() {
+  $('#view').innerHTML = pageHead(t('nav_teachers'), t('teachers_sub'), can('teachers.write') ? `<button class="btn btn-primary" data-act="tch-new">${ic('plus', 16)} ${t('add_teacher')}</button>` : '') +
+    `<div class="card"><div id="tch-filters"></div><div id="tch-list"></div><div id="tch-pager"></div></div>`;
+  filterBar($('#tch-filters'), [{ k: 'q', type: 'search', ph: t('search_teachers_ph') }, { k: 'status', type: 'select', blank: t('all_statuses'), opts: () => enumOpts(TCH_STATUS, 'st_') }], TCH, loadTeachers);
+  await loadTeachers();
+}
+async function loadTeachers() {
+  const box = $('#tch-list'); if (!box) return; box.innerHTML = skeleton();
+  let q = sb.from('teachers').select('*, teacher_assignments(id,class_id,section_id,subject_id)', { count: 'exact' }).eq('school_id', S.school.id);
+  const s = sanitizeQ(TCH.q);
+  if (s) q = q.or(`full_name.ilike.%${s}%,teacher_no.ilike.%${s}%,email.ilike.%${s}%,phone.ilike.%${s}%`);
+  if (TCH.status) q = q.eq('status', TCH.status);
+  const { data, error, count } = await q.order('full_name').order('id').range((TCH.page - 1) * PAGE_SIZE, TCH.page * PAGE_SIZE - 1);
+  if (error) { box.innerHTML = `<div class="card-pad"><div class="alert err">${esc(errMsg(error))}</div></div>`; return; }
+  box.innerHTML = data.length ? `<div class="table-wrap"><table class="tbl"><thead><tr><th>${t('teacher')}</th><th>${t('phone')}</th><th>${t('qualification')}</th><th>${t('assigned_subjects')}</th><th>${t('assigned_classes')}</th><th>${t('status')}</th><th></th></tr></thead><tbody>
+    ${data.map(r => { const as = r.teacher_assignments || [];
+      const subs = uniq(as.map(a => a.subject_id)).map(i => nameOf(S.subjects, i)), cls = uniq(as.map(a => classLabel(a.class_id, a.section_id)));
+      return `<tr><td><div class="cell-user">${avatar(r.full_name)}<div><b>${esc(r.full_name)}</b><span class="muted small">${esc(r.teacher_no)}${r.email ? ' · ' + esc(r.email) : ''}</span></div></div></td>
+      <td>${esc(r.phone || '—')}</td><td>${esc(r.qualification || '—')}</td>
+      <td><div class="chips">${subs.map(x => `<span class="chip">${esc(x)}</span>`).join('') || '—'}</div></td><td><div class="chips">${cls.map(x => `<span class="chip">${esc(x)}</span>`).join('') || '—'}</div></td>
+      <td>${badge(r.status)}</td><td><div class="row-actions">${can('teachers.write') ? `<button class="icon-btn" data-act="tch-edit" data-id="${r.id}" title="${t('edit')}">${ic('edit')}</button><button class="icon-btn danger" data-act="tch-del" data-id="${r.id}" data-name="${esc(r.full_name)}" title="${t('delete')}">${ic('trash')}</button>` : ''}</div></td></tr>`; }).join('')}
+    </tbody></table></div>` : emptyState(t('no_teachers'));
+  pager($('#tch-pager'), { total: count || 0, page: TCH.page, onPage: p => { TCH.page = p; loadTeachers(); } });
+}
+ACT['tch-new'] = () => openTeacherForm();
+ACT['tch-edit'] = el => openTeacherForm(el.dataset.id);
+ACT['tch-del'] = async el => {
+  if (!await confirmBox({ title: t('delete'), message: t('confirm_delete', { name: el.dataset.name }), danger: true, okLabel: t('delete') })) return;
+  ok(await sb.from('teachers').delete().eq('id', el.dataset.id)); toast(t('deleted')); loadTeachers(); refreshStats();
+};
+function assignmentEditor(host, initial) {
+  const rows = initial.map(a => ({ class_id: a.class_id, section_id: a.section_id || '', subject_id: a.subject_id }));
+  const draw = () => {
+    host.innerHTML = rows.length ? rows.map((r, i) => `<div class="asg" data-i="${i}">
+      <select data-f="class_id" aria-label="${t('class')}"><option value="">${t('class')}</option>${opt(S.classes).map(o => `<option value="${o.v}" ${o.v === r.class_id ? 'selected' : ''}>${esc(o.l)}</option>`).join('')}</select>
+      <select data-f="section_id" aria-label="${t('section')}"><option value="">${t('all_sections')}</option>${opt(sectionsOf(r.class_id)).map(o => `<option value="${o.v}" ${o.v === r.section_id ? 'selected' : ''}>${esc(o.l)}</option>`).join('')}</select>
+      <select data-f="subject_id" aria-label="${t('subject')}"><option value="">${t('subject')}</option>${opt(S.subjects).map(o => `<option value="${o.v}" ${o.v === r.subject_id ? 'selected' : ''}>${esc(o.l)}</option>`).join('')}</select>
+      <button type="button" class="icon-btn danger" data-rm="${i}" aria-label="${t('delete')}">${ic('trash', 16)}</button></div>`).join('') : `<div class="help">${t('no_assignments')}</div>`;
+  };
+   host.addEventListener('change', e => { const row = e.target.closest('.asg'); if (!row) return; const i = +row.dataset.i; rows[i][e.target.dataset.f] = e.target.value; if (e.target.dataset.f === 'class_id') { rows[i].section_id = ''; draw(); } });
+  host.addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) { rows.splice(+b.dataset.rm, 1); draw(); } });
+  draw();
+  return { add() { rows.push({ class_id: '', section_id: '', subject_id: '' }); draw(); }, get: () => rows.filter(r => r.class_id && r.subject_id) };
+}
+async function openTeacherForm(id) {
+  const sid = S.school.id; let ex = null;
+  if (id) ex = ok(await sb.from('teachers').select('*, teacher_assignments(*)').eq('id', id).single()).data;
+  let suggested = '';
+  if (!ex) { const { count } = await sb.from('teachers').select('id', { count: 'exact', head: true }).eq('school_id', sid); suggested = `TCH-${String((count || 0) + 1).padStart(4, '0')}`; }
+  const fields = [{ k: 'teacher_no', l: 'teacher_id', req: true }, { k: 'full_name', l: 'full_name', req: true },
+    { k: 'gender', l: 'gender', type: 'select', opts: enumOpts(['male', 'female'], 'g_') }, { k: 'phone', l: 'phone', type: 'tel' },
+    { k: 'email', l: 'email', type: 'email', help: 'teacher_email_help' }, { k: 'qualification', l: 'qualification' },
+    { k: 'hire_date', l: 'hire_date', type: 'date' }, { k: 'status', l: 'status', type: 'select', req: true, opts: enumOpts(TCH_STATUS, 'st_') }];
+  let editor;
+  const extra = `<div class="section-title">${t('assignments')}</div><div class="fg full"><div id="asg-host"></div><div><button type="button" class="btn btn-sm" id="asg-add">${ic('plus', 14)} ${t('add_assignment')}</button></div></div>`;
+  formModal({ title: ex ? t('edit_teacher') : t('add_teacher'), fields, values: { ...(ex || {}), teacher_no: ex?.teacher_no || suggested, status: ex?.status || 'active' }, extra, size: 'lg',
+    onMount: el => { editor = assignmentEditor($('#asg-host', el), ex?.teacher_assignments || []); $('#asg-add', el).addEventListener('click', () => editor.add()); },
+    onSubmit: async v => {
+      const payload = { ...v, school_id: sid, status: v.status || 'active' };
+      let tid = ex?.id;
+      if (!ex) tid = ok(await sb.from('teachers').insert(payload).select('id').single()).data.id; else ok(await sb.from('teachers').update(payload).eq('id', tid));
+      const key = a => `${a.class_id}|${a.section_id || ''}|${a.subject_id}`;
+      const want = new Map(editor.get().map(a => [key(a), a])), have = ex?.teacher_assignments || [];
+      const del = have.filter(a => !want.has(key(a))).map(a => a.id), haveKeys = new Set(have.map(key));
+      if (del.length) ok(await sb.from('teacher_assignments').delete().in('id', del));
+      const add = [...want.entries()].filter(([k]) => !haveKeys.has(k)).map(([, a]) => ({ school_id: sid, teacher_id: tid, class_id: a.class_id, section_id: a.section_id || null, subject_id: a.subject_id }));
+      if (add.length) ok(await sb.from('teacher_assignments').insert(add));
+      toast(t('saved')); loadTeachers(); refreshStats();
+    } });
+   }
+   /* =====================================================================
+   9.4 Classes, sections, subjects, academic years, terms
+   ===================================================================== */
+const ACA = { tab: 'classes' }; TABSTATE.academics = ACA;
+async function renderAcademics() {
+  const tabs = [{ id: 'classes', label: t('classes_sections') }, { id: 'subjects', label: t('subjects') }, { id: 'years', label: t('academic_years') }, { id: 'terms', label: t('terms') }];
+  const w = can('academics.write'), add = (a, l) => w ? `<button class="btn btn-primary" data-act="${a}">${ic('plus', 16)} ${t(l)}</button>` : '';
+  const heads = { classes: (w ? `<button class="btn" data-act="sec-new">${ic('plus', 16)} ${t('add_section')}</button>` : '') + add('cls-new', 'add_class'), subjects: add('sub-new', 'add_subject'), years: add('yr-new', 'add_year'), terms: add('trm-new', 'add_term') };
+  $('#view').innerHTML = pageHead(t('nav_academics'), t('academics_sub'), heads[ACA.tab]) + tabsBar(tabs, ACA.tab) + `<div class="card" id="aca-body"></div>`;
+  const rowBtns = (kind, r) => w ? `<div class="row-actions"><button class="icon-btn" data-act="${kind}-edit" data-id="${r.id}" title="${t('edit')}">${ic('edit')}</button><button class="icon-btn danger" data-act="${kind}-del" data-id="${r.id}" title="${t('delete')}">${ic('trash')}</button></div>` : '';
+  const body = $('#aca-body');
+  const table = (heads, rows) => rows.length ? `<div class="table-wrap"><table class="tbl"><thead><tr>${heads.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>` : emptyState(t('no_data'));
+  if (ACA.tab === 'classes') body.innerHTML = table([t('order'), t('class'), t('level'), t('sections'), ''], S.classes.map(c => `<tr><td>${c.sort_order}</td><td><b>${esc(c.name)}</b></td><td>${badge(c.level === 'primary' ? 'active' : 'blue', t('lvl_' + c.level))}</td>
+    <td><div class="chips">${sectionsOf(c.id).map(s => `<button class="chip" ${w ? `data-act="sec-edit" data-id="${s.id}"` : ''}>${esc(s.name)}${s.capacity ? ' · ' + s.capacity : ''}</button>`).join('') || '—'}</div></td><td>${rowBtns('cls', c)}</td></tr>`));
+  if (ACA.tab === 'subjects') body.innerHTML = table([t('subject'), t('code'), t('level'), ''], S.subjects.map(s => `<tr><td><b>${esc(s.name)}</b></td><td>${esc(s.code || '—')}</td><td>${t('lvl_' + s.level)}</td><td>${rowBtns('sub', s)}</td></tr>`));
+  if (ACA.tab === 'years') body.innerHTML = table([t('academic_year'), t('start_date'), t('end_date'), t('status'), ''], S.years.map(y => `<tr><td><b>${esc(y.name)}</b></td><td>${fmtDate(y.start_date)}</td><td>${fmtDate(y.end_date)}</td><td>${y.is_current ? badge('active', t('current')) : '—'}</td><td>${rowBtns('yr', y)}</td></tr>`));
+  if (ACA.tab === 'terms') body.innerHTML = table([t('term'), t('academic_year'), t('start_date'), t('end_date'), ''], S.terms.map(m => `<tr><td><b>${esc(m.name)}</b></td><td>${esc(nameOf(S.years, m.academic_year_id))}</td><td>${fmtDate(m.start_date)}</td><td>${fmtDate(m.end_date)}</td><td>${rowBtns('trm', m)}</td></tr>`));
+}
+function crudForm({ table, title, fields, row, defaults }) {
+  return formModal({ title, fields, values: row || defaults || {}, onSubmit: async v => {
+    if (row) ok(await sb.from(table).update(v).eq('id', row.id));
+    else ok(await sb.from(table).insert({ ...Object.fromEntries(Object.entries(v).filter(([, x]) => x !== null)), school_id: S.school.id }));
+    await loadLookups(); toast(t('saved')); route();
+  } });
+}
+async function deleteRow(table, id, label) {
+  if (!await confirmBox({ title: t('delete'), message: t('confirm_delete', { name: label }), danger: true, okLabel: t('delete') })) return;
+  const { error } = await sb.from(table).delete().eq('id', id);
+  if (error) return toast(errMsg(error), 'error');
+  await loadLookups(); toast(t('deleted')); route();
+}
+const F = {
+  cls: [{ k: 'name', l: 'name', req: true, ph: 'Grade 1' }, { k: 'level', l: 'level', type: 'select', req: true, opts: enumOpts(['primary', 'secondary'], 'lvl_') }, { k: 'sort_order', l: 'order', type: 'number', min: 0 }],
+  sec: () => [{ k: 'class_id', l: 'class', type: 'select', req: true, opts: opt(S.classes) }, { k: 'name', l: 'name', req: true, ph: 'A' }, { k: 'capacity', l: 'capacity', type: 'number', min: 1 }],
+  sub: [{ k: 'name', l: 'name', req: true }, { k: 'code', l: 'code' }, { k: 'level', l: 'level', type: 'select', req: true, opts: enumOpts(['all', 'primary', 'secondary'], 'lvl_') }],
+  yr: [{ k: 'name', l: 'name', req: true, ph: '2026/27' }, { k: 'start_date', l: 'start_date', type: 'date', req: true }, { k: 'end_date', l: 'end_date', type: 'date', req: true }, { k: 'is_current', l: 'is_current', type: 'checkbox' }],
+  trm: () => [{ k: 'academic_year_id', l: 'academic_year', type: 'select', req: true, opts: opt(S.years) }, { k: 'name', l: 'name', req: true, ph: 'Semester 1' }, { k: 'start_date', l: 'start_date', type: 'date', req: true }, { k: 'end_date', l: 'end_date', type: 'date', req: true }]
+};
+   };
+ACT['cls-new'] = () => crudForm({ table: 'classes', title: t('add_class'), fields: F.cls, defaults: { level: 'primary', sort_order: S.classes.length + 1 } });
+ACT['cls-edit'] = el => crudForm({ table: 'classes', title: t('edit_class'), fields: F.cls, row: byId(S.classes, el.dataset.id) });
+ACT['cls-del'] = el => deleteRow('classes', el.dataset.id, nameOf(S.classes, el.dataset.id));
+ACT['sec-new'] = () => crudForm({ table: 'sections', title: t('add_section'), fields: F.sec(), defaults: { capacity: 50 } });
+ACT['sec-edit'] = el => { const s = byId(S.sections, el.dataset.id);
+  const m = crudForm({ table: 'sections', title: t('edit_section'), fields: F.sec(), row: s });
+  $('.modal-foot', m).insertAdjacentHTML('afterbegin', `<button type="button" class="btn btn-danger" style="margin-right:auto" id="sec-del">${ic('trash', 16)} ${t('delete')}</button>`);
+  $('#sec-del', m).addEventListener('click', async () => { closeModal(m); await deleteRow('sections', s.id, `${nameOf(S.classes, s.class_id)} – ${s.name}`); }); };
+ACT['sub-new'] = () => crudForm({ table: 'subjects', title: t('add_subject'), fields: F.sub, defaults: { level: 'all' } });
+ACT['sub-edit'] = el => crudForm({ table: 'subjects', title: t('edit_subject'), fields: F.sub, row: byId(S.subjects, el.dataset.id) });
+ACT['sub-del'] = el => deleteRow('subjects', el.dataset.id, nameOf(S.subjects, el.dataset.id));
+ACT['yr-new'] = () => crudForm({ table: 'academic_years', title: t('add_year'), fields: F.yr, defaults: { is_current: !S.years.length } });
+ACT['yr-edit'] = el => crudForm({ table: 'academic_years', title: t('edit_year'), fields: F.yr, row: byId(S.years, el.dataset.id) });
+ACT['yr-del'] = el => deleteRow('academic_years', el.dataset.id, nameOf(S.years, el.dataset.id));
+ACT['trm-new'] = () => crudForm({ table: 'terms', title: t('add_term'), fields: F.trm(), defaults: { academic_year_id: S.curYear?.id } });
+ACT['trm-edit'] = el => crudForm({ table: 'terms', title: t('edit_term'), fields: F.trm(), row: byId(S.terms, el.dataset.id) });
+ACT['trm-del'] = el => deleteRow('terms', el.dataset.id, nameOf(S.terms, el.dataset.id));
+/* =====================================================================
+   9.5 Attendance
+   ===================================================================== */
+const ATT_STATUS = ['present', 'absent', 'late', 'excused'];
+const ATT = { tab: 'take', take: { cls: '', sec: '', date: todayStr() }, daily: { date: todayStr(), cls: '', sec: '' },
+  monthly: { month: todayStr().slice(0, 7), cls: '', sec: '' }, hist: null, histFrom: addDays(todayStr(), -90), histTo: todayStr() };
+TABSTATE.attendance = ATT;
+   async function renderAttendance() {
+  const tabs = [...(can('attendance.write') ? [{ id: 'take', label: t('take_attendance') }] : []), { id: 'daily', label: t('daily_report') }, { id: 'monthly', label: t('monthly_report') }, { id: 'history', label: t('student_history') }];
+  if (!tabs.some(x => x.id === ATT.tab)) ATT.tab = tabs[0].id;
+  $('#view').innerHTML = pageHead(t('nav_attendance'), t('attendance_sub')) + tabsBar(tabs, ATT.tab) + `<div class="card" id="att-body"></div>`;
+  ({ take: viewTake, daily: viewDaily, monthly: viewMonthly, history: viewHistory })[ATT.tab]($('#att-body'));
+}
+const statusRadios = (name, val, dis) => `<div class="att-status">${ATT_STATUS.map(s => `<label><input type="radio" name="${name}" value="${s}" ${val === s ? 'checked' : ''} ${dis ? 'disabled' : ''}><span class="s-${s}">${t('st_' + s)}</span></label>`).join('')}</div>`;
+
+/* ---- take attendance ---- */
+function viewTake(body) {
+  const st = ATT.take;
+  body.innerHTML = `<div id="att-filters"></div><div id="att-roster"></div>`;
+  filterBar($('#att-filters', body), [
+    { k: 'cls', type: 'select', blank: t('select_class'), opts: classOpts, reset: ['sec'] },
+    { k: 'sec', type: 'select', blank: t('select_section'), opts: () => sectionOpts(st.cls) },
+    { k: 'date', type: 'date', ph: t('date'), max: todayStr() }], st, loadRoster);
+  loadRoster();
+}
+async function loadRoster() {
+  const st = ATT.take, box = $('#att-roster'); if (!box) return;
+  if (!st.cls || !st.sec || !st.date) { box.innerHTML = emptyState(isTeacher() && !allowedClasses().length ? t('n_no_assign') : t('pick_class_section'), 'calendar'); return; }
+  if (!S.curYear) { box.innerHTML = emptyState(t('need_setup')); return; }
+  if (st.date > todayStr()) { box.innerHTML = emptyState(t('future_date')); return; }
+  box.innerHTML = skeleton();
+  const sid = S.school.id;
+  const [enr, ses] = await Promise.all([
+    sb.from('enrollments').select('student_id, students(id,full_name,admission_no,status)').eq('school_id', sid).eq('section_id', st.sec).eq('academic_year_id', S.curYear.id),
+    sb.from('attendance_sessions').select('id, attendance_records(student_id,status,note)').eq('section_id', st.sec).eq('session_date', st.date).maybeSingle()]);
+  ok(enr); ok(ses);
+  const existing = Object.fromEntries((ses.data?.attendance_records || []).map(r => [r.student_id, r]));
+  const rows = (enr.data || []).map(e => e.students).filter(s => s && (s.status === 'active' || existing[s.id])).sort((a, b) => a.full_name.localeCompare(b.full_name));
+  const locked = st.date < addDays(todayStr(), -1) && !can('attendance.edit_past');
+  if (!rows.length) { box.innerHTML = emptyState(t('no_students_in_section')); return; }
+  box.innerHTML = `${ses.data ? `<div class="alert warn" style="margin:14px 18px 0">${t('att_exists')}</div>` : ''}${locked ? `<div class="alert err" style="margin:14px 18px 0">${t('att_locked')}</div>` : ''}
+    <div class="summary-row" id="att-sum"></div>
+    <div class="table-wrap"><table class="tbl"><thead><tr><th>#</th><th>${t('student')}</th><th>${t('status')}</th><th>${t('note')}</th></tr></thead><tbody>
+    ${rows.map((s, i) => `<tr data-sid="${s.id}"><td>${i + 1}</td><td><div class="cell-user">${avatar(s.full_name)}<div><b>${esc(s.full_name)}</b><span class="muted small">${esc(s.admission_no)}</span></div></div></td>
+      <td>${statusRadios('s_' + s.id, existing[s.id]?.status || 'present', locked)}</td>
+      <td><input type="text" class="att-note" maxlength="200" value="${esc(existing[s.id]?.note || '')}" ${locked ? 'disabled' : ''} aria-label="${t('note')}"></td></tr>`).join('')}</tbody></table></div>
+    <div class="sticky-foot">${locked ? '' : `<button class="btn" data-act="att-all" data-s="present">${t('mark_all_present')}</button><button class="btn" data-act="att-all" data-s="absent">${t('mark_all_absent')}</button><button class="btn btn-primary" data-act="att-save">${ic('check', 16)} ${t('save_attendance')}</button>`}</div>`;
+  const sum = () => { const c = Object.fromEntries(ATT_STATUS.map(s => [s, 0])); $$('#att-roster tbody tr').forEach(tr => { const r = $('input:checked', tr); if (r) c[r.value]++; });
+    $('#att-sum').innerHTML = `<span class="pill">${t('total')}: ${rows.length}</span>` + ATT_STATUS.map(s => `<span class="pill"><span class="c-${s}" style="display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px"></span>${t('st_' + s)}: ${c[s]}</span>`).join(''); };
+  sum(); $('#att-roster tbody').addEventListener('change', sum);
+   }
+   ACT['att-all'] = el => { $$('#att-roster tbody tr').forEach(tr => { const r = $(`input[value="${el.dataset.s}"]`, tr); if (r && !r.disabled) r.checked = true; }); $('#att-roster tbody').dispatchEvent(new Event('change')); };
+ACT['att-save'] = async el => withBusy(el, async () => {
+  const st = ATT.take, sid = S.school.id;
+  const rows = $$('#att-roster tbody tr').map(tr => ({ student_id: tr.dataset.sid, status: $('input:checked', tr)?.value, note: $('.att-note', tr).value.trim() || null }));
+  if (rows.some(r => !r.status)) return toast(t('mark_all_first'), 'error');
+  const s = ok(await sb.from('attendance_sessions').upsert({ school_id: sid, section_id: st.sec, session_date: st.date, taken_by: S.user.id }, { onConflict: 'section_id,session_date' }).select('id').single()).data;
+  ok(await sb.from('attendance_records').upsert(rows.map(r => ({ ...r, school_id: sid, session_id: s.id, marked_by: S.user.id })), { onConflict: 'session_id,student_id' }));
+  toast(t('attendance_saved')); refreshStats(); loadRoster();
+});
+
+/* ---- daily report ---- */
+function viewDaily(body) {
+  const st = ATT.daily;
+  body.innerHTML = `<div id="d-filters"></div><div id="d-out"></div>`;
+  filterBar($('#d-filters', body), [{ k: 'date', type: 'date', ph: t('date'), max: todayStr() },
+    { k: 'cls', type: 'select', blank: t('all_classes'), opts: classOpts, reset: ['sec'] },
+    { k: 'sec', type: 'select', blank: t('all_sections'), opts: () => sectionOpts(st.cls) }], st, loadDaily);
+  loadDaily();
+}
+async function loadDaily() {
+  const st = ATT.daily, box = $('#d-out'); if (!box) return; box.innerHTML = skeleton();
+  let q = sb.from('attendance_sessions').select('id,section_id,session_date, attendance_records(status,note,students(full_name,admission_no))').eq('school_id', S.school.id).eq('session_date', st.date);
+  if (st.sec) q = q.eq('section_id', st.sec); else if (st.cls) q = q.in('section_id', sectionsOf(st.cls).map(s => s.id));
+  const { data, error } = await q; if (error) { box.innerHTML = `<div class="card-pad"><div class="alert err">${esc(errMsg(error))}</div></div>`; return; }
+  const secs = data.sort((a, b) => classLabel(S.sections.find(x => x.id === a.section_id)?.class_id, a.section_id).localeCompare(classLabel(S.sections.find(x => x.id === b.section_id)?.class_id, b.section_id), undefined, { numeric: true }));
+  const flat = []; const cnt = Object.fromEntries(ATT_STATUS.map(s => [s, 0]));
+  secs.forEach(s => { const sec = byId(S.sections, s.section_id); (s.attendance_records || []).forEach(r => { cnt[r.status]++; flat.push({ date: st.date, class_section: classLabel(sec?.class_id, s.section_id), admission_no: r.students?.admission_no, full_name: r.students?.full_name, status: t('st_' + r.status), _s: r.status, note: r.note || '' }); }); });
+  flat.sort((a, b) => a.class_section.localeCompare(b.class_section, undefined, { numeric: true }) || (a.full_name || '').localeCompare(b.full_name || ''));
+  const total = flat.length;
+  const pending = !isTeacher() && !st.sec && can('attendance.write') ? S.sections.filter(x => (!st.cls || x.class_id === st.cls) && !data.some(d => d.section_id === x.id)) : [];
+  DAILY_CACHE = flat;
+  box.innerHTML = `<div class="summary-row"><span class="pill">${t('total')}: ${total}</span>${ATT_STATUS.map(s => `<span class="pill">${t('st_' + s)}: ${cnt[s]}</span>`).join('')}<span class="pill">${t('attendance_rate')}: ${total ? pct(cnt.present + cnt.late, total) : 0}%</span>
+    <span style="flex:1"></span><button class="btn btn-sm" data-act="daily-csv">${ic('download', 14)} CSV</button><button class="btn btn-sm" data-act="daily-print">${ic('printer', 14)} ${t('print')}</button></div>
+    ${pending.length ? `<div class="alert warn" style="margin:14px 18px 0">${t('sections_pending')}: ${pending.slice(0, 20).map(x => esc(classLabel(x.class_id, x.id))).join(', ')}${pending.length > 20 ? '…' : ''}</div>` : ''}
+    ${total ? `<div class="table-wrap">${tableHTML([{ k: 'class_section', l: t('class_section') }, { k: 'admission_no', l: t('admission_no') }, { k: 'full_name', l: t('student') }, { k: 'badge', l: t('status'), html: true }, { k: 'note', l: t('note') }], flat.map(r => ({ ...r, badge: badge(r._s) })))}</div>` : emptyState(t('no_attendance_day'))}`;
+}
+   let DAILY_CACHE = [];
+const DAILY_COLS = () => [{ k: 'date', l: t('date') }, { k: 'class_section', l: t('class_section') }, { k: 'admission_no', l: t('admission_no') }, { k: 'full_name', l: t('student') }, { k: 'status', l: t('status') }, { k: 'note', l: t('note') }];
+ACT['daily-csv'] = () => downloadCSV('attendance-daily', DAILY_COLS(), DAILY_CACHE);
+ACT['daily-print'] = () => printDoc(`<div class="sheet">${letterhead(t('daily_report'), fmtDate(ATT.daily.date))}${tableHTML(DAILY_COLS().slice(1), DAILY_CACHE)}</div>`, t('daily_report'));
+
+/* ---- monthly report ---- */
+function viewMonthly(body) {
+  const st = ATT.monthly;
+  body.innerHTML = `<div id="m-filters"></div><div id="m-out"></div>`;
+  filterBar($('#m-filters', body), [{ k: 'month', type: 'month', ph: t('month'), max: todayStr().slice(0, 7) },
+    { k: 'cls', type: 'select', blank: t('all_classes'), opts: classOpts, reset: ['sec'] },
+    { k: 'sec', type: 'select', blank: t('all_sections'), opts: () => sectionOpts(st.cls) }], st, loadMonthly);
+  loadMonthly();
+}
+let MONTHLY_CACHE = [];
+async function loadMonthly() {
+  const st = ATT.monthly, box = $('#m-out'); if (!box) return;
+  if (!st.month) { box.innerHTML = emptyState(t('pick_month')); return; }
+  box.innerHTML = skeleton(); const [from, to] = monthRange(st.month);
+  const { data, error } = await sb.rpc('attendance_summary', { p_school: S.school.id, p_from: from, p_to: to, p_class: st.cls || null, p_section: st.sec || null });
+  if (error) { box.innerHTML = `<div class="card-pad"><div class="alert err">${esc(errMsg(error))}</div></div>`; return; }
+  MONTHLY_CACHE = data.map(r => ({ admission_no: r.admission_no, full_name: r.full_name, class_section: `${r.class_name} – ${r.section_name}`, present: +r.present, absent: +r.absent, late: +r.late, excused: +r.excused, total: +r.total, rate: pct(+r.present + +r.late, +r.total) + '%' }));
+  box.innerHTML = `<div class="summary-row"><span class="pill">${t('students')}: ${MONTHLY_CACHE.length}</span><span style="flex:1"></span><button class="btn btn-sm" data-act="monthly-csv">${ic('download', 14)} CSV</button><button class="btn btn-sm" data-act="monthly-print">${ic('printer', 14)} ${t('print')}</button></div>
+    ${MONTHLY_CACHE.length ? `<div class="table-wrap">${tableHTML(MONTHLY_COLS(), MONTHLY_CACHE)}</div>` : emptyState(t('no_attendance_month'))}`;
+}
+const MONTHLY_COLS = () => [{ k: 'admission_no', l: t('admission_no') }, { k: 'full_name', l: t('student') }, { k: 'class_section', l: t('class_section') }, ...ATT_STATUS.map(s => ({ k: s, l: t('st_' + s), num: true })), { k: 'total', l: t('total'), num: true }, { k: 'rate', l: t('attendance_rate'), num: true }];
+ACT['monthly-csv'] = () => downloadCSV('attendance-' + ATT.monthly.month, MONTHLY_COLS(), MONTHLY_CACHE);
+ACT['monthly-print'] = () => printDoc(`<div class="sheet">${letterhead(t('monthly_report'), ATT.monthly.month)}${tableHTML(MONTHLY_COLS(), MONTHLY_CACHE)}</div>`, t('monthly_report'));
+
+/* ---- student history ---- */
+function viewHistory(body) {
+  body.innerHTML = `<div class="filters"><div id="h-pick" style="flex:1;min-width:240px;max-width:380px"></div><input type="date" id="h-from" value="${ATT.histFrom}" max="${todayStr()}" aria-label="${t('from')}"><input type="date" id="h-to" value="${ATT.histTo}" max="${todayStr()}" aria-label="${t('to')}"></div><div id="h-out"></div>`;
+  studentPicker($('#h-pick', body), { onPick: r => { ATT.hist = { id: r.id, name: r.full_name, adm: r.admission_no }; loadHistory(); } });
+  ['h-from', 'h-to'].forEach(i => $('#' + i, body).addEventListener('change', e => { if (i === 'h-from') ATT.histFrom = e.target.value; else ATT.histTo = e.target.value; loadHistory(); }));
+  loadHistory();
+}
+   let HIST_CACHE = [];
+async function loadHistory() {
+  const box = $('#h-out'); if (!box) return;
+  if (!ATT.hist) { box.innerHTML = emptyState(t('pick_student'), 'users'); return; }
+  box.innerHTML = skeleton();
+  const id = ATT.hist.id;
+  let rows;
+  try { rows = await fetchAll(() => sb.from('attendance_records').select('id,status,note, attendance_sessions!inner(session_date,section_id)').eq('student_id', id).gte('attendance_sessions.session_date', ATT.histFrom).lte('attendance_sessions.session_date', ATT.histTo).order('id')); }
+  catch (e) { box.innerHTML = `<div class="card-pad"><div class="alert err">${esc(errMsg(e))}</div></div>`; return; }
+  rows.sort((a, b) => b.attendance_sessions.session_date.localeCompare(a.attendance_sessions.session_date));
+  const cnt = Object.fromEntries(ATT_STATUS.map(s => [s, 0])); rows.forEach(r => cnt[r.status]++);
+  HIST_CACHE = rows.map(r => ({ date: r.attendance_sessions.session_date, class_section: classLabel(byId(S.sections, r.attendance_sessions.section_id)?.class_id, r.attendance_sessions.section_id), status: t('st_' + r.status), note: r.note || '', _s: r.status }));
+  box.innerHTML = `<div class="summary-row"><b>${esc(ATT.hist.name)}</b><span class="muted">${esc(ATT.hist.adm)}</span><span class="pill">${t('total')}: ${rows.length}</span>${ATT_STATUS.map(s => `<span class="pill">${t('st_' + s)}: ${cnt[s]}</span>`).join('')}<span class="pill">${t('attendance_rate')}: ${rows.length ? pct(cnt.present + cnt.late, rows.length) : 0}%</span>
+    <span style="flex:1"></span><button class="btn btn-sm" data-act="hist-csv">${ic('download', 14)} CSV</button><button class="btn btn-sm" data-act="hist-print">${ic('printer', 14)} ${t('print')}</button></div>
+    ${rows.length ? `<div class="table-wrap">${tableHTML([{ k: 'dt', l: t('date') }, { k: 'class_section', l: t('class_section') }, { k: 'b', l: t('status'), html: true }, { k: 'note', l: t('note') }], HIST_CACHE.map(r => ({ ...r, dt: fmtDate(r.date), b: badge(r._s) })))}</div>` : emptyState(t('no_records'))}`;
+}
+const HIST_COLS = () => [{ k: 'date', l: t('date') }, { k: 'class_section', l: t('class_section') }, { k: 'status', l: t('status') }, { k: 'note', l: t('note') }];
+ACT['hist-csv'] = () => downloadCSV('attendance-' + (ATT.hist?.adm || 'student'), HIST_COLS(), HIST_CACHE);
+ACT['hist-print'] = () => printDoc(`<div class="sheet">${letterhead(t('student_history'), `${ATT.hist.name} (${ATT.hist.adm})`)}${tableHTML(HIST_COLS(), HIST_CACHE)}</div>`, t('student_history'));
+
+/* =====================================================================
+   9.6 Examinations & marks
+   ===================================================================== */
+const EXAM_TYPES = ['quiz', 'test', 'midterm', 'exam', 'assignment'];
+const EXM = { tab: 'assessments', a: { term: '', cls: '', page: 1 }, m: { term: '', cls: '', aid: '', sec: '' }, r: { term: '', cls: '', sec: '' }, list: [] };
+TABSTATE.exams = EXM;
+const defaultTerm = () => { const td = todayStr(); return (S.terms.find(x => x.start_date <= td && td <= x.end_date) || S.terms.find(x => x.academic_year_id === S.curYear?.id) || S.terms[0])?.id || ''; };
+const termOpts = () => opt(S.terms, termLabel);
+
+async function renderExams() {
+  if (!EXM.a.term) EXM.a.term = EXM.m.term = EXM.r.term = defaultTerm();
+  const tabs = [{ id: 'assessments', label: t('assessments') }, { id: 'marks', label: t('enter_marks') }, { id: 'results', label: t('results') }];
+  $('#view').innerHTML = pageHead(t('nav_exams'), t('exams_sub'), EXM.tab === 'assessments' && can('marks.write') ? `<button class="btn btn-primary" data-act="asm-new">${ic('plus', 16)} ${t('create_exam')}</button>` : '') + tabsBar(tabs, EXM.tab) + `<div class="card" id="exm-body"></div>`;
+  ({ assessments: viewAssessments, marks: viewMarks, results: viewResults })[EXM.tab]($('#exm-body'));
+   }
+   /* ---- assessments ---- */
+function viewAssessments(body) {
+  body.innerHTML = `<div id="a-filters"></div><div id="a-list"></div><div id="a-pager"></div>`;
+  filterBar($('#a-filters', body), [{ k: 'term', type: 'select', blank: t('all_terms'), opts: termOpts }, { k: 'cls', type: 'select', blank: t('all_classes'), opts: classOpts }], EXM.a, loadAssessments);
+  loadAssessments();
+}
+async function loadAssessments() {
+  const box = $('#a-list'); if (!box) return; box.innerHTML = skeleton(); const st = EXM.a;
+  let q = sb.from('assessments').select('*', { count: 'exact' }).eq('school_id', S.school.id);
+  if (st.term) q = q.eq('term_id', st.term); if (st.cls) q = q.eq('class_id', st.cls);
+  const { data, error, count } = await q.order('exam_date', { ascending: false, nullsFirst: false }).order('created_at', { ascending: false }).range((st.page - 1) * PAGE_SIZE, st.page * PAGE_SIZE - 1);
+  if (error) { box.innerHTML = `<div class="card-pad"><div class="alert err">${esc(errMsg(error))}</div></div>`; return; }
+  box.innerHTML = data.length ? `<div class="table-wrap"><table class="tbl"><thead><tr><th>${t('exam_name')}</th><th>${t('class')}</th><th>${t('subject')}</th><th>${t('term')}</th><th class="num">${t('max_marks')}</th><th>${t('date')}</th><th></th></tr></thead><tbody>
+    ${data.map(a => `<tr><td><b>${esc(a.name)}</b><br><span class="muted small">${t('et_' + a.exam_type)}</span></td><td>${esc(nameOf(S.classes, a.class_id))}</td><td>${esc(nameOf(S.subjects, a.subject_id))}</td><td>${esc(nameOf(S.terms, a.term_id))}</td><td class="num">${a.max_marks}</td><td>${fmtDate(a.exam_date)}</td>
+    <td><div class="row-actions">${can('marks.write') ? `<button class="btn btn-sm btn-primary" data-act="asm-marks" data-id="${a.id}">${t('enter_marks')}</button><button class="icon-btn" data-act="asm-edit" data-id="${a.id}" title="${t('edit')}">${ic('edit')}</button><button class="icon-btn danger" data-act="asm-del" data-id="${a.id}" data-name="${esc(a.name)}" title="${t('delete')}">${ic('trash')}</button>` : ''}</div></td></tr>`).join('')}</tbody></table></div>` : emptyState(t('no_exams'));
+  EXM.known = Object.fromEntries(data.map(a => [a.id, a]));
+  pager($('#a-pager'), { total: count || 0, page: st.page, onPage: p => { st.page = p; loadAssessments(); } });
+}
+async function openAssessmentForm(id) {
+  let ex = id ? EXM.known?.[id] || ok(await sb.from('assessments').select('*').eq('id', id).single()).data : null;
+  const fields = [{ k: 'term_id', l: 'term', type: 'select', req: true, opts: termOpts() }, { k: 'class_id', l: 'class', type: 'select', req: true, opts: classOpts() },
+    { k: 'subject_id', l: 'subject', type: 'select', req: true, opts: opt(allowedSubjects(ex?.class_id)) }, { k: 'name', l: 'exam_name', req: true, ph: 'Midterm Exam' },
+    { k: 'exam_type', l: 'exam_type', type: 'select', req: true, opts: enumOpts(EXAM_TYPES, 'et_') }, { k: 'max_marks', l: 'max_marks', type: 'number', req: true, min: 1, step: '0.01' }, { k: 'exam_date', l: 'date', type: 'date' }];
+  formModal({ title: ex ? t('edit_exam') : t('create_exam'), fields, values: ex || { term_id: EXM.a.term || defaultTerm(), class_id: EXM.a.cls, exam_type: 'exam', max_marks: 100 },
+    onMount: (el, form) => { const sync = () => fillSelect(form.elements.subject_id, opt(allowedSubjects(form.elements.class_id.value)), '', t('select_opt')); form.elements.class_id.addEventListener('change', sync); if (!ex && form.elements.class_id.value) sync(); },
+    onSubmit: async v => {
+      const term = byId(S.terms, v.term_id), payload = { ...v, academic_year_id: term.academic_year_id, exam_type: v.exam_type || 'exam' };
+      if (ex) ok(await sb.from('assessments').update(payload).eq('id', ex.id)); else ok(await sb.from('assessments').insert({ ...payload, school_id: S.school.id, created_by: S.user.id }));
+      toast(t('saved')); loadAssessments();
+    } });
+       }
+   ACT['asm-new'] = () => openAssessmentForm();
+ACT['asm-edit'] = el => openAssessmentForm(el.dataset.id);
+ACT['asm-del'] = async el => {
+  if (!await confirmBox({ title: t('delete'), message: t('confirm_delete_exam', { name: el.dataset.name }), danger: true, okLabel: t('delete') })) return;
+  ok(await sb.from('assessments').delete().eq('id', el.dataset.id)); toast(t('deleted')); loadAssessments();
+};
+ACT['asm-marks'] = el => { const a = EXM.known[el.dataset.id]; EXM.tab = 'marks'; Object.assign(EXM.m, { term: a.term_id, cls: a.class_id, aid: a.id, sec: '' }); route(); };
+
+/* ---- marks entry ---- */
+async function loadAssessmentList() {
+  const m = EXM.m; if (!m.term || !m.cls) { EXM.list = []; return; }
+  EXM.list = ok(await sb.from('assessments').select('*').eq('school_id', S.school.id).eq('term_id', m.term).eq('class_id', m.cls).order('name')).data || [];
+  if (!EXM.list.some(a => a.id === m.aid)) m.aid = '';
+}
+async function viewMarks(body) {
+  const m = EXM.m; await loadAssessmentList();
+  body.innerHTML = `<div id="m-filters"></div><div id="mk-out"></div>`;
+  filterBar($('#m-filters', body), [
+    { k: 'term', type: 'select', blank: t('select_term'), opts: termOpts, reset: ['aid'], wait: true },
+    { k: 'cls', type: 'select', blank: t('select_class'), opts: classOpts, reset: ['aid', 'sec'], wait: true },
+    { k: 'aid', type: 'select', blank: t('select_exam'), opts: () => EXM.list.map(a => ({ v: a.id, l: `${a.name} – ${nameOf(S.subjects, a.subject_id)} (${a.max_marks})` })) },
+    { k: 'sec', type: 'select', blank: t('all_sections'), opts: () => sectionOpts(m.cls) }], m, async k => { if (k === 'term' || k === 'cls') await loadAssessmentList(); loadMarks(); });
+  loadMarks();
+   }
+   async function loadMarks() {
+  const m = EXM.m, box = $('#mk-out'); if (!box) return;
+  const a = EXM.list.find(x => x.id === m.aid);
+  if (!a) { box.innerHTML = emptyState(t('pick_exam'), 'award'); return; }
+  box.innerHTML = skeleton();
+  const sid = S.school.id;
+  let eq = sb.from('enrollments').select('student_id,section_id, students(full_name,admission_no,status)').eq('school_id', sid).eq('class_id', a.class_id).eq('academic_year_id', a.academic_year_id);
+  if (m.sec) eq = eq.eq('section_id', m.sec);
+  const [enr, mk] = await Promise.all([eq, sb.from('marks').select('student_id,score,remarks').eq('assessment_id', a.id)]); ok(enr); ok(mk);
+  const have = Object.fromEntries(mk.data.map(x => [x.student_id, x]));
+  const rows = enr.data.filter(e => e.students && (e.students.status === 'active' || have[e.student_id])).sort((x, y) => x.students.full_name.localeCompare(y.students.full_name));
+  if (!rows.length) { box.innerHTML = emptyState(t('no_students_in_class')); return; }
+  const w = can('marks.write');
+  box.innerHTML = `<div class="summary-row" id="mk-sum"></div><div class="table-wrap"><table class="tbl"><thead><tr><th>#</th><th>${t('student')}</th><th>${t('section')}</th><th class="num">${t('score')} / ${a.max_marks}</th><th class="num">%</th><th>${t('remarks')}</th></tr></thead><tbody>
+    ${rows.map((e, i) => `<tr data-sid="${e.student_id}" data-had="${have[e.student_id] ? 1 : 0}"><td>${i + 1}</td><td><b>${esc(e.students.full_name)}</b><br><span class="muted small">${esc(e.students.admission_no)}</span></td><td>${esc(nameOf(S.sections, e.section_id))}</td>
+    <td class="num"><input class="mark-input" type="number" min="0" max="${a.max_marks}" step="0.01" inputmode="decimal" value="${have[e.student_id]?.score ?? ''}" ${w ? '' : 'disabled'} aria-label="${t('score')}"></td><td class="num mk-pct">—</td>
+    <td><input type="text" class="mk-rem" maxlength="200" value="${esc(have[e.student_id]?.remarks || '')}" ${w ? '' : 'disabled'}></td></tr>`).join('')}</tbody></table></div>
+    ${w ? `<div class="sticky-foot"><button class="btn btn-primary" data-act="marks-save">${ic('check', 16)} ${t('save_marks')}</button></div>` : ''}`;
+  const calc = () => { const vals = []; $$('#mk-out tbody tr').forEach(tr => { const inp = $('.mark-input', tr), v = inp.value === '' ? null : Number(inp.value); const bad = v !== null && (isNaN(v) || v < 0 || v > a.max_marks);
+    inp.classList.toggle('bad', bad); $('.mk-pct', tr).textContent = v === null || bad ? '—' : pct(v, a.max_marks) + '%'; if (v !== null && !bad) vals.push(v); });
+    const sum = vals.reduce((x, y) => x + y, 0);
+    $('#mk-sum').innerHTML = `<span class="pill">${t('entered')}: ${vals.length}/${rows.length}</span><span class="pill">${t('total')}: ${Math.round(sum * 100) / 100}</span><span class="pill">${t('average')}: ${vals.length ? Math.round(sum / vals.length * 100) / 100 : 0} (${vals.length ? pct(sum / vals.length, a.max_marks) : 0}%)</span><span class="pill">${t('highest')}: ${vals.length ? Math.max(...vals) : '—'}</span><span class="pill">${t('lowest')}: ${vals.length ? Math.min(...vals) : '—'}</span><span class="pill">${t('pass_rate')}: ${vals.length ? pct(vals.filter(v => v / a.max_marks >= .5).length, vals.length) : 0}%</span>`; };
+  calc(); $('#mk-out tbody').addEventListener('input', calc);
+}
+ACT['marks-save'] = async el => withBusy(el, async () => {
+  const a = EXM.list.find(x => x.id === EXM.m.aid), sid = S.school.id, up = [], del = [];
+  let invalid = false;
+  $$('#mk-out tbody tr').forEach(tr => {
+    const inp = $('.mark-input', tr), raw = inp.value, stuId = tr.dataset.sid;
+    if (raw === '') { if (tr.dataset.had === '1') del.push(stuId); return; }
+    const v = Number(raw); if (isNaN(v) || v < 0 || v > a.max_marks) { invalid = true; inp.classList.add('bad'); return; }
+    up.push({ school_id: sid, assessment_id: a.id, student_id: stuId, score: v, remarks: $('.mk-rem', tr).value.trim() || null, entered_by: S.user.id });
+  });
+  if (invalid) return toast(t('marks_exceed', { max: a.max_marks }), 'error');
+  for (const c of chunk(up, 200)) ok(await sb.from('marks').upsert(c, { onConflict: 'assessment_id,student_id' }));
+  if (del.length) ok(await sb.from('marks').delete().eq('assessment_id', a.id).in('student_id', del));
+  toast(t('marks_saved')); loadMarks();
+});
+   /* ---- results & report cards ---- */
+let RES = null;
+function viewResults(body) {
+  const st = EXM.r;
+  body.innerHTML = `<div id="r-filters"></div><div id="r-out"></div>`;
+  filterBar($('#r-filters', body), [{ k: 'term', type: 'select', blank: t('select_term'), opts: termOpts }, { k: 'cls', type: 'select', blank: t('select_class'), opts: classOpts, reset: ['sec'] },
+    { k: 'sec', type: 'select', blank: t('all_sections'), opts: () => sectionOpts(st.cls) }], st, loadResults);
+  loadResults();
+}
+async function loadResults() {
+  const st = EXM.r, box = $('#r-out'); if (!box) return;
+  if (!st.term || !st.cls) { box.innerHTML = emptyState(t('pick_term_class'), 'award'); return; }
+  box.innerHTML = skeleton(); RES = await classResults(st.cls, st.term);
+  const rows = RES.rows.filter(r => !st.sec || r.section_id === st.sec);
+  RES.view = rows;
+  if (!RES.subjects.length) { box.innerHTML = emptyState(t('no_exams')); return; }
+  box.innerHTML = `<div class="summary-row"><span class="pill">${t('students')}: ${rows.length}</span><span class="pill">${t('subjects')}: ${RES.subjects.length}</span><span style="flex:1"></span>
+    <button class="btn btn-sm" data-act="res-csv">${ic('download', 14)} CSV</button><button class="btn btn-sm" data-act="res-print">${ic('printer', 14)} ${t('print')}</button><button class="btn btn-sm btn-primary" data-act="res-cards">${ic('file', 14)} ${t('print_all_cards')}</button></div>
+    <div class="table-wrap"><table class="tbl"><thead><tr><th>${t('rank')}</th><th>${t('student')}</th>${RES.subjects.map(s => `<th class="num">${esc(s.name)}</th>`).join('')}<th class="num">${t('total')}</th><th class="num">${t('average')}</th><th class="num">%</th><th>${t('grade')}</th><th></th></tr></thead><tbody>
+    ${rows.map(r => `<tr><td><b>${r.rank || '—'}</b></td><td><b>${esc(r.name)}</b><br><span class="muted small">${esc(r.adm)}</span></td>${RES.subjects.map(s => { const x = r.subj[s.id]; return `<td class="num">${x ? `${x.score}/${x.max}` : '—'}</td>`; }).join('')}
+    <td class="num">${r.max ? `${r.total}/${r.max}` : '—'}</td><td class="num">${r.max ? r.avg + '%' : '—'}</td><td class="num">${r.max ? r.pct + '%' : '—'}</td><td>${r.grade}</td><td><button class="btn btn-sm" data-act="res-card" data-id="${r.id}">${t('report_card')}</button></td></tr>`).join('')}</tbody></table></div>`;
+}
+const resRows = () => (RES?.view || []).map(r => ({ rank: r.rank || '', adm: r.adm, name: r.name, ...Object.fromEntries(RES.subjects.map(s => [s.id, r.subj[s.id] ? pct(r.subj[s.id].score, r.subj[s.id].max) + '%' : ''])), total: r.max ? `${r.total}/${r.max}` : '', avg: r.max ? r.avg + '%' : '', pct: r.max ? r.pct + '%' : '', grade: r.grade }));
+const resCols = () => [{ k: 'rank', l: t('rank') }, { k: 'adm', l: t('admission_no') }, { k: 'name', l: t('student') }, ...RES.subjects.map(s => ({ k: s.id, l: s.name + ' %', num: true })), { k: 'total', l: t('total'), num: true }, { k: 'avg', l: t('average'), num: true }, { k: 'pct', l: '%', num: true }, { k: 'grade', l: t('grade') }];
+ACT['res-csv'] = () => downloadCSV('results', resCols(), resRows());
+ACT['res-print'] = () => printDoc(`<div class="sheet">${letterhead(t('results'), `${nameOf(S.classes, EXM.r.cls)} · ${termLabel(RES.term)}`)}${tableHTML(resCols(), resRows())}</div>`, t('results'));
+ACT['res-cards'] = () => printDoc(RES.view.filter(r => r.max).map(r => reportCardHTML(RES, r)).join('') || `<p>${t('no_data')}</p>`, t('report_card'));
+ACT['res-card'] = el => { const r = RES.rows.find(x => x.id === el.dataset.id);
+  const m = modal({ title: t('report_card'), size: 'lg', body: `${reportCardHTML(RES, r)}<div class="modal-foot"><button class="btn" data-act="modal-close">${t('close')}</button><button class="btn btn-primary" data-act="card-print">${ic('printer', 16)} ${t('print')}</button></div>` }); m._row = r; };
+ACT['card-print'] = el => printDoc(reportCardHTML(RES, el.closest('.modal-backdrop')._row), t('report_card'));
+   /* =====================================================================
+   9.7 School fees
+   ===================================================================== */
+const FEE = { tab: 'invoices', inv: { q: '', status: '', from: '', to: '', page: 1 }, pay: { q: '', method: '', from: '', to: '', page: 1 }, types: [] };
+TABSTATE.fees = FEE;
+const PAY_METHODS = ['cash', 'bank_transfer', 'mobile_money', 'cheque', 'other'];
+const INV_STATUS = ['unpaid', 'partial', 'paid', 'overdue', 'void'];
+
+async function renderFees() {
+  FEE.types = ok(await sb.from('fee_types').select('*').eq('school_id', S.school.id).order('name')).data || [];
+  const tabs = [{ id: 'invoices', label: t('invoices') }, { id: 'payments', label: t('payments') }, { id: 'types', label: t('fee_types') }];
+  const w = can('fees.write');
+  const head = w ? (FEE.tab === 'types' ? `<button class="btn btn-primary" data-act="ft-new">${ic('plus', 16)} ${t('add_fee_type')}</button>` : `<button class="btn btn-primary" data-act="inv-gen">${ic('plus', 16)} ${t('generate_invoices')}</button>`) : '';
+  $('#view').innerHTML = pageHead(t('nav_fees'), t('fees_sub', { cur: S.school.currency }), head) + tabsBar(tabs, FEE.tab) + `<div class="card" id="fee-body"></div>`;
+  ({ invoices: viewInvoices, payments: viewPayments, types: viewFeeTypes })[FEE.tab]($('#fee-body'));
+}
+async function studentIdsFor(s) {
+  s = sanitizeQ(s); if (!s) return [];
+  const { data } = await sb.from('students').select('id').eq('school_id', S.school.id).or(`full_name.ilike.%${s}%,admission_no.ilike.%${s}%`).limit(60);
+  return (data || []).map(x => x.id);
+}
+/* ---- invoices ---- */
+function viewInvoices(body) {
+  body.innerHTML = `<div id="i-filters"></div><div id="i-list"></div><div id="i-pager"></div>`;
+  filterBar($('#i-filters', body), [{ k: 'q', type: 'search', ph: t('search_invoices_ph') }, { k: 'status', type: 'select', blank: t('all_statuses'), opts: () => enumOpts(INV_STATUS, 'st_') },
+    { k: 'from', type: 'date', ph: t('from') }, { k: 'to', type: 'date', ph: t('to') }], FEE.inv, loadInvoices);
+  loadInvoices();
+}
+   async function loadInvoices() {
+  const box = $('#i-list'); if (!box) return; box.innerHTML = skeleton(); const st = FEE.inv, today = todayStr();
+  let q = sb.from('invoices').select('*, students(full_name,admission_no)', { count: 'exact' }).eq('school_id', S.school.id);
+  if (st.q) { const ids = await studentIdsFor(st.q), s = sanitizeQ(st.q); q = q.or(`invoice_no.ilike.%${s}%${ids.length ? `,student_id.in.(${ids.join(',')})` : ''}`); }
+  if (st.status === 'overdue') q = q.in('status', ['unpaid', 'partial']).lt('due_date', today); else if (st.status) q = q.eq('status', st.status);
+  if (st.from) q = q.gte('issue_date', st.from); if (st.to) q = q.lte('issue_date', st.to);
+  const { data, error, count } = await q.order('issue_date', { ascending: false }).order('created_at', { ascending: false }).range((st.page - 1) * PAGE_SIZE, st.page * PAGE_SIZE - 1);
+  if (error) { box.innerHTML = `<div class="card-pad"><div class="alert err">${esc(errMsg(error))}</div></div>`; return; }
+  box.innerHTML = data.length ? `<div class="table-wrap"><table class="tbl"><thead><tr><th>${t('invoice_no')}</th><th>${t('student')}</th><th>${t('description')}</th><th class="num">${t('amount')}</th><th class="num">${t('paid')}</th><th class="num">${t('balance')}</th><th>${t('due_date')}</th><th>${t('status')}</th><th></th></tr></thead><tbody>
+    ${data.map(i => { const bal = i.amount - i.amount_paid, s = statusOf(i);
+      return `<tr><td><b>${esc(i.invoice_no)}</b></td><td>${esc(i.students?.full_name || '—')}<br><span class="muted small">${esc(i.students?.admission_no || '')}</span></td><td>${esc(i.description)}</td>
+      <td class="num">${money(i.amount)}</td><td class="num">${money(i.amount_paid)}</td><td class="num"><b>${i.status === 'void' ? '—' : money(bal)}</b></td><td>${fmtDate(i.due_date)}</td><td>${badge(s)}</td>
+      <td><div class="row-actions"><button class="icon-btn" data-act="inv-view" data-id="${i.id}" title="${t('view')}">${ic('eye')}</button>${can('fees.write') && bal > 0 && i.status !== 'void' ? `<button class="btn btn-sm btn-primary" data-act="pay-new" data-id="${i.id}">${t('record_payment')}</button>` : ''}</div></td></tr>`; }).join('')}</tbody></table></div>` : emptyState(t('no_invoices'));
+  pager($('#i-pager'), { total: count || 0, page: st.page, onPage: p => { st.page = p; loadInvoices(); } });
+}
+function invoiceHTML(i, pays) {
+  return `<div class="sheet">${letterhead(t('invoice'), i.invoice_no)}<table><tr><th>${t('student')}</th><td>${esc(i.students?.full_name)} (${esc(i.students?.admission_no)})</td><th>${t('issue_date')}</th><td>${fmtDate(i.issue_date)}</td></tr>
+    <tr><th>${t('description')}</th><td>${esc(i.description)}</td><th>${t('due_date')}</th><td>${fmtDate(i.due_date)}</td></tr></table>
+    <table><tr><th>${t('amount')}</th><td class="num">${money(i.amount)}</td></tr><tr><th>${t('paid')}</th><td class="num">${money(i.amount_paid)}</td></tr><tr><th>${t('balance')}</th><td class="num"><b>${i.status === 'void' ? '—' : money(i.amount - i.amount_paid)}</b></td></tr></table>
+    ${pays.length ? `<h2>${t('payment_history')}</h2>${tableHTML([{ k: 'd', l: t('date') }, { k: 'r', l: t('receipt_no') }, { k: 'm', l: t('method') }, { k: 'a', l: t('amount'), num: true }], pays.map(p => ({ d: fmtDate(p.paid_on), r: p.receipt_no, m: t('pm_' + p.method), a: money(p.amount) })))}` : ''}</div>`;
+}
+ACT['inv-view'] = async el => {
+  const id = el.dataset.id;
+  const [i, p] = await Promise.all([sb.from('invoices').select('*, students(full_name,admission_no)').eq('id', id).single(), sb.from('payments').select('*').eq('invoice_id', id).order('created_at')]); ok(i); ok(p);
+  const inv = i.data, bal = inv.amount - inv.amount_paid;
+  const m = modal({ title: `${t('invoice')} ${inv.invoice_no}`, size: 'lg', body: `${invoiceHTML(inv, p.data)}<div class="modal-foot">
+    ${can('fees.write') && inv.status !== 'void' && inv.amount_paid === 0 ? `<button class="btn btn-danger" style="margin-right:auto" data-act="inv-void" data-id="${id}">${t('void_invoice')}</button>` : ''}
+    ${p.data.map(x => `<button class="btn btn-sm" data-act="rcpt" data-id="${x.id}">${ic('printer', 14)} ${esc(x.receipt_no)}</button>`).join('')}
+    <button class="btn" data-act="inv-print">${ic('printer', 16)} ${t('print')}</button>${can('fees.write') && bal > 0 && inv.status !== 'void' ? `<button class="btn btn-primary" data-act="pay-new" data-id="${id}">${t('record_payment')}</button>` : ''}</div>` });
+  m._inv = inv; m._pays = p.data;
+};
+ACT['inv-print'] = el => { const m = el.closest('.modal-backdrop'); printDoc(invoiceHTML(m._inv, m._pays), m._inv.invoice_no); };
+ACT['inv-void'] = async el => {
+  if (!await confirmBox({ title: t('void_invoice'), message: t('confirm_void'), danger: true, okLabel: t('void_invoice') })) return;
+  ok(await sb.from('invoices').update({ status: 'void' }).eq('id', el.dataset.id)); toast(t('saved')); closeModal(); route(); refreshStats();
+};
+ACT['pay-new'] = async el => {
+  const i = ok(await sb.from('invoices').select('*, students(full_name,admission_no)').eq('id', el.dataset.id).single()).data, bal = Math.round((i.amount - i.amount_paid) * 100) / 100;
+  const fields = [{ k: 'amount', l: 'amount', type: 'number', req: true, min: 0.01, max: bal, step: '0.01' }, { k: 'method', l: 'method', type: 'select', req: true, opts: enumOpts(PAY_METHODS, 'pm_') },
+    { k: 'paid_on', l: 'payment_date', type: 'date', req: true, max: todayStr() }, { k: 'reference', l: 'reference' }, { k: 'notes', l: 'notes', full: true }];
+  const top = `<div class="fg full"><div class="card card-pad" style="box-shadow:none;background:var(--slate-l)"><b>${esc(i.students.full_name)}</b> · ${esc(i.invoice_no)}<br>${esc(i.description)}<br><span class="muted">${t('balance')}:</span> <b>${money(bal)}</b></div></div>`;
+  formModal({ title: t('record_payment'), fields, extraTop: top, submitLabel: t('save_payment'), values: { amount: bal, method: 'cash', paid_on: todayStr() },
+    onSubmit: async v => {
+      if (v.amount > bal) throw new Error(t('payment_exceeds', { bal: money(bal) }));
+      const p = ok(await sb.from('payments').insert({ ...v, method: v.method || 'cash', school_id: S.school.id, invoice_id: i.id, student_id: i.student_id, received_by: S.user.id }).select('id').single()).data;
+      toast(t('payment_recorded')); refreshStats();
+      $$('.modal-backdrop').filter(m => m._inv).forEach(m => closeModal(m)); route(); showReceipt(p.id);
+    } });
+};
+   /* ---- payments ---- */
+function viewPayments(body) {
+  body.innerHTML = `<div id="p-filters"></div><div id="p-list"></div><div id="p-pager"></div>`;
+  filterBar($('#p-filters', body), [{ k: 'q', type: 'search', ph: t('search_payments_ph') }, { k: 'method', type: 'select', blank: t('all_methods'), opts: () => enumOpts(PAY_METHODS, 'pm_') },
+    { k: 'from', type: 'date', ph: t('from') }, { k: 'to', type: 'date', ph: t('to') }], FEE.pay, loadPayments);
+  loadPayments();
+}
+async function loadPayments() {
+  const box = $('#p-list'); if (!box) return; box.innerHTML = skeleton(); const st = FEE.pay;
+  let q = sb.from('payments').select('*, students(full_name,admission_no), invoices(invoice_no,description)', { count: 'exact' }).eq('school_id', S.school.id);
+  if (st.q) { const ids = await studentIdsFor(st.q), s = sanitizeQ(st.q); q = q.or(`receipt_no.ilike.%${s}%,reference.ilike.%${s}%${ids.length ? `,student_id.in.(${ids.join(',')})` : ''}`); }
+  if (st.method) q = q.eq('method', st.method); if (st.from) q = q.gte('paid_on', st.from); if (st.to) q = q.lte('paid_on', st.to);
+  const { data, error, count } = await q.order('paid_on', { ascending: false }).order('created_at', { ascending: false }).range((st.page - 1) * PAGE_SIZE, st.page * PAGE_SIZE - 1);
+  if (error) { box.innerHTML = `<div class="card-pad"><div class="alert err">${esc(errMsg(error))}</div></div>`; return; }
+  box.innerHTML = data.length ? `<div class="table-wrap"><table class="tbl"><thead><tr><th>${t('receipt_no')}</th><th>${t('student')}</th><th>${t('invoice_no')}</th><th>${t('method')}</th><th>${t('date')}</th><th class="num">${t('amount')}</th><th></th></tr></thead><tbody>
+    ${data.map(p => `<tr><td><b>${esc(p.receipt_no)}</b></td><td>${esc(p.students?.full_name || '—')}<br><span class="muted small">${esc(p.students?.admission_no || '')}</span></td><td>${esc(p.invoices?.invoice_no || '—')}</td><td>${t('pm_' + p.method)}${p.reference ? `<br><span class="muted small">${esc(p.reference)}</span>` : ''}</td><td>${fmtDate(p.paid_on)}</td><td class="num"><b>${money(p.amount)}</b></td>
+    <td><div class="row-actions"><button class="icon-btn" data-act="rcpt" data-id="${p.id}" title="${t('print_receipt')}">${ic('printer')}</button></div></td></tr>`).join('')}</tbody></table></div>` : emptyState(t('no_payments'));
+  pager($('#p-pager'), { total: count || 0, page: st.page, onPage: p => { st.page = p; loadPayments(); } });
+}
+async function showReceipt(id) {
+  const p = ok(await sb.from('payments').select('*, students(full_name,admission_no), invoices(invoice_no,description,amount,amount_paid)').eq('id', id).single()).data;
+  const html = `<div class="sheet">${letterhead(t('receipt'), p.receipt_no)}<table><tr><th>${t('student')}</th><td>${esc(p.students?.full_name)} (${esc(p.students?.admission_no)})</td><th>${t('date')}</th><td>${fmtDate(p.paid_on)}</td></tr>
+    <tr><th>${t('invoice_no')}</th><td>${esc(p.invoices?.invoice_no)}</td><th>${t('method')}</th><td>${t('pm_' + p.method)}${p.reference ? ' · ' + esc(p.reference) : ''}</td></tr>
+    <tr><th>${t('description')}</th><td colspan="3">${esc(p.invoices?.description)}</td></tr></table>
+    <table><tr><th>${t('amount_paid')}</th><td class="num"><b>${money(p.amount)}</b></td></tr><tr><th>${t('remaining_balance')}</th><td class="num">${money((p.invoices?.amount || 0) - (p.invoices?.amount_paid || 0))}</td></tr></table>
+    <div class="sign"><div>${t('received_by')}</div><div>${t('payer_sign')}</div></div></div>`;
+  const m = modal({ title: `${t('receipt')} ${p.receipt_no}`, size: 'lg', body: `${html}<div class="modal-foot"><button class="btn" data-act="modal-close">${t('close')}</button><button class="btn btn-primary" data-act="rcpt-print">${ic('printer', 16)} ${t('print_receipt')}</button></div>` });
+  m._html = html;
+}
+ACT.rcpt = el => showReceipt(el.dataset.id);
+ACT['rcpt-print'] = el => printDoc(el.closest('.modal-backdrop')._html, t('receipt'));
+/* ---- fee types ---- */
+function viewFeeTypes(body) {
+  const w = can('fees.write');
+  body.innerHTML = FEE.types.length ? `<div class="table-wrap"><table class="tbl"><thead><tr><th>${t('name')}</th><th>${t('frequency')}</th><th class="num">${t('amount')}</th><th>${t('status')}</th><th></th></tr></thead><tbody>
+   ${FEE.types.map(f => `<tr><td><b>${esc(f.name)}</b><br><span class="muted small">${esc(f.description || '')}</span></td><td>${t('freq_' + f.frequency)}</td><td class="num">${money(f.amount)}</td><td>${badge(f.is_active ? 'active' : 'inactive')}</td>
+   <td>${w ? `<div class="row-actions"><button class="icon-btn" data-act="ft-edit" data-id="${f.id}">${ic('edit')}</button>${can('fees.delete') ? `<button class="icon-btn danger" data-act="ft-del" data-id="${f.id}" data-name="${esc(f.name)}">${ic('trash')}</button>` : ''}</div>` : ''}</td></tr>`).join('')}</tbody></table></div>` : emptyState(t('no_fee_types'));
+}
+const FT_FIELDS = [{ k: 'name', l: 'name', req: true }, { k: 'amount', l: 'amount', type: 'number', req: true, min: 0, step: '0.01' }, { k: 'frequency', l: 'frequency', type: 'select', req: true, opts: enumOpts(['one_time', 'monthly', 'termly', 'yearly'], 'freq_') }, { k: 'is_active', l: 'active', type: 'checkbox' }, { k: 'description', l: 'description', full: true }];
+const ftForm = row => formModal({ title: row ? t('edit_fee_type') : t('add_fee_type'), fields: FT_FIELDS, values: row || { frequency: 'termly', is_active: true }, onSubmit: async v => {
+  if (row) ok(await sb.from('fee_types').update(v).eq('id', row.id)); else ok(await sb.from('fee_types').insert({ ...Object.fromEntries(Object.entries(v).filter(([, x]) => x !== null)), school_id: S.school.id }));
+  toast(t('saved')); route(); } });
+ACT['ft-new'] = () => ftForm(); ACT['ft-edit'] = el => ftForm(FEE.types.find(f => f.id === el.dataset.id));
+ACT['ft-del'] = async el => { if (!await confirmBox({ title: t('delete'), message: t('confirm_delete', { name: el.dataset.name }), danger: true, okLabel: t('delete') })) return;
+  const { error } = await sb.from('fee_types').delete().eq('id', el.dataset.id); if (error) return toast(errMsg(error), 'error'); toast(t('deleted')); route(); };
+   /* ---- generate invoices (one student or a whole class/section) ---- */
+ACT['inv-gen'] = () => {
+  if (!FEE.types.length) toast(t('no_fee_types_hint'), 'warn');
+  let picked = null;
+  const fields = [
+    { k: 'fee_type_id', l: 'fee_type', type: 'select', opts: opt(FEE.types.filter(f => f.is_active), f => `${f.name} (${nf2.format(f.amount)})`), blank: t('custom_fee') },
+    { k: 'term_id', l: 'term', type: 'select', opts: termOpts(), blank: t('no_term') },
+    { k: 'description', l: 'description', req: true, full: true }, { k: 'amount', l: 'amount', type: 'number', req: true, min: 0.01, step: '0.01' }, { k: 'due_date', l: 'due_date', type: 'date' },
+    { k: 'target', l: 'invoice_for', type: 'select', req: true, opts: [{ v: 'class', l: t('whole_class') }, { v: 'student', l: t('single_student') }], blank: t('select_opt') },
+    { k: 'class_id', l: 'class', type: 'select', opts: opt(S.classes) }, { k: 'section_id', l: 'section', type: 'select', opts: [], blank: t('all_sections') }];
+  const extra = `<div class="fg full" id="g-student" hidden><label>${t('student')}</label><div id="g-pick"></div><div class="help" id="g-picked"></div></div>`;
+  formModal({ title: t('generate_invoices'), fields, extra, submitLabel: t('generate'), size: 'lg', values: { target: 'class', due_date: addDays(todayStr(), 30) },
+    onMount: (el, form) => {
+      const fe = form.elements, sync = () => { const cls = fe.target.value === 'class'; fe.class_id.closest('.fg').hidden = !cls; fe.section_id.closest('.fg').hidden = !cls; $('#g-student', el).hidden = cls; };
+      fe.target.addEventListener('change', sync); sync();
+      fe.class_id.addEventListener('change', () => fillSelect(fe.section_id, opt(sectionsOf(fe.class_id.value)), '', t('all_sections')));
+      fe.fee_type_id.addEventListener('change', () => { const f = FEE.types.find(x => x.id === fe.fee_type_id.value); if (f) { fe.amount.value = f.amount; fe.description.value = f.name; } });
+      studentPicker($('#g-pick', el), { onPick: r => { picked = r; $('#g-picked', el).textContent = `✓ ${r.full_name} (${r.admission_no})`; } });
+    },
+    onSubmit: async (v, form) => {
+      const sid = S.school.id, term = v.term_id ? byId(S.terms, v.term_id) : null, yearId = term?.academic_year_id || S.curYear?.id || null;
+      let ids = [];
+      if (v.target === 'student') { if (!picked) throw new Error(t('pick_student')); ids = [picked.id]; }
+      else {
+        if (!v.class_id) throw new Error(t('select_class'));
+        const roster = await fetchAll(() => { let q = sb.from('enrollments').select('student_id, students(status)').eq('school_id', sid).eq('class_id', v.class_id).eq('academic_year_id', yearId); if (v.section_id) q = q.eq('section_id', v.section_id); return q.order('student_id'); });
+        ids = roster.filter(r => r.students?.status === 'active').map(r => r.student_id);
+      }
+      if (!ids.length) throw new Error(t('no_students_in_class'));
+      const exists = new Set();
+      for (const c of chunk(ids, 80)) { let q = sb.from('invoices').select('student_id').eq('school_id', sid).eq('description', v.description).in('student_id', c); q = v.fee_type_id ? q.eq('fee_type_id', v.fee_type_id) : q.is('fee_type_id', null); (ok(await q).data || []).forEach(r => exists.add(r.student_id)); }
+      const todo = ids.filter(i => !exists.has(i));
+      for (const c of chunk(todo, 200)) ok(await sb.from('invoices').insert(c.map(stu => ({ school_id: sid, student_id: stu, academic_year_id: yearId, term_id: v.term_id, fee_type_id: v.fee_type_id, description: v.description, amount: v.amount, due_date: v.due_date, created_by: S.user.id }))));
+      toast(t('invoices_created', { n: todo.length, s: ids.length - todo.length })); route(); refreshStats();
+    } });
+};
+   /* =====================================================================
+   9.8 Reports  (on-screen, CSV export, print / save as PDF)
+   ===================================================================== */
+const REP = { type: 'students', cls: '', sec: '', status: '', gender: '', month: todayStr().slice(0, 7), term: '', out: null };
+const REPORTS = {
+  students: { perm: 'students.read', params: ['cls', 'sec', 'status', 'gender'], run: async () => {
+    const f = REP.cls || REP.sec;
+    const data = await fetchAll(() => { let q = sb.from('students').select(`admission_no,full_name,gender,date_of_birth,phone,status, enrollments${f ? '!inner' : ''}(academic_year_id,class_id,section_id), student_guardians(guardians(full_name,phone))`).eq('school_id', S.school.id);
+      if (REP.status) q = q.eq('status', REP.status); if (REP.gender) q = q.eq('gender', REP.gender);
+      if (REP.cls) q = q.eq('enrollments.class_id', REP.cls); if (REP.sec) q = q.eq('enrollments.section_id', REP.sec);
+      return q.order('full_name').order('id'); });
+    const rows = data.map(r => { const en = (r.enrollments || []).find(e => e.academic_year_id === S.curYear?.id) || r.enrollments?.[0], g = r.student_guardians?.[0]?.guardians;
+      return { admission_no: r.admission_no, full_name: r.full_name, gender: r.gender ? t('g_' + r.gender) : '', dob: r.date_of_birth || '', class_section: en ? classLabel(en.class_id, en.section_id) : '', phone: r.phone || '', guardian: g ? `${g.full_name}${g.phone ? ' (' + g.phone + ')' : ''}` : '', status: t('st_' + r.status) }; });
+    return { title: t('rep_students'), cols: [['admission_no', 'admission_no'], ['full_name', 'full_name'], ['gender', 'gender'], ['dob', 'dob'], ['class_section', 'class_section'], ['phone', 'phone'], ['guardian', 'guardian'], ['status', 'status']].map(([k, l]) => ({ k, l: t(l) })), rows, summary: [[t('total'), rows.length]] }; } },
+  teachers: { perm: 'teachers.read', params: ['status'], run: async () => {
+    const data = await fetchAll(() => { let q = sb.from('teachers').select('teacher_no,full_name,gender,phone,email,qualification,status,teacher_assignments(class_id,section_id,subject_id)').eq('school_id', S.school.id); if (REP.status) q = q.eq('status', REP.status); return q.order('full_name').order('id'); });
+    const rows = data.map(r => ({ teacher_no: r.teacher_no, full_name: r.full_name, phone: r.phone || '', email: r.email || '', qualification: r.qualification || '', subjects: uniq((r.teacher_assignments || []).map(a => nameOf(S.subjects, a.subject_id))).join(', '), classes: uniq((r.teacher_assignments || []).map(a => classLabel(a.class_id, a.section_id))).join(', '), status: t('st_' + r.status) }));
+    return { title: t('rep_teachers'), cols: [['teacher_no', t('teacher_id')], ['full_name', t('full_name')], ['phone', t('phone')], ['email', t('email')], ['qualification', t('qualification')], ['subjects', t('assigned_subjects')], ['classes', t('assigned_classes')], ['status', t('status')]].map(([k, l]) => ({ k, l })), rows, summary: [[t('total'), rows.length]] }; } },
+  attendance: { perm: 'attendance.read', params: ['month', 'cls', 'sec'], run: async () => {
+    const [from, to] = monthRange(REP.month);
+    const d = ok(await sb.rpc('attendance_summary', { p_school: S.school.id, p_from: from, p_to: to, p_class: REP.cls || null, p_section: REP.sec || null })).data;
+    const rows = d.map(r => ({ admission_no: r.admission_no, full_name: r.full_name, class_section: `${r.class_name} – ${r.section_name}`, present: +r.present, absent: +r.absent, late: +r.late, excused: +r.excused, total: +r.total, rate: pct(+r.present + +r.late, +r.total) + '%' }));
+    const sum = k => rows.reduce((a, r) => a + r[k], 0), tot = sum('total');
+    return { title: `${t('rep_attendance')} · ${REP.month}`, cols: MONTHLY_COLS(), rows, summary: [[t('students'), rows.length], [t('st_present'), sum('present')], [t('st_absent'), sum('absent')], [t('attendance_rate'), (tot ? pct(sum('present') + sum('late'), tot) : 0) + '%']] }; } },
+  exams: { perm: 'marks.read', params: ['term', 'cls', 'sec'], need: ['term', 'cls'], run: async () => {
+    RES = await classResults(REP.cls, REP.term); RES.view = RES.rows.filter(r => !REP.sec || r.section_id === REP.sec);
+    const rows = resRows(), ranked = RES.view.filter(r => r.max);
+    return { title: `${t('rep_exams')} · ${nameOf(S.classes, REP.cls)} · ${termLabel(RES.term)}`, cols: resCols(), rows, summary: [[t('students'), rows.length], [t('average'), ranked.length ? Math.round(ranked.reduce((a, r) => a + r.pct, 0) / ranked.length * 10) / 10 + '%' : '—'], [t('pass_rate'), ranked.length ? pct(ranked.filter(r => r.pct >= 50).length, ranked.length) + '%' : '—']] }; } },
+  fees: { perm: 'fees.read', params: ['month'], run: async () => {
+    const [from, to] = monthRange(REP.month), sid = S.school.id;
+    const [pays, invs] = await Promise.all([
+      fetchAll(() => sb.from('payments').select('receipt_no,paid_on,amount,method,reference,students(full_name,admission_no),invoices(invoice_no)').eq('school_id', sid).gte('paid_on', from).lte('paid_on', to).order('paid_on').order('id')),
+      fetchAll(() => sb.from('invoices').select('amount,status').eq('school_id', sid).gte('issue_date', from).lte('issue_date', to).neq('status', 'void').order('id'))]);
+    const rows = pays.map(p => ({ paid_on: fmtDate(p.paid_on), receipt_no: p.receipt_no, full_name: p.students?.full_name || '', invoice_no: p.invoices?.invoice_no || '', method: t('pm_' + p.method), reference: p.reference || '', amount: nf2.format(p.amount) }));
+    const total = pays.reduce((a, p) => a + +p.amount, 0), byM = {}; pays.forEach(p => byM[p.method] = (byM[p.method] || 0) + +p.amount);
+    return { title: `${t('rep_fees')} · ${REP.month}`, cols: [['paid_on', t('date')], ['receipt_no', t('receipt_no')], ['full_name', t('student')], ['invoice_no', t('invoice_no')], ['method', t('method')], ['reference', t('reference')], ['amount', t('amount') + ' (' + S.school.currency + ')', true]].map(([k, l, n]) => ({ k, l, num: n })), rows,
+      summary: [[t('invoiced_month'), money(invs.reduce((a, i) => a + +i.amount, 0))], [t('collected'), money(total)], [t('payments'), pays.length], ...Object.entries(byM).map(([m, v]) => [t('pm_' + m), money(v)])] }; } },
+  outstanding: { perm: 'fees.read', params: ['cls'], run: async () => {
+    const sid = S.school.id;
+    const [invs, enr] = await Promise.all([
+      fetchAll(() => sb.from('invoices').select('student_id,amount,amount_paid,due_date,students(full_name,admission_no)').eq('school_id', sid).in('status', ['unpaid', 'partial']).order('id')),
+      REP.cls ? fetchAll(() => sb.from('enrollments').select('student_id,class_id,section_id').eq('school_id', sid).eq('academic_year_id', S.curYear?.id).order('student_id')) : Promise.resolve([])]);
+    const en = Object.fromEntries(enr.map(e => [e.student_id, e])), g = {};
+    invs.forEach(i => { if (REP.cls && en[i.student_id]?.class_id !== REP.cls) return; const x = g[i.student_id] ||= { adm: i.students?.admission_no, name: i.students?.full_name, n: 0, amount: 0, paid: 0, oldest: null, sid: i.student_id };
+      x.n++; x.amount += +i.amount; x.paid += +i.amount_paid; if (i.due_date && (!x.oldest || i.due_date < x.oldest)) x.oldest = i.due_date; });
+    const list = Object.values(g).sort((a, b) => (b.amount - b.paid) - (a.amount - a.paid));
+    const rows = list.map(x => ({ admission_no: x.adm, full_name: x.name, class_section: en[x.sid] ? classLabel(en[x.sid].class_id, en[x.sid].section_id) : '', n: x.n, amount: nf2.format(x.amount), paid: nf2.format(x.paid), balance: nf2.format(x.amount - x.paid), oldest: x.oldest ? fmtDate(x.oldest) : '' }));
+    return { title: t('rep_outstanding'), cols: [['admission_no', t('admission_no')], ['full_name', t('student')], ['class_section', t('class_section')], ['n', t('invoices'), true], ['amount', t('amount'), true], ['paid', t('paid'), true], ['balance', t('balance'), true], ['oldest', t('oldest_due')]].map(([k, l, n]) => ({ k, l, num: n })), rows,
+      summary: [[t('students'), list.length], [t('outstanding'), money(list.reduce((a, x) => a + x.amount - x.paid, 0))]] }; } }
+};
+   const REP_PARAMS = {
+  cls: { type: 'select', blank: () => t('all_classes'), opts: () => opt(S.classes), reset: ['sec'] },
+  sec: { type: 'select', blank: () => t('all_sections'), opts: () => REP.cls ? opt(sectionsOf(REP.cls)) : [] },
+  status: { type: 'select', blank: () => t('all_statuses'), opts: () => enumOpts(REP.type === 'teachers' ? TCH_STATUS : STU_STATUS, 'st_') },
+  gender: { type: 'select', blank: () => t('all_genders'), opts: () => enumOpts(['male', 'female'], 'g_') },
+  month: { type: 'month', ph: () => t('month') }, term: { type: 'select', blank: () => t('select_term'), opts: termOpts }
+};
+function renderReports() {
+  const avail = Object.keys(REPORTS).filter(k => can(REPORTS[k].perm));
+  if (!avail.includes(REP.type)) REP.type = avail[0];
+  if (!REP.term) REP.term = defaultTerm();
+  $('#view').innerHTML = pageHead(t('nav_reports'), t('reports_sub')) + `<div class="card"><div class="filters">
+    <select id="rep-type" aria-label="${t('report_type')}">${avail.map(k => `<option value="${k}" ${k === REP.type ? 'selected' : ''}>${t('rep_' + k)}</option>`).join('')}</select><span id="rep-params" style="display:contents"></span>
+    <button class="btn btn-primary" data-act="rep-run">${ic('chart', 16)} ${t('generate')}</button></div><div id="rep-out">${emptyState(t('rep_hint'), 'chart')}</div></div>`;
+  $('#rep-type').addEventListener('change', e => { REP.type = e.target.value; REP.out = null; drawParams(); $('#rep-out').innerHTML = emptyState(t('rep_hint'), 'chart'); });
+  drawParams();
+}
+function drawParams() {
+  const host = $('#rep-params'); const defs = REPORTS[REP.type].params.map(k => ({ k, ...REP_PARAMS[k], blank: REP_PARAMS[k].blank?.(), ph: REP_PARAMS[k].ph?.(), max: k === 'month' ? todayStr().slice(0, 7) : undefined }));
+  const tmp = document.createElement('div'); filterBar(tmp, defs, REP, () => { }); host.innerHTML = ''; [...$('.filters', tmp).children].forEach(c => host.appendChild(c));
+  // filterBar attached listeners to the moved nodes; re-draw on dependent change
+  const cls = $('[data-k=cls]', host); if (cls) cls.addEventListener('change', () => drawParams());
+}
+ACT['rep-run'] = async el => withBusy(el, async () => {
+  const def = REPORTS[REP.type];
+  if ((def.need || []).some(k => !REP[k])) return toast(t('pick_term_class'), 'error');
+  if (REPORTS[REP.type].params.includes('month') && !REP.month) return toast(t('pick_month'), 'error');
+  $('#rep-out').innerHTML = skeleton(6);
+  REP.out = await def.run(); const o = REP.out;
+  $('#rep-out').innerHTML = `<div class="summary-row">${o.summary.map(([l, v]) => `<span class="pill">${esc(l)}: ${esc(v)}</span>`).join('')}<span style="flex:1"></span>
+    <button class="btn btn-sm" data-act="rep-csv">${ic('download', 14)} CSV</button><button class="btn btn-sm" data-act="rep-print">${ic('printer', 14)} ${t('print_pdf')}</button></div>
+    ${o.rows.length ? `<div class="table-wrap">${tableHTML(o.cols, o.rows)}</div>` : emptyState(t('no_data'))}`;
+});
+ACT['rep-csv'] = () => { if (REP.out) downloadCSV('report-' + REP.type, REP.out.cols, REP.out.rows); };
+ACT['rep-print'] = () => { const o = REP.out; if (o) printDoc(`<div class="sheet">${letterhead(o.title)}<div class="sum">${o.summary.map(([l, v]) => `<div><b>${esc(l)}:</b> ${esc(v)}</div>`).join('')}</div>${tableHTML(o.cols, o.rows)}</div>`, o.title); };
+   /* =====================================================================
+   9.9 Settings: school profile, members, audit log
+   ===================================================================== */
+const SET = { tab: '', audit: { q: '', page: 1 } }; TABSTATE.settings = SET;
+const PERM_LIST = ['students.read', 'students.write', 'teachers.read', 'teachers.write', 'academics.read', 'academics.write', 'attendance.read', 'attendance.write', 'attendance.edit_past', 'marks.read', 'marks.write', 'fees.read', 'fees.write', 'reports.read'];
+const ROLES = ['school_admin', 'teacher', 'accountant', 'staff'];
+async function renderSettings() {
+  const tabs = [...(can('school.manage') ? [{ id: 'school', label: t('school_profile') }] : []), ...(can('members.manage') ? [{ id: 'members', label: t('members') }] : []), ...(can('audit.read') ? [{ id: 'audit', label: t('audit_log') }] : [])];
+  if (!tabs.some(x => x.id === SET.tab)) SET.tab = tabs[0].id;
+  $('#view').innerHTML = pageHead(t('nav_settings'), t('settings_sub'), SET.tab === 'members' ? `<button class="btn btn-primary" data-act="mem-new">${ic('plus', 16)} ${t('add_member')}</button>` : '') + tabsBar(tabs, SET.tab) + `<div class="card" id="set-body"></div>`;
+  ({ school: setSchool, members: setMembers, audit: setAudit })[SET.tab]($('#set-body'));
+}
+function setSchool(body) {
+  const s = S.school, kv = (l, v) => `<div><small>${t(l)}</small>${v || '—'}</div>`;
+  body.innerHTML = `<div class="card-pad"><form id="sch-form" class="form-grid">${[{ k: 'name', l: 'school_name', req: true }, { k: 'short_name', l: 'short_name' }, { k: 'phone', l: 'phone', type: 'tel' }, { k: 'email', l: 'email', type: 'email' }, { k: 'address', l: 'address', full: true },
+    { k: 'default_language', l: 'language', type: 'select', req: true, opts: [{ v: 'en', l: 'English' }, { v: 'so', l: 'Soomaali' }] }].map(f => field(f, s[f.k])).join('')}
+    <div class="modal-foot"><button class="btn btn-primary" type="submit">${t('save')}</button></div></form>
+    <div class="section-title" style="margin:20px 0 12px">${t('subscription')}</div>
+    <div class="kv">${kv('status', badge(s.status))}${kv('plan', esc(s.plan))}${kv('billing_cycle', s.billing_cycle ? t('bc_' + s.billing_cycle) : '')}${kv('expires', s.subscription_ends_at ? fmtDate(s.subscription_ends_at) : t('no_expiry'))}${kv('country', esc(s.country))}${kv('currency', esc(s.currency))}</div></div>`;
+  $('#sch-form').addEventListener('submit', async e => { e.preventDefault(); await withBusy($('[type=submit]', e.target), async () => { try {
+    const v = readForm(e.target, [{ k: 'name' }, { k: 'short_name' }, { k: 'phone' }, { k: 'email' }, { k: 'address' }, { k: 'default_language' }]);
+    const r = ok(await sb.from('schools').update(v).eq('id', S.school.id).select().single()).data; Object.assign(S.school, r); S.member.schools = S.school; renderShell(); toast(t('saved')); } catch (err) { handleErr(err); } }); });
+}
+async function setMembers(body) {
+  const rows = ok(await sb.from('school_members').select('*, profiles(full_name,email)').eq('school_id', S.school.id).order('created_at')).data || [];
+  body.innerHTML = `<div class="table-wrap"><table class="tbl"><thead><tr><th>${t('user')}</th><th>${t('role')}</th><th>${t('extra_permissions')}</th><th>${t('status')}</th><th></th></tr></thead><tbody>
+   ${rows.map(m => `<tr><td><div class="cell-user">${avatar(m.profiles?.full_name || m.profiles?.email)}<div><b>${esc(m.profiles?.full_name || '—')}</b><span class="muted small">${esc(m.profiles?.email || '')}</span></div></div></td><td>${badge(m.role, t('role_' + m.role))}</td>
+   <td><div class="chips">${(m.permissions || []).map(p => `<span class="chip">${esc(t('perm_' + p.replace('.', '_')))}</span>`).join('') || '—'}</div></td><td>${badge(m.status)}</td>
+   <td><div class="row-actions"><button class="icon-btn" data-act="mem-edit" data-id="${m.id}">${ic('edit')}</button></div></td></tr>`).join('')}</tbody></table></div>
+   <div class="card-pad muted small">${t('members_help')}</div>`;
+  SET.members = rows;
+                                        }
+   function memberFields(isNew) {
+  return [...(isNew ? [{ k: 'email', l: 'email', type: 'email', req: true, full: true }] : []), { k: 'role', l: 'role', type: 'select', req: true, opts: ROLES.map(r => ({ v: r, l: t('role_' + r) })) },
+    ...(isNew ? [] : [{ k: 'status', l: 'status', type: 'select', req: true, opts: [{ v: 'active', l: t('st_active') }, { v: 'inactive', l: t('st_inactive') }] }])];
+}
+function permBoxes(sel) { return `<div class="section-title">${t('extra_permissions')}</div><div class="fg full"><div class="help">${t('perm_help')}</div><div class="form-grid" id="perm-box" style="margin-top:8px">${PERM_LIST.map(p => `<label class="check"><input type="checkbox" value="${p}" ${sel.includes(p) ? 'checked' : ''}> <span>${t('perm_' + p.replace('.', '_'))}</span></label>`).join('')}</div></div>`; }
+const pickPerms = el => $$('#perm-box input:checked', el).map(i => i.value);
+ACT['mem-new'] = () => formModal({ title: t('add_member'), fields: memberFields(true), extra: permBoxes([]), values: { role: 'staff' }, size: 'lg',
+  onSubmit: async (v, f, el) => { ok(await sb.rpc('add_member_by_email', { p_school: S.school.id, p_email: v.email, p_role: v.role, p_permissions: v.role === 'staff' ? pickPerms(el) : [] })); toast(t('saved')); route(); } });
+ACT['mem-edit'] = el => { const m = SET.members.find(x => x.id === el.dataset.id);
+  formModal({ title: m.profiles?.full_name || m.profiles?.email || t('members'), fields: memberFields(false), extra: permBoxes(m.permissions || []), values: m, size: 'lg',
+    onSubmit: async (v, f, mel) => { ok(await sb.from('school_members').update({ role: v.role, status: v.status, permissions: v.role === 'staff' ? pickPerms(mel) : [] }).eq('id', m.id)); toast(t('saved')); if (m.user_id === S.user.id) { const p = ok(await sb.rpc('my_permissions', { p_school: S.school.id })).data; S.perms = new Set(p); S.role = v.role; renderShell(); } route(); } }); };
+function setAudit(body) {
+  body.innerHTML = `<div id="au-filters"></div><div id="au-list"></div><div id="au-pager"></div>`;
+  filterBar($('#au-filters', body), [{ k: 'q', type: 'search', ph: t('search_audit_ph') }], SET.audit, loadAudit); loadAudit();
+}
+async function loadAudit() {
+  const box = $('#au-list'); if (!box) return; box.innerHTML = skeleton(); const st = SET.audit;
+  let q = sb.from('audit_logs').select('id,action,table_name,details,created_at,profiles(full_name)', { count: 'exact' }).eq('school_id', S.school.id);
+  const s = sanitizeQ(st.q); if (s) q = q.or(`table_name.ilike.%${s}%,details->>label.ilike.%${s}%`);
+  const { data, error, count } = await q.order('created_at', { ascending: false }).range((st.page - 1) * 20, st.page * 20 - 1);
+  if (error) { box.innerHTML = `<div class="card-pad"><div class="alert err">${esc(errMsg(error))}</div></div>`; return; }
+  box.innerHTML = data.length ? `<div class="table-wrap">${tableHTML([{ k: 'at', l: t('date') }, { k: 'who', l: t('user') }, { k: 'what', l: t('action') }, { k: 'rec', l: t('record') }], data.map(x => ({ at: fmtDateTime(x.created_at), who: x.profiles?.full_name || t('system'), what: `${t('act_' + x.action)} · ${t('tbl_' + x.table_name)}`, rec: x.details?.label || '' })))}</div>` : emptyState(t('no_activity'));
+  pager($('#au-pager'), { total: count || 0, page: st.page, size: 20, onPage: p => { st.page = p; loadAudit(); } });
+}
+   /* =====================================================================
+   9.10 My profile
+   ===================================================================== */
+ACT.profile = () => {
+  $$('.menu').forEach(m => m.hidden = true);
+  const fields = [{ k: 'full_name', l: 'full_name', req: true }, { k: 'phone', l: 'phone', type: 'tel' }, { k: 'language', l: 'language', type: 'select', req: true, opts: [{ v: 'en', l: 'English' }, { v: 'so', l: 'Soomaali' }] },
+    { sep: 'change_password' }, { k: 'np1', l: 'new_password', type: 'password', help: 'pw_help' }, { k: 'np2', l: 'confirm_password', type: 'password' }];
+  formModal({ title: t('my_profile'), fields, values: { ...S.profile, language: LANG }, onSubmit: async v => {
+    if (v.np1 || v.np2) { if (v.np1 !== v.np2) throw new Error(t('pw_mismatch')); if (v.np1.length < 8) throw new Error(t('pw_short')); ok(await sb.auth.updateUser({ password: v.np1 })); }
+    ok(await sb.from('profiles').update({ full_name: v.full_name, phone: v.phone, language: v.language }).eq('id', S.user.id));
+    Object.assign(S.profile, { full_name: v.full_name, phone: v.phone, language: v.language }); setLang(v.language); renderShell(); toast(t('saved')); route(); } });
+};
+
+/* =====================================================================
+   10. BOOT
+   ===================================================================== */
+(function boot() {
+  setLang(LANG);
+  if (!CONFIGURED || !sb) { showSetup(); return; }
+  sb.auth.onAuthStateChange((ev, session) => {
+    // never await Supabase calls inside this callback (deadlock risk) - defer with setTimeout
+    if (ev === 'PASSWORD_RECOVERY') { recovery = true; setTimeout(() => showAuth('reset'), 0); return; }
+    if (ev === 'SIGNED_OUT') { S.user = null; S.school = null; setTimeout(() => showAuth('login'), 0); return; }
+    if (ev === 'INITIAL_SESSION' || ev === 'SIGNED_IN') {
+      if (recovery) return;
+      if (session && S.user && S.user.id === session.user.id) return;   // token refresh / tab refocus
+      setTimeout(() => start(session), 0);
+    }
+  });
+  document.addEventListener('click', e => { const a = e.target.closest('a[href^="#/"]'); if (a) document.body.classList.remove('nav-open'); });
+})();
+</script>
+</body>
+</html>
  
