@@ -272,3 +272,33 @@ button.chip{cursor:pointer}button.chip:hover{background:var(--blue-l);color:var(
 </style>
 </head>
 <body>
+   
+<!-- Boot spinner -->
+<div id="boot" class="boot"><div class="spinner"></div></div>
+
+<!-- Authentication screens (login / forgot / reset / no access) -->
+<section id="auth" hidden>
+  <div class="auth-wrap">
+    <div class="auth-brand" id="auth-brand"></div>
+    <div class="auth-side">
+      <div class="auth-lang" id="auth-lang"></div>
+      <div class="auth-card" id="auth-card"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Application shell -->
+<div id="app" hidden>
+  <div id="scrim" class="scrim" data-act="nav-close"></div>
+  <aside id="sidebar" class="sidebar"></aside>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <main id="view" class="view"></main>
+  </div>
+</div>
+
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+<div id="print-root"></div>
+
+<script>
